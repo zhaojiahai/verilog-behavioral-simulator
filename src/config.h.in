@@ -1,0 +1,20 @@
+/* Template file to generate config.h. */
+
+/* We use getopt_long if it exists. */
+#undef HAVE_GETOPT_H
+#undef HAVE_GETOPT
+#undef HAVE_GETOPT_LONG
+#undef HAVE_PROTO_GETOPT
+
+/* Extra packages support. */
+#undef HAVE_ZLIB_H
+
+/* Directory to search for the preprocessor. */
+#undef VERILOGVPP_PROGRAM_DIR
+
+/* Preprocessor execution support. */
+#undef HAVE_FORK
+#undef HAVE_STAT
+
+/* yytext is a character pointer (char *) instead of an array. */
+#undef YYTEXT_POINTER

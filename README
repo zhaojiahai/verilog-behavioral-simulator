@@ -1,0 +1,249 @@
+Verilog Behavioral Simulation version 1.4.0
+
+	This is the public release of the Verilog Behavioral Simulator.
+Verilog is a Hardware Description Language used mostly for digital circuit
+design and simulation.  This program is a simple implementation of a
+Verilog simulator.  VBS tries to implement all of the Verilog behavioral
+constructs that are synthesizable, but still allow complex test vectors
+for simulation. 
+
+
+What's New in 1.4.1
+
+$stime API support
+Support GCC 3.4.0 builds
+
+
+What's New in 1.4.0
+
+This release contains many bug fixes and a few new features.  The new
+features include:
+
+Shell interface for Guile
+$dump* API support
+Multiple/lvalue concatenation
+Net declaration assignment
+Delay or event control in non-blocking assignment
+Hierarchical variable reference
+
+There are too many bug fixes to list here.  VBS now passes many of the
+test cases in the IVL test suite maintained by Steven Wilson.  The
+Makefile includes a target to run through those test cases.  The test
+suite can be downloaded from the Icarus project; icarus.com.
+
+For full details of all changes, see the CHANGELOG.
+
+
+What's New in 1.3.7
+
+This release adds support for $random system function.  See the CHANGELOG
+file for details.  The big change in this release is that there's now a
+CVS server and a mailing list.  Both are hosted by Simple End User Linux
+(SEUL) as part of the gEDA project.  See 'Getting the source code' for the
+FTP site.  There is no dedicated mailing list for VBS discussions.  But
+The gEDA mailing list is willing to allow VBS discussions.  Visit the gEDA
+project web site at
+
+http://geda.seul.org/
+
+or
+
+http://www.seul.org/
+
+for details on the mailing list and other services.  A CVS tree of the
+latest VBS source code may also be found at the above site.  Visit the
+official VBS web page for more details.
+
+
+What's New in 1.3.6
+
+This release is another maintenance release.  Patches from a few users have
+been applied.  Please see the CONTRIBUTORS file for details.  This release
+is mainly for fixing problems with building on glibc2 and the latest egcs
+compiler.  I should mention one gotcha.  I currently use egcs 1.0.3, which
+does not support the -ftemplate-depth parameter.  Users have reported that
+this parameter is needed with the latest egcs.  Since I don't have the
+latest egcs, I can not verify this.  What I have done instead is to provide
+a configure option (--with-template-depth) to allow the user to set this
+parameter if one is needed.  To use it, type:
+
+configure --with-template-depth=32
+
+This will generate a Makefile with the correct parameter for egcs to overcome
+a template depth problem found in sim.cc.  As usual, feedback and patches
+are always welcomed.  Enjoy!
+
+
+What's New in 1.3.5
+
+This release is only a bug fix release.  VBS can now be compiled with the
+egcs compiler.  A configure script is provided to detect which compiler
+and other tools for generating the vbs binary.  VBS can still be compiled
+with gcc 2.7.2.X + frepo.  Future development has stopped on VBS.  I am
+now working on a compiled simulator with the FreeHDL group.  I do not know
+when source will be available from this project.  You can find out more by
+visiting the FreeHDL web site:
+
+http://www.freehdl.seul.org/
+
+A mailing list also exists, if you want to join the effort.  I will
+continue to accept patches and make future releases.  If this turns out to
+be the last release, I would like to thank all of you who have sent
+feedback and patches. 
+
+
+What's New in 1.3.4
+
+This release includes some bug fixes reported by users.  See below
+for a list of new features.  The preprocessor used in this release is
+optional.  The preprocessor program is searched in the following
+directories:
+
+vbs (directory where vbs is located)
+/bin
+/usr/bin
+/usr/local/bin
+. (current directory)
+
+The name of the preprocessor program must be 'vpp'.  If no preprocessor is
+found, a straight copy is done on the input.  This may cause the compile
+step to fail if the input file contained preprocessing directives not
+supported by vbs.  If there is an error in the compilation, the line
+numbering may be invalid, since currently there is no support for file
+name and number reporting.  You can find a preprocessor in my home page
+listed below, called vbpp.  It is a seperate software package from vbs, so
+they will not be distributed together.
+
+
+Supported features:
+
+	o $dump* (v.1.4.0)
+	o multiple/lvalue concatenation (v.1.4.0)
+	o preprocessor integration (v.1.3.4)
+	o expressions as port connections (v.1.3.4)
+	o rhs concatenation (v.1.3.4)
+	o CPU usage statistics (v.1.3.3)
+	o parameter declaration (v.1.3.3)
+	o ternary operator (v.1.3.2)
+	o mintypmax (v.1.3.2)
+	o memory declaration (v.1.3.1)
+	o $strobe system task (v.1.3.1)
+	o integer declaration (v.1.3.1)
+	o operator !==/=== (v.1.3.1)
+	o evaluation of qouted string (v.1.3.1)
+	o user defined functions and tasks (v.1.3.0)
+	o multiple trigger types in event control (v.1.3.0)
+	o event control in initial procedural block (v.1.3.0)
+	o delay events in loops (v.1.3.0)
+	o forever, repeat and while loops (v.1.3.0)
+	o delays as event control in 'always' procedural blocks (v.1.3.0)
+	o continuous assignment (v.1.3.0)
+	o bit select (v.1.3.0)
+
+
+Contents
+
+This distribution contains the source code to the Verilog Behavioral 
+Simulator.  This directory contains the following subdirectories and files:
+
+CHANGELOG	Log of changes to the base code.
+CONTRIBUTORS	Contributors to this project.
+COPYING-2.0	GNU General Public License
+COPYRIGHT	Copyright information.
+TODO		File containing todo list (and bugs).
+README		This file.
+src/		Unarchived directory of latest working version.
+src/tests/	Directory containing test programs for objects.
+EXAMPLES/	Example verilog code to test the simulator.
+docs/		Directory of documentation.
+
+
+Getting the source code:
+
+Source code to this project can be obtained from the Linux archive site
+on the world wide web.  The URL is:
+
+ftp://sunsite.unc.edu/pub/Linux/apps/circuits/vbs-X.X.X.tar.gz
+ftp://ftp.geda.seul.org/pub/geda/dist/vbs-X.X.X.tar.gz
+
+The authors do not maintain this site, so the location could change without
+notice.  Or...
+
+http://www.flex.com/~jching
+
+This is the official home page for VBS.  The author does maintain this site. 
+
+
+Compiling VBS
+
+The following is needed:
+	flex 2.3 or later
+		Or any POSIX lex which can generate ANSI C code.  (*) (**)
+	bison 1.22 or later
+		POSIX yacc should work too.  Must be able to create the
+		header file 'yy.tab.h', as well as ANSI C code.  (**)
+	Any ANSI C compiler
+		Tested with GCC 2.7.2, 2.95.x and 3.0.
+	C++ compiler that supports templates and namespace.
+		Tested with G++ 2.7.2 with the -frepo patch.  (***)
+		Version G++ 2.7.0 is known not to compile the simulator.
+		EGCS, 2.95.x and 3.0 is now supported.
+
+(*)  If you use flex 2.3, you might need to undefine 'yywrap'.  Version
+2.3 has this word defined rather than a function in the library. 
+
+(**)  We use both ANSI and POSIX standards.  Thus, if turning on ANSI with
+your C or C++ compiler breaks the POSIX code, do not turn on ANSI.  This
+is the case for GCC.  Turning on ANSI (-ansi) will turn off POSIX.  This
+only applies to the file vbs.cc.  This file uses POSIX functions.
+
+(***)  See the FAQ for more details on obtaining and using the -frepo
+patch.
+
+1.  Make a directory for the objects, 'mkdir obj'.
+
+2.  Change into the 'obj' directory.
+
+3.  Type the command '<srcdir>/configure' to generate the Makefile and
+other required files.  This script will detect required system headers and
+tools to build the vbs executable.  If anything is missing, you will not
+be able to proceed.  When the configure script is done, there will be some
+instructions, please follow them to compile vbs.  (*) 
+
+4.  Run the program on example files by typing:
+
+vbs <srcdir>/../EXAMPLES/test.v
+
+Where 'test' is one of the pre-made tests.  (**)
+
+5.  You can install the vbs binary by just copying it into your path.  vbs
+is a self contained binary, no config files are needed.
+
+(*)  If you receive any warnings about "defined but not used" or
+"assignment between integer and pointer", ignore these.  They are problems
+with the system files, not this package.  <srcdir> is the directory where
+the src is located.  Note, the src directory is under the main vbs-X.X.X
+directory.
+
+(**)  The output of the executable may contain a few debug statements for
+easier analysis.  Type 'vbs --help' for a list of options on debugging
+output.
+
+
+Testing individual C++ objects:
+
+1.  Change directory into the 'obj' directory
+2.  Type 'make' to get a list of targets.
+3.  Type 'make <target>' to test that object.
+
+Note:  the test modules do not test every conceivable permutation of usage
+for the C++ classes.  Only basic, or required, methods (member functions)
+are tested, because we need to use them. 
+
+As usual, this program has only been tested on a Linux system.  If you
+find any problems, or have questions and comments, please send them to
+the mailing list.
+
+If you wish to help develop this simulator, feel free to jump in.  All
+discussions are done on the mailing list.  Send patches to me directly,
+though.  Patches should be in unified diff format, i.e. diff -u.

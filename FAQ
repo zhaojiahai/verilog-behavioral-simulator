@@ -1,0 +1,188 @@
+Verilog Behavioral Simulator FAQ
+
+	This FAQ attempts to answer some common questions about the
+VBS distribution.  Because of the requirements to compile VBS, some
+users might have problems compiling the source code.  I hope the
+following questions (with answers) will help these users.
+
+This FAQ was last modified on June 7, 2003.
+
+Q1.  What Verilog constructs are supported by VBS?
+Q2.  Which compilers do I need to compile VBS?
+Q3.  Where can I get the various packages to compile VBS?
+Q4.  Where can I find a Verilog preprocessor?
+Q5.  I've found a problem (bug/defect), what should I do?
+Q6.  Where can I go to find updates?
+Q7.  Why am I getting a link error when I try to compile with egcs1.1?
+Q8.  How can I generate VCD and ASCII waveform files?
+Q9.  The following Verilog code does not work, how come?
+Q10. Are negative numbers supported?
+
+--------------------------------------------------------------------------------
+
+Q1.  What Verilog constructs are supported by VBS?
+
+A1.  Read vbs.txt, and the README file.  They enumerate the supported
+constructs in the current release of VBS.
+
+--------------------------------------------------------------------------------
+
+Q2.  Which compilers do I need to compile VBS?
+
+A2.  I only have access to GCC, so gcc can compile VBS.  But make sure
+you have at least GCC version 2.95.3.  VBS makes extensive use of
+templates and ANSI C++ Standard objects.  Earlier versions of gcc (such
+as 2.6.3) have bugs in regards to the template handling facility.
+
+--------------------------------------------------------------------------------
+
+Q3.  Where can I get the various packages to compile VBS?
+
+A3.  The only programs you need, besides the compiler, is the flex lexical
+analyzer generator and the bison grammar parser generator.  These are FSF
+software, so they can be found at:
+
+http://www.gnu.org/order/ftp.html
+
+Look for flex-X.X.X.tar.gz and bison-X.X.X.tar.gz.  The FSF does not
+distribute binaries from their FTP site.  But you can order their
+CD-ROM.
+
+--------------------------------------------------------------------------------
+
+Q4.  Where can I find a Verilog preprocessor?
+
+A4.  I currently maintain a Verilog preprocessor named vbpp.  Visit my
+web site for details.
+
+VBS version 1.3.4 and beyond support a preprocessor, if one is found in
+the standard bin directory.  The preprocessor program must be compiled
+seperately and installed in the correct directory.  The following
+directories are supported:
+
+/bin
+/usr/bin
+/usr/local/bin
+vbs (directory where vbs was installed)
+. (current directory)
+
+--------------------------------------------------------------------------------
+
+Q5.  I've found a problem (bug/defect), what should I do?
+
+A5.  Well, you have access to the source code.  Try fix the problem
+and send the patch (diff -u) to jching@flex.com.  Or email me the
+sample verilog code that produced the bug and I will work on it as
+soon as possible.  If you want the fix when found, please also specify
+how you would want to receive it.
+
+If you believe the problem is in the behavior of the simulator, please
+provide a reference to any formal description of what the simulator 
+should do.  Currently, VBS follows the IEEE Std 1364-1995 specification.
+If you believe VBS does not follow this specification to the letter,
+please specify with which section of this document that VBS does not
+comply.
+
+--------------------------------------------------------------------------------
+
+Q6.  Where can I go to find updates?
+
+A6.  I have now put up a web site for new updates.  The URL is:
+
+http://www.flex.com/~jching
+
+--------------------------------------------------------------------------------
+
+Q7.  Why am I getting a link error when I try to compile with egcs1.1?
+
+A7.  Egcs 1.1 is more ISO C++ conformant than previous versions.  One
+of these standard behavior is that the template depth is limited to 17.
+To build vbs, you need to set the template depth to at least 32.  To do
+this, specify the '--with-template-depth=32' argument to configure.
+
+--------------------------------------------------------------------------------
+
+Q8.  How can I generate VCD and ASCII waveform files?
+
+A8.  As of version 1.3.8 of VBS, the simulator can be programmed to
+perform VCD and ASCII dumping.  The dumped file can also be compressed
+to save on disk space.  You may use dinotrace to view either of the
+waveform formats.  Please check the following site for more information
+on dinotrace: http://www.veripool.com/dinotrace/.  GTKWave may also be
+used to view these waveform files.
+
+To dump the waveform, use the system task $dumpvars in the verilog
+source code.  This will select the variables to dump.  VBS supports
+all of the $dump* system tasks except $dumpflush.  The command line
+switch -a/-v will select the format, ASCII or VCD respectively.  To
+compress the output file, use the -z switch.  This assumes VBS was
+built with compression enabled.  See 'vbs -h' for more information
+on the available switches.  Here is an example of waveform dumping:
+
+module main;
+
+reg [3:0] a;
+
+initial
+	begin
+	a = 0;
+	while (1)
+		begin
+		#10 a = a + 1;
+		end
+	end
+
+initial
+	begin
+	$dumpvars;
+	$dumpfile("file.vcd"); // Dump output file.
+	#1000;
+	$finish;
+	end
+
+endmodule
+
+Simulate this verilog module with 'vbs -v file.v', or just 'vbs file.v'.
+The .vcd dump output filename extension will select the VCD format.  The
+output will be saved to file.vcd.  Dinotrace can then be used to view
+the waveform with 'dinotrace file.vcd'.
+
+--------------------------------------------------------------------------------
+
+Q9.  The following Verilog code does not work, how come?
+
+module test;
+task a;
+        input b;
+        #0 $write("Hello world %d\n", b);
+endtask
+initial
+        begin
+        a(0);
+        a(1);
+        end
+endmodule
+
+A9.  This is a known bug in VBS.  Unfortunately, because of the way VBS
+is currently implemented, this bug is very difficult to fix.
+
+--------------------------------------------------------------------------------
+
+Q10. Are negative numbers supported?
+
+A10.  No.  VBS does not support negative numbers or operations on negative
+numbers.  I.e. do not do
+
+	if (value < 0)
+		;
+
+This comparison will always evaluate to false.  The 'sign' keyword is
+ignored.
+
+--------------------------------------------------------------------------------
+
+If you have any other questions, please email them to me at
+
+jching@flex.com.
+
+Copyright (C) 1996-1997,2001-2003, Jimen Ching

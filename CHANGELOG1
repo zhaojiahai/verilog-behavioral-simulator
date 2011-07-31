@@ -1,0 +1,340 @@
+#
+# CHANGELOG
+#
+# A log of changes to the base verilog behavioral simulator source tree.
+# These changes were made after the first distribution.  All future
+# changes should go into one of these CHANGELOG files.
+
+(jc) --  Jimen Ching <jching@adtech-inc.com>
+(uf) --  Udi Finkelstein <fink@post.tau.ac.il>
+
+--------------------------------------------------------------------------
+
+-------------
+
+2/6/97
+
+st_util.*, st_net.*,
+esetup.*, d_setup.*:  Added support for memory declarations.  (jc)
+
+-------------
+
+1/31/97
+
+p_moditm.cc, vbs.y:  Added support for integer declaration.  (jc)
+
+-------------
+
+1/27/97
+
+sim.cc, strobe.*:  Added support for $strobe system task.  (jc)
+
+-------------
+
+1/27/97
+
+binary_op.*:  Added support for operator===/!==.  (jc)
+
+-------------
+
+1/20/97
+
+qstr.*:  Evaluate now returns a number for the string, as per the
+	IEEE Std 1364-1995.  (jc)
+
+-------------
+
+1/18/97
+
+cexpr.*:  Removed, constant expressions now use regular expressions.  (jc)
+	A flag is used to check for const-ness at setup time.
+
+-------------
+
+1/16/97
+
+event.h:  Updated event queue to conform with IEEE Std 1364-1995.  (jc)
+	Added monitor and strobe event type.
+
+-------------
+
+1/14/97
+
+stmt/*:  Combined all repeat/while/forever/for statements into a single
+	loop statement.  (jc)
+
+-------------
+
+1/12/96
+
+vbs.y/l:  Updated parser to conform with IEEE Std 1364-1995.  (jc)
+
+-------------
+
+12/29/96
+
+expr/*:  Changed unary/binary operator expressions to use unary_op_expr
+	and binary_op_expr, respectively.  (jc)
+
+-------------
+
+12/24/96
+
+vbs.y/l:  Changed to conform with IEEE-1364.  (jc)
+
+-------------
+
+9/28/96
+
+vbs.y:  Added support for delay event control after '=' in assignment.  (jc)
+
+-------------
+
+9/20/96
+
+vbs.l, vbs.y:  Added support for 'line and 'file preprocessor directive.  (jc)
+	These directive allow for future support of 'include directive.
+
+-------------
+
+9/14/96
+
+vbs.cc:  Added support for stages in the main loop.  (jc)
+	Adding support for preprocessor or object files should be easy now.
+
+-------------
+
+8/24/96
+
+d_setup.*:  Net must exist for module IO declaration.  (jc)
+
+-------------
+
+6/29/96
+
+st_util.cc:  Fixed bug with event control in initial block.  (jc)
+
+-------------
+
+6/22/96
+
+eventexpr.*:  Support for event control in initial procedural block.  (jc)
+	A bug still exist.
+
+-------------
+
+6/18/96
+
+stmt/*, expr.*:  Fixed multiple instantiation bug.  (jc)
+	Added virtual copy_constructor.
+	
+
+-------------
+
+6/15/96
+
+st_setup.cc:  Global scope was not included in statement setup in a
+	function/task enable.  (jc)
+
+-------------
+
+6/8/96
+
+bit.*:  Added support for bit select.  (jc)
+
+sym_tab.cc (symbol_table):  Fixed bug with scope starting at zero.  (jc)
+	Zero is global scope, no module should use global scope.
+
+-------------
+
+5/29/96
+
+decsetup.cc:  Fixed bug with ored event expression.  (jc)
+	(one expression in module instantiation did not work)
+
+-------------
+
+5/27/96
+
+nbassign.*:  Added support for non-blocking assignment.  (jc)
+
+-------------
+
+5/21/96
+
+*.*:  Converted source tree to conform with GNU coding style.  (jc)
+cassign.*:  Bug with destructor fixed.  (jc)
+
+-------------
+
+4/22/96
+
+CAssign.*:  Added support for continuous assign.  Bug exist.  (jc)
+
+-------------
+
+4/16/96
+
+Forever.*:  Added support for forever loops.  (uf)
+
+Repeat.*:  Added support for repeat loops.  (uf)
+
+While.*:  Added support for while loops.  (uf)
+
+-------------
+
+4/7/96
+
+Bitvector.cc:  Fixed bug with range selection.
+	Fixed bug with GetBitAsInt not returning correct index.  (jc)
+
+-------------
+
+4/2/96
+
+*.*:  The following are the changes to the source tree:  (jc)
+	1.  Using standard string class.
+	2.  Using standard list class and other containers.
+	3.  Rearranged setup and trigger functions.
+	4.  Redid the symbol table node objects.
+	5.  Changed the sequential block trigger function.
+	6.  Fixed delay in 'for' loop.
+	7.  Redid the verilog tests.
+
+-------------
+
+9/3/95
+
+Base.h (ErrorData -> CommonData):  Used by all parser objects.  (jc)
+
+Setup.cc:  Seperated expression and statement setup functions.  (jc)
+
+Trigger.cc:  Seperated expression and statement trigger functions.  (jc)
+
+-------------
+
+9/3/95
+
+PExpr.h (LogXorOp):  Added XOR operator support.  (jc)
+
+-------------
+
+8/18/95
+
+Setup.cc:  Updated all C++ files to use the new ANSI Draft standard.  (jc)
+	This includes the scope change in the 'for' loops.
+
+-------------
+
+8/18/95
+
+String.h (String):  Updated interface to imitate standard string class.  (jc)
+	Updated all other files to conform.
+
+Setup.cc (check_monitor):  Incremented i too many times, fixed.  (jc)
+
+Trigger.cc (NullStmt):  Added Sim_trigger for Null statement.  (jc)
+
+PStmts.h (NullStmt):  Created copy constructor to fix above.  (jc)
+
+-------------
+
+7/28/95
+
+Systask.cc (Sim_trigger):  Combined Sim_filename assignments.
+
+*.*:  Removed use of Bool enum type.
+
+PTypes.h (Stmts classes):  Moved statement classes to PStmts.h.  (jc)
+
+Symtab.cc (Sim_trigger for tasks):  Fixed bug with passing TaskStmt
+	to both system tasks and user defined tasks.
+	Added type NT_SYSTASK.  (jc)
+
+-------------
+
+6/12/95
+
+glo.h:  Updated header files to be POSIX compliant.
+
+-------------
+
+6/7/95
+
+PTypes.h (ModuleInstan):  Added module instantiation.  (jc)
+
+PTypes.cc (TFDecl):  Problem with deleting TFDecl seems to be fixed.  (jc)
+	(Note:  must have been a side effect of fixing something else).
+
+-------------
+
+6/6/95
+
+Base.h (filename,lineno):  Added support for filename and line number
+		in error reporting.  (jc)
+
+-------------
+
+6/5/95
+
+PTypes.h (Task):  Added support for user defined tasks.  (jc)
+
+-------------
+
+6/2/95
+
+Symtab.cc (Assignment):  Moved monitor checking to Symtab.cc.  (jc)
+
+-------------
+
+6/1/95
+
+Symtab.cc (STnode):  Changed STnode.  (jc)
+
+PTypes.h (IO declaration):  Added support for input/output/inout.  (jc)
+
+PTypes.h (function):  Added support for function definition.  (jc)
+
+-------------
+
+5/30/95
+
+Bitvector.cc (bin2dec):  Fixed bug with not displaying x in decimal.  (jc)
+
+-------------
+
+5/29/95
+
+PTypes.h (Expression classes):  Moved all expressions to PExpr.h.  (jc)
+
+-------------
+
+5/27/95
+
+PTypes.h (Base classes):  Seperated Base classes to Base.h.  (jc)
+
+Symtab.h (SymTab):  Added support for scope, see doc for details.  (jc)
+	Affected files:
+		Setup.cc
+		Trigger.cc
+
+-------------
+
+5/25/95
+
+../tests/testlst.cc:  Fixed core dump on Linux machines.  (jc)
+
+Trigger.cc (SeqBlkStmt):  Fixed nesting bug.  (jc)
+	Other files affected:
+		Setup.cc
+		PTypes.h
+
+Trigger.cc (RangeId):  Fixed bug with range id in expression.  (jc)
+
+TWheel.h (TWnode),
+List.h (Listnode):  cleaned up code, better use of C++.
+	Data member function no longer deletes node.  (jc)
+
+doc:  Updated documentation of nested bug fix.  (jc)
+
+-------------

@@ -1,0 +1,254 @@
+Implementation Decisions
+
+	This project was the first attempt by the team members to write a
+behavioral simulator for Verilog.  Thus, many of the design and
+implementation details are first attempts.  This means that the method in
+which we implemented a feature was not the only method, but the easiest or
+the first one that came to mind.  Thus, this simulator is far from
+professional quality.  I.e.  there were no research done, at least not
+extensively.  Most of the time for this project was spent coding the
+simulator and not on research.  There were basically a few decisions that
+were made.  Here is a list, in order of importance: 
+
+	1.  Simulation procedure
+	1a. As a side effect, the representation of a Verilog statement
+	was also determined by the simulation procedure.
+	2.  Programming language
+	3.  Register representation
+	4.  Data types:  symbol table, time wheel, event queue
+
+The rest of the section will describe each of these, starting with the 
+simulation procedure.
+
+
+Simulation procedure
+
+	At the time of design, we only considered the easiest method to
+implement the simulation.  This means we didn't want to implement too many
+details to make the simulation work.  This resulted in the implementation
+that we are using now.  This implementation uses C++ (see discussion for
+programming language) objects to represent a statement in the Verilog
+description.  Each statement is then divided into smaller objects like
+lvalue, expressions, etc.  This made the parsing of the description text
+easy.  As we parsed the file, we would create an object to represent it. 
+The simulation was also easy.  Because each statement is in an object, we
+simply triggered the object to represent the execution of that statement. 
+In the case of a sequential block, we would go through each statement until
+a delay occurs.  At which point we return from simulation and move forward
+in time (see the implementation detials document for a clearer picture).
+Thus the advantage of this method was ease of implementation.  Previously,
+we did not support delays in nested blocks, but it is now fixed.  The
+following is an example of a delay in nested block.
+
+module test;
+	reg a, b, c;
+
+	initial
+		being
+		a = 0;
+		b = 0;
+		#2 if (!a)
+			begin
+			#1 b = !a;
+			#2 if (b)
+				#3 c = !b;
+			b = 0;
+			end
+		#1 $write("%d %d %d %d (0 0 0)\n", $time, a, b, c);
+		end
+endmodule
+
+See the simulation procedure in the Impl_details document on the
+description of how this works.  The limitation is that delays in a 'for'
+loop does not yet work correctly.  Further work is in progress.
+
+	We do have an alternative implementation of the simulation
+procedure.  It is more complex and require more knowledge than we have. 
+This method requires the creation of a simulation language, very similar
+to assembly language.  This simulation language will allow us to execute
+statements in terms of very low level constructs like 'goto', 'sgt' (set
+if greater than) and 'bnez' (branch if not equal to zero).  Notice the
+similarity to instruction set design in "Computer Architecture"
+[Hennessey90].  This method is similar to compiling a high level language
+into assembly language.  But to design such an assembly language for
+behavioral simulation would require knowledge of language and compiler
+theory.  We simply did not have the time to do the research necessary for
+this approach. 
+
+
+Programming Language
+
+	In writing a simulator for Verilog, it was necessary to parse a
+Verilog description.  This usually requires knowledge of compiler theory. 
+The goal of this project was not to learn compiler theory, thus we used
+compiler generator tools to implement the parsing.  The tools we used were
+lex for scanning tokens, and yacc for grammar parsing.  Using these two
+tools allowed us to save a lot of time from writing grammar parsers and
+token scanners by hand.  When we started this project, none of the members
+knew anything about lex and yacc.  We used "lex & yacc" [Levine90] as our
+reference on the subject.  Because we chose to use lex and yacc, one of
+the languages we used was ANSI C.  The lex and yacc tools could not
+generate the C++ statements that would be needed to create the objects. 
+Thus we were forced to use interfacing functions to communicate between
+the two languages. 
+
+	As you probably know by now, we used C++ as the language of
+choice.  We could have stayed with C for the simulation objects, but we
+feel that the object oriented nature of C++ provided constructs that would
+simplify our implementation.  A Verilog behavioral description uses many
+statements, and we support over four Verilog statements.  Thus, an object
+oriented programming idea called polymorphism was used.  This technique
+allowed us to implement statements in a way that is very natural.  C++
+also had other features which simplify our work.  The function overloading
+feature allowed us to lower the name space.  Operator overloading allowed
+us to implement objects such as numbers and strings in a way that was easy
+and natural to use.  These features allowed us to reduce bugs in our code
+and thus reduce development time, which we had very little. 
+
+	You may wonder why we didn't use C++ versions of lex and yacc, 
+since they were already available.  The reason is this;  currently, C++ 
+versions of lex and yacc are not yet readily available or standardized.  
+Thus, requiring our users to obtain these tools to compile our simple 
+program seemed more of a burden than anything else.  We felt that the 
+burden should be on the developers rather than on the end users.  As a 
+result, our project now requires two compilers.  We do not consider this 
+a problem for the following reason.  The C++ language is a superset of 
+C.  This means all C++ compilers must be able to compile ANSI C code.  
+Because of this, we felt that using two similar languages was an 
+acceptable compromise.
+
+
+Register Representation
+
+	The representation of our register type went through a feature 
+update.  The original representation of the register took the following 
+form:
+
+class A
+	{
+	int size;		// Number of bits
+	unsigned long value;	// Data value
+	A *next;		// Next significant value
+	};
+
+This representation limited the register representation to 32 bits (size 
+of unsigned long).  To fix this, we considered a link list of this 
+class.  Each node would represent 32 bits of the total value.  The 
+advantage of this representation is the ease of implementation.  
+Operations like add, subtract, shift, and logical operations, were easy 
+to implement.  But there were two major problems.  1.  Implementing 
+addition for more than 32 bits required a lot of processing.  We would 
+need to do lots of testing to make sure the result was correct.  This was 
+too tedious for a simple project.  2.  Don't care or high impedance values
+could not be modeled with this representation.  We consider this to be 
+the major reason why this representation was replaced.
+
+	The second representation of registers took the following form:
+
+typedef unsigned char Bits;
+class A
+	{
+	int size;		// Number of bits
+	int begin;		// First valid bit
+	end end;		// Last valid bit
+	Bits *bits;		// Storage for bits
+	};
+
+This representation allowed us to represent don't cares and high 
+impedance simply by defining a macro for it.  Also, because the storage 
+for the bits is an array, the size is practically unlimited.  There is 
+one disadvantage.  Almost all operations are slow.  Because the storage 
+space is an array, all operations were basically loops.  Thus, to do a 
+basic operation like add, we need to loop until the result is found.  For 
+large bit vectors, this might prove to be slow.  We chose to use this
+representation even if it might slow simulation a bit.  The ability to
+model don't care values was more important for us than speed.
+
+
+Data Types
+
+	To make the simulation work, we needed a few basic objects.  For
+the parser, we needed a symbol table.  For the simulation procedure, we
+needed a time wheel and an event queue.  All objects are implemented in
+C++.  Other objects were also needed to make the simulator work.  But
+these objects are basic C++ objects which did not require making any
+decisions on their implementation.  The two objects we needed were strings
+and lists.  See the implementation details document for a description of
+these objects.  The following discussion describes some decision we made
+to implement the time wheel, event queue and symbol table. 
+
+	The time wheel and event queue implementation was determined by
+the simulation procedure.  Because the statements are triggered one after
+the other, the time wheel is a link list of statements sorted in time.
+The event queue was added to support the 'always' procedural statement.
+We needed to separate statements that was to be executed on a specific
+time and those that needs to be executed after the current time.  An
+example is when we want to monitor a variable.  We do not want to display
+the output until after all statements in the current time have been executed.
+Since statements could be appended to the time wheel on the current time,
+we could not simply append the monitor to the end of the link list on the
+current time node.  See discussion of the implementation details for a
+description of the time wheel.
+
+	The symbol table does not need to conform to any limitations of
+the simulation procedure.  Thus we were free to implement the symbol table
+in any way we want.  We chose to implement the symbol table as a large
+static array of symbols.  For the placement policy, we chose to use a hash
+function.  In case of a collision, we used rehashing.  This simplified
+table lookup and placement.  The first implementation of the symbol table
+could not handle scope rules.  The current implementation can.  The
+implementation is from "Compiler Design in C" [Holub90].  To support scope
+rules, the new implementation simply added a list to each element in the
+array.  This implementation allowed us to keep the other parts of the
+project the same.  This is because the lookup is done in the same way,
+using indices. The only difference now is that we now have a two
+dimensional array to deal with.  The latest version of the symbol table
+also has support for different data types.  For example, we now support
+wires, registers, functions, tasks and modules. 
+
+	The original implementation for all these data types was to use
+polymorphism.  This worked ok until we wanted to support IO declarations. 
+Polymorphism did not work well with this.  The reason is that IO
+declarations are not used in the same place as the declaration for the
+register.  Here's an example:
+
+function [7:0] myfunc;
+	input [7:0] a;
+	output [7:0] b;
+	reg [7:0] b;
+
+	begin ... end
+endfunction
+
+This example shows that 'a' is a wire type with direction of input.  While
+'b' is register type with direction output.  But notice the direction of
+'b' and the type is not declared in the same statement.  Thus, to use
+polymorphism, we would be required to create an object of type 'wire' when
+we see the 'output [7:0] b' statement.  But when we reach the 'reg [7:0]
+b' statement, we have to change this object from 'wire' to 'reg'. 
+Currently, the authors do not know if this is possible.  As a result, we
+must set flags for these details at different points in the program.  This
+required us to have all flags available in each node and free to be
+modified when necessary.  Thus, our implementation has all required
+storage for all the different types.  See the implementation details
+document for a list of the data members.  This implementation gave bloat
+to the 'STnode' object.  We now have pointers that are not used at all. 
+But because of the way Verilog works, we must use this method.  Of course,
+it might be possible to use polymorphism if it was possible to change the
+data type dynamically.  Until a way is found, we will stay with this
+implementation. 
+
+
+Conclusion
+
+	The purpose of this project was to produce a working Verilog
+behavioral simulator.  We did not have time to implement radical ideas and
+lots of features.  As a result, we needed short cuts for almost
+everything.  The simulation procedure was simple to implement.  Though it
+might not be powerful enough for all features of the Verilog language. 
+This decision also limited us to the implementation of other things like
+the time wheel and symbol table.  To reduce even more work, we used
+compiler generator tools to create the grammar parser needed to scan the
+Verilog description.  Even though these decisions might have limited the
+ability of the simulator, it gave us the opportunity to write a working
+version of this simulator quickly. 

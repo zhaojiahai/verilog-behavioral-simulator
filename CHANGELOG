@@ -1,0 +1,1461 @@
+CHANGELOG
+
+-------------------------------------------------------------------------------
+2003-06-08  Jimen Ching  <jching@core2>
+
+	* FAQ: Mention negative numbers are not supported.
+
+2003-06-07  Jimen Ching  <jching@core2>
+
+	* FAQ: Don't support older gcc.
+	Other cleanup.
+
+	* vbs.txt: Document added features.
+
+	* src/vbs.l, src/vbs.y: Update copyright.
+
+	* src/Makefile.in: Clean all configure generated files.
+
+2003-06-06  Jimen Ching  <jching@core2>
+
+	* src/configure, src/Makefile.in, src/configure.in:
+	Fix build for Perl support.
+
+	* EXAMPLES/ivl.sh: Additional test cases to ignore.
+
+	* src/vbs.l, src/vbs.y: Fix parsing of numbers and optional delay.
+
+	* src/p_expr.cc: Support parsing negative numbers.
+
+2003-02-17  Jimen Ching  <jching@core2>
+
+	* src/common/st_setup.cc, src/misc/decbase.h, src/moditm/misetup.cc, src/stmt/assign.cc, src/stmt/assign.h, src/stmt/case.cc, src/stmt/case.h, src/stmt/ifelse.cc, src/stmt/ifelse.h, src/stmt/loopstmt.cc, src/stmt/loopstmt.h, src/stmt/seqblk.cc, src/stmt/seqblk.h, src/stmt/stmtbase.h, src/stmt/taskenbl.cc, src/stmt/taskenbl.h:
+	Remove unused code.
+
+2003-02-03  Jimen Ching  <jching@core2>
+
+	* BUGS: Update with missing feature.
+
+	* src/common/event.h, src/common/time_whl.h:
+	More (C++) standard conformance.
+
+2003-01-21  Jimen Ching  <jching@core2>
+
+	* src/expr/esetup.cc: Initialize variable to silence warning.
+
+2003-01-20  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh, src/common/bvector.cc, src/common/bvector.h, src/expr/eeval.cc, src/expr/esetup.cc, src/moditm/d_setup.cc, src/stmt/ssetup.cc, src/stmt/strigger.cc:
+	Many bug fixes.
+
+	* src/moditm/misetup.cc:
+	Do not move delay or event control when wrapping statements.
+
+2002-12-26  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh:
+	Fix detection of log file.  Cleanup shell command usage.
+
+	* src/stmt/ssetup.cc, src/misc/msetup.cc, src/moditm/d_setup.cc, src/p_expr.cc:
+	Detect unsupported constructs and report error.
+
+	* src/common/bvector.h, src/expr/number.cc, src/common/bvector.cc:
+	Add support for outputing strings.
+
+	* src/expr/qstr.cc: Do not allocate more bits than necessary.
+
+	* src/p_stmt.cc: Use error reporting API instead.
+
+2002-12-21  Jimen Ching  <jching@core2>
+
+	* src/expr/esetup.cc, src/expr/esetup.h, src/misc/lvalue.cc, src/misc/lvalue.h, src/misc/msetup.cc, src/misc/msetup.h:
+	Specify size when setting up rval in assignment.
+
+	* src/misc/decsetup.cc, src/misc/decsetup.h, src/stmt/ssetup.cc:
+	Use correct statement when creating event cache.
+	Specify size when setting up rval in assignment.
+
+	* src/stmt/strigger.cc:
+	Do not use parent when triggering pre/post assignment in for-loop.
+
+	* src/moditm/misetup.cc:
+	Schedule statement no matter whether there is a delay or not.
+
+	* src/stmt/strigger.cc, EXAMPLES/contrib_inst.v, EXAMPLES/mi006_assign.v, EXAMPLES/stmt010_nbassign.v, EXAMPLES/wt_4_3p03p03p03p0.v, EXAMPLES/x_allev.v, EXAMPLES/x_counter.v, EXAMPLES/x_cport.v, EXAMPLES/x_dae.v, EXAMPLES/x_dump.v, EXAMPLES/x_gareth.v, EXAMPLES/x_inflp.v, EXAMPLES/x_monitor.v:
+	$monitor/$strobe includes newline.
+
+	* src/common/event.h, src/common/st_setup.cc, src/common/st_setup.h, src/common/st_task.cc, src/common/st_task.h, src/common/st_trig.cc, src/common/st_util.cc, src/expr/esetup.cc, src/expr/esetup.h, src/misc/decsetup.cc, src/misc/decsetup.h, src/misc/dectrig.cc, src/misc/dectrig.h, src/misc/evntexpr.cc, src/misc/evntexpr.h, src/misc/msetup.cc, src/moditm/d_setup.cc, src/moditm/misetup.cc, src/sim.cc, src/stmt/assign.h, src/stmt/loopstmt.cc, src/stmt/loopstmt.h, src/stmt/seqblk.cc, src/stmt/seqblk.h, src/stmt/ssetup.cc, src/stmt/ssetup.h, src/stmt/stmtbase.h, src/stmt/strigger.cc, src/stmt/taskenbl.cc, src/stmt/taskenbl.h:
+	Fix event delays in nested blocks.
+
+2002-12-14  Jimen Ching  <jching@core2>
+
+	* src/misc/decrdwr.cc: Removed unused event type.
+
+2002-11-27  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh: Updated to latest IVL test suite.
+
+	* src/common/bvector.h: Do not access out-of-range indices.
+
+	* src/common/st_util.cc, src/expr/number.cc: Support %T format.
+
+	* src/expr/qstr.cc: Support empty qouted strings.
+
+	* src/vbs.y: Parse unsupported constructs and report it.
+
+2002-11-22  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh: Report why test cases are inconclusive.
+
+	* src/vbs.y: Specify unsupported constructs.
+
+	* src/common/st_util.cc, src/expr/esetup.cc, src/stmt/ssetup.cc:
+	Scope list should only modify the module instance scope when setting
+	up the function/task declarations.
+
+	* src/vbs.y:
+	Issue error or parser will not detect unsupported constructs.
+
+	* src/common/event.h, src/vbs.y: Fix compile errors with g++ 3.2.
+
+2002-11-21  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh: Handle erroneous test cases.
+
+	* src/common/st_node.h, src/common/st_util.cc, src/expr/esetup.cc, src/moditm/d_setup.cc, src/moditm/misetup.cc, src/stmt/ssetup.cc, src/sim.cc:
+	Use instance scope in hierarchical reference.
+
+	* src/common/st_setup.cc: Correctly order the scopes.
+
+	* src/common/dstack.h: Actually behave like a stack.
+
+2002-11-16  Jimen Ching  <jching@core2>
+
+	* src/common/sym_tab.cc, src/common/sym_tab.h:
+	Do not waste time making a copy of the scope list.
+
+	* src/common/tmpl_utl.h, src/stmt/strigger.cc:
+	Put reference of list type in template parameter.
+
+2002-11-14  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc:
+	Clear result variable, because it is used in calculation algorithm.
+
+	* src/common/hash.cc, src/common/hash.h, src/common/st_setup.cc, src/common/st_util.cc, src/common/sym_tab.cc, src/common/sym_tab.h, src/moditm/misetup.cc, src/sim.cc:
+	Allow module instance name to be the same as module definition name.
+	Fix scope lookup problem when this is allowed.
+
+	* src/moditm/d_setup.cc: Code cleanup.
+	Should only lookup net symbol in local scope when declaring it.
+
+	* src/expr/esetup.cc, src/stmt/ssetup.cc: Code cleanup.
+
+2002-11-02  Jimen Ching  <jching@core2>
+
+	* src/common/st_setup.cc, src/moditm/misetup.cc, src/sim.cc:
+	Moved file settings around for error reporting.
+
+2002-10-30  Jimen Ching  <jching@core2>
+
+	* src/common/error.cc, src/common/error.h, src/common/st_mod.h, src/common/st_setup.cc, src/moditm/misetup.cc, src/sim.cc:
+	Display correct filename during error reporting.
+
+2002-10-29  Jimen Ching  <jching@core2>
+
+	* src/misc/dectrig.cc, src/misc/mtrigger.h, src/moditm/d_setup.cc, src/stmt/strigger.cc, src/stmt/strigger.h, src/expr/binary_op.cc, src/expr/binary_op.h, src/expr/concat.cc, src/expr/concat.h, src/expr/eeval.cc, src/expr/eeval.h, src/expr/esetup.cc, src/expr/esetup.h, src/expr/etrigger.cc, src/expr/exprbase.h, src/expr/funccall.cc, src/expr/funccall.h, src/expr/mintypmax.cc, src/expr/mintypmax.h, src/expr/number.cc, src/expr/number.h, src/expr/qstr.cc, src/expr/qstr.h, src/expr/rangeid.cc, src/expr/rangeid.h, src/expr/ternary_op.cc, src/expr/ternary_op.h, src/expr/unary_op.cc, src/expr/unary_op.h, src/common/bvector.h, src/common/dumpasc.cc, src/common/dumpvcd.cc, src/common/logic.h, src/common/st_eval.cc, src/common/st_eval.h, src/common/st_func.cc, src/common/st_func.h, src/common/st_net.cc, src/common/st_net.h, src/common/st_node.h, src/common/st_util.cc, src/common/bvector.cc:
+	Optimize expression evaluation.
+
+	* EXAMPLES/expr_invert.v, EXAMPLES/testv-all.tmpl:
+	Corrected expression evaluation.
+
+2002-10-28  Jimen Ching  <jching@core2>
+
+	* src/misc/dectrig.cc, src/misc/delayid.cc, src/misc/delayid.h, src/misc/delaynum.cc, src/misc/delaynum.h, src/misc/evntexpr.cc, src/misc/evntexpr.h, src/stmt/ssetup.cc, src/stmt/strigger.cc, src/misc/decbase.h:
+	Code cleanup.
+
+	* src/misc/decsetup.cc: Conformance fix.
+
+2002-05-31  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh:
+	Deleted one error code, update return value checking.
+
+2002-05-29  Jimen Ching  <jching@core2>
+
+	* src/common/error.cc, src/common/error.h, src/common/st_mod.cc, src/common/st_mod.h, src/common/st_net.cc, src/common/st_net.h, src/common/st_setup.cc, src/common/st_util.cc:
+	Remove check for complete net declaration.
+	Inline some functions for optimization.
+
+	* src/common/bvector.cc: Avoid memory references for optimization.
+
+	* src/expr/funccall.cc, src/expr/funccall.h, src/expr/rangeid.cc, src/expr/rangeid.h:
+	Inlined functions for optimization.
+
+	* src/common/debug.cc, src/common/debug.h:
+	Inline functions for optimization.
+
+	* src/common/st_eval.cc, src/common/st_eval.h:
+	Inline constructors of function objects for optimization.
+
+	* src/common/event.h: Removed unnecessary code.
+
+	* src/expr/erdwr.cc, src/expr/erdwr.h, src/expr/esetup.cc, src/expr/esetup.h, src/expr/etrigger.cc, src/expr/etrigger.h, src/expr/emon.cc, src/expr/emon.h:
+	Inline constructors of function objects for optimization.
+
+	* src/misc/port.cc, src/misc/port.h:
+	Inline constructor of object for optimization.
+
+	* src/misc/decrdwr.cc, src/misc/decrdwr.h, src/misc/decsetup.cc, src/misc/decsetup.h, src/misc/dectrig.cc, src/misc/dectrig.h, src/misc/mmon.cc, src/misc/mmon.h, src/misc/mrdwr.cc, src/misc/mrdwr.h, src/misc/msetup.cc, src/misc/msetup.h, src/misc/mtrigger.cc, src/misc/mtrigger.h, src/moditm/d_rdwr.cc, src/moditm/d_rdwr.h, src/moditm/d_setup.cc, src/moditm/d_setup.h, src/moditm/mirdwr.cc, src/moditm/mirdwr.h, src/moditm/misetup.cc, src/moditm/misetup.h, src/moditm/tfrdwr.cc, src/moditm/tfrdwr.h, src/moditm/tfsetup.cc, src/moditm/tfsetup.h, src/stmt/srdwr.cc, src/stmt/srdwr.h, src/stmt/ssetup.cc, src/stmt/ssetup.h, src/stmt/strigger.cc, src/stmt/strigger.h:
+	Inline constructors of function objects for optimization.
+
+2002-05-25  Jimen Ching  <jching@core2>
+
+	* BUGS: Update bug list.
+
+	* src/common/bvector.cc, src/common/bvector.h, src/common/logic.h:
+	Optimize via inlining.
+	Implement memory cache for logic array.
+
+	* src/expr/eeval.cc, src/expr/esetup.cc: Remove unnecessary comparison.
+
+2002-05-15  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc, src/common/bvector.h, src/common/logic.h:
+	Code cleanup.  Reduce copy constructor calls.
+
+2002-05-14  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh: Output script name when writing to log file.
+
+	* src/vbs.y: Support more parser constructs.
+
+	* src/moditm/mirdwr.cc: Do not access potentially null pointer.
+
+2002-05-09  Jimen Ching  <jching@core2>
+
+	* src/sim.cc: More C++ language conformance.
+
+2002-05-04  Jimen Ching  <jching@core2>
+
+	* src/common/event.h: Stricter C++ conformance.
+
+2002-04-20  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc, src/common/bvector.h, src/common/st_func.cc, src/common/st_util.cc, src/expr/eeval.cc, src/stmt/strigger.cc:
+	Code cleanup:
+	Removed unused code.
+	Made compare_* functions non-members.
+	Eliminated unnecessary checks.
+
+2002-03-21  Jimen Ching  <jching@core2>
+
+	* src/Makefile.in: Remove all generated files with maintainer-clean.
+
+2002-03-06  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh:
+	Do not use negative number in return value for shell function.
+
+	* src/Makefile.in: Delete generated sstream.
+
+2002-03-05  Jimen Ching  <jching@core2>
+
+	* src/misc/lvalue.h, src/misc/msetup.cc:
+	Avoid using evaluate during setup procedure.
+
+	* src/moditm/d_setup.cc: Bit select of integer type is reversed.
+
+2002-03-04  Jimen Ching  <jching@core2>
+
+	* src/common/st_func.h: Removed untrue comment.
+
+2002-03-02  Jimen Ching  <jching@core2>
+
+	* README:
+	Make the next release a minor revision rather than just a patch level.
+
+	* src/configure, src/configure.in: Fix scripting language checks.
+
+2002-02-25  Jimen Ching  <jching@core2>
+
+	* src/stmt/ssetup.cc:
+	No need to use evaluate when we know the object is a number.
+	Optimized out a copy constructor for the bit_vector.
+
+2002-02-24  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc, src/common/bvector.h, src/expr/eeval.cc:
+	Minor optimizations.
+
+2002-02-21  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc: Minor performance improvements.
+
+2002-02-11  Jimen Ching  <jching@core2>
+
+	* src/common/dumpstrm.cc, src/common/error.cc, src/common/st_util.cc, src/expr/esetup.cc, src/misc/decsetup.cc, src/misc/msetup.cc, src/p_stmt.cc, src/stmt/ssetup.cc, src/swig/vbs_api.cc:
+	Use standard conforming stringstream class.
+
+	* src/configure, src/configure.in:
+	Generate standard conforming sstream header.
+
+	* EXAMPLES/ivl.sh:
+	Display parameters to vbs when outputing error message.
+
+2002-02-10  Jimen Ching  <jching@core2>
+
+	* vbs.txt: Update documentation.  Some typo fixes.
+
+	* EXAMPLES/ivl.sh: Generate more useful output in the logs.
+
+2002-02-09  Jimen Ching  <jching@core2>
+
+	* src/misc/lvalue.cc: Increment iterator to set entire list.
+
+	* EXAMPLES/testv-all.tmpl, EXAMPLES/x_lvalue.v, src/Makefile.in:
+	Test for new concatenated lvalue support.
+
+	* EXAMPLES/ivl.sh: Typo: mismatched parameter test.
+
+	* src/common/st_func.cc, src/common/st_func.h, src/common/st_net.cc, src/common/st_net.h, src/common/st_util.cc, src/expr/eeval.cc, src/expr/esetup.cc, src/misc/lvalue.cc, src/misc/lvalue.h, src/misc/mrdwr.cc, src/misc/msetup.cc, src/misc/mtrigger.cc, src/misc/mtrigger.h, src/moditm/d_setup.cc, src/p_expr.cc, src/p_expr.h, src/stmt/assign.cc, src/stmt/assign.h, src/stmt/strigger.cc, src/swig/vbs_api.cc, src/vbs.y:
+	Support concatenated lvalue.
+
+	* src/p_misc.cc, src/p_misc.h, src/p_stmt.cc, src/p_stmt.h:
+	Move lvalue into appropriate file.
+
+2002-02-07  Jimen Ching  <jching@core2>
+
+	* src/sim.h: Included wrong header.  Use more appropriate p_types.h.
+
+2002-02-03  Jimen Ching  <jching@core2>
+
+	* src/moditm/d_int.cc, src/moditm/d_int.h, src/moditm/d_io.h, src/moditm/d_net.h, src/moditm/d_param.h, src/moditm/d_rdwr.cc, src/moditm/d_reg.h, src/moditm/d_setup.cc, src/moditm/tfbase.h, src/p_moditm.cc, src/p_moditm.h, src/p_types.h, src/vbs.y:
+	Refactor declaration assignments.  Use common code to reduce code bloat.
+
+	* src/expr/esetup.cc: Forgot to add copyright year.
+
+	* src/expr/esetup.cc:
+	Do not treat out-of-bound memory references as errors.
+
+	* src/common/st_util.cc:
+	Do not treat out-of-bound memory references as run-time errors.
+
+2002-01-29  Jimen Ching  <jching@core2>
+
+	* src/common/dumpstrm.h: Allow non-libz build.
+
+2002-01-28  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh: Change inconclusive to unsupported...
+
+2002-01-27  Jimen Ching  <jching@core2>
+
+	* src/parser.c, src/sim.cc, src/sim.h, src/vbs.cc:
+	Support vbpp as the preprocessor.
+
+	* src/vbs.l:
+	The `line directive specifies the number for the next line.
+
+	* src/configure, src/configure.in: Make module name 'vbs'.
+
+2002-01-24  Jimen Ching  <jching@core2>
+
+	* src/vbs.l, src/vbs.y:
+	Parse unsupported constructs and output an error.
+
+	* src/sim.cc: Do not process module if a parse error occured.
+
+2002-01-11  Jimen Ching  <jching@core2>
+
+	* src/swig/vbs_api.cc, src/common/dumpvcd.cc, src/common/scp_tab.cc:
+	Gcc 2.96 (RH7) is more C++ conforming, but not as conforming as gcc3.0.
+
+	* src/configure, src/Makefile.in, src/configure.in:
+	Build separate support for TCL and Perl scripting.
+
+	* src/common/bvector.cc: Implement subtraction with borrow-in.
+
+2002-01-10  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc:
+	Treat '?' as high-impedance to make casex/casez work.
+	For casex, '?' is supposed to be dont-care, but high-impedance has the
+	same behavior.  So it should be ok.
+
+	* src/common/scp_tab.cc, src/swig/vbs_api.cc: C++ conformance cleanups.
+
+	* src/vbs.cc, src/vbs.l, src/vbs.y, src/parser.c, src/sim.cc:
+	Improve error reporting and parsing.
+
+	* src/common/error.cc, src/common/error.h:
+	Shorten output to fit on a line.
+
+2002-01-08  Jimen Ching  <jching@core2>
+
+	* src/swig/vbs_api.cc: Conform to standard C++ language usage.
+
+2002-01-06  Jimen Ching  <jching@core2>
+
+	* src/misc/msetup.cc, src/misc/msetup.h, src/misc/portconn.cc, src/misc/portconn.h, src/moditm/misetup.cc:
+	Discard blank port connections to module instances.
+
+	* src/common/error.cc: _state is a bitmap, test accordingly.
+	Avoid potential call of vbs_fatal in case vbs_warn returns.
+
+	* src/common/st_setup.cc: Use a valid line number for error reporting.
+
+	* src/vbs.l: Manually read // style comment.
+	When reading a line, read until newline.
+
+	* src/expr/binary_op.cc, src/expr/binary_op.h, src/expr/eeval.cc, src/p_expr.cc, src/vbs.y:
+	Complete support for binary operators; nand, nor, xnor...
+
+2002-01-05  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc, src/common/bvector.h, src/expr/eeval.cc, src/expr/erdwr.cc, src/expr/erdwr.h, src/expr/exprbase.cc, src/expr/exprbase.h, src/expr/unary_op.cc, src/expr/unary_op.h, src/p_expr.cc, src/vbs.y:
+	Support all of the unary operators.
+
+	* EXAMPLES/testv-all.tmpl: Pad unused decimal digits with white space.
+
+	* src/moditm/d_setup.cc:
+	Allow direction declaration before integer declaration.
+	Used to cause error because the index order were different.
+
+	* src/sim.cc: More consistent use of names.
+
+	* src/common/st_util.cc: More unterminated string stream.
+
+	* src/common/bvector.cc: Pad unused decimal digits with white space.
+
+2002-01-04  Jimen Ching  <jching@core2>
+
+	* src/stmt/assign.cc, src/stmt/assign.h, src/stmt/strigger.cc, src/misc/lvalue.h, src/misc/mtrigger.cc, src/misc/mtrigger.h:
+	When queuing the non-blocking assignment, the left-hand target must
+	also be evaluated.
+
+2002-01-03  Jimen Ching  <jching@core2>
+
+	* src/common/scp_tab.cc, src/sim.cc, src/swig/vbs_api.cc, src/swig/vbs_swig.i:
+	Update scripting support from George V.
+
+	* src/common/dumpvcd.cc: Fix from George V.:  typo
+
+	* src/common/st_setup.cc:
+	Allow an empty port connection to a module instantiation that has ports.
+
+2002-01-01  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/ivl.sh, src/common/error.cc, src/common/error.h, src/expr/esetup.cc, src/stmt/ssetup.cc:
+	Report unsupported system tasks/functions as a separate error.
+
+2001-12-30  Jimen Ching  <jching@core2>
+
+	* src/common/st_util.cc:
+	When monitoring a bit, any change should trigger an event.
+	I.e. if the bit changed from DC to Z or vis versa.
+
+	* src/common/bvector.cc:
+	Display 'z' if high-impedance.  Use blank/' ' as place holder.
+	If right-hand-side is DC/Z, result of shift operators is unknown.
+
+	* src/moditm/d_setup.cc:
+	Schedule continuous assignment at least once at the end of time unit 0.
+	Default wire declaration to high-impedance.
+
+	* src/moditm/misetup.cc:
+	Schedule continuous assignment at least once at the end of time unit 0.
+
+	* src/sim.cc, src/sim.h, src/stmt/strigger.cc, src/vbs.cc, EXAMPLES/ivl.sh:
+	Increased silent execution to match test suite log.
+
+	* EXAMPLES/mi011_wiredecl.v, EXAMPLES/testv-all.tmpl:
+	New results for initializing wire to high-impedance.
+	Also, continuous assignment is now triggered, at least once, at the end
+	of time unit 0.
+
+	* src/misc/msetup.cc, src/moditm/d_setup.cc, src/p_stmt.cc, src/stmt/assign.cc, src/stmt/assign.h, src/stmt/strigger.cc:
+	Differentiate between delay after equal sign in blocking and non-blocking
+	assignment statements.
+
+	* src/misc/decsetup.cc, src/misc/msetup.cc, src/p_stmt.cc, src/stmt/ssetup.cc:
+	Terminate string stream for error output.
+
+	* src/common/bvector.cc: Skip white space when checking decimal string.
+
+	* src/common/st_util.cc: Read data a token at a time for readmemh/b.
+
+	* src/common/bvector.cc: Extend shift return value to hold the result.
+	Check decimal string for invalid values.
+	If bit vector contains dont-care; return -1, instead of 0, to indicate error.
+
+	* src/expr/esetup.cc:
+	During setup, an index could be dont-care.  This is not an error.
+	Indices are now checked at run-time, so it is ok to overlook it.
+
+	* src/expr/eeval.cc:
+	If a index is dont-care, return dont-care as result.
+
+2001-12-29  Jimen Ching  <jching@core2>
+
+	* src/moditm/d_net.cc, src/moditm/d_net.h, src/moditm/d_param.cc, src/moditm/d_param.h, src/moditm/d_rdwr.cc, src/moditm/d_reg.cc, src/moditm/d_reg.h, src/moditm/d_setup.cc, src/p_moditm.cc, src/p_moditm.h, src/p_types.h, src/vbs.y:
+	Support register assignment declaration.
+	Make assignment declaration consistant across declaration types.
+
+2001-12-28  Jimen Ching  <jching@core2>
+
+	* src/common/dumpvcd.cc, src/common/scp_tab.cc:
+	str.compare() is not standard conformant in g++2.95.x.
+
+	* src/moditm/d_setup.h, src/moditm/d_setup.cc:
+	Correctly treat wire assignment declaration as continuous assignment.
+
+2001-12-27  Jimen Ching  <jching@core2>
+
+	* src/common/dumpvcd.cc, src/common/scp_tab.cc:
+	Use byte limited compare for hierarchical names.
+
+2001-12-26  Jimen Ching  <jching@core2>
+
+	* src/common/dumpvcd.cc:
+	Use new memory file size method to skip dump of memory variables.
+
+	* src/common/st_net.h:
+	New method to determine the size of a memory file.  This can also be used
+	to determine if a net is a memory file, ie. size would be non-zero.
+
+	* src/sim.cc: Reset error filename when performing setup/simulation.
+
+	* src/common/st_util.cc, src/stmt/ssetup.cc, src/stmt/strigger.cc, src/stmt/taskenbl.cc, src/stmt/taskenbl.h:
+	Add hierarchical name format string output.
+
+	* src/common/scp_tab.cc:
+	Make sure search was successful before accessing result.
+
+	* src/configure, src/Makefile.in, src/configure.in:
+	Typos for scripting support.
+
+2001-12-24  Jimen Ching  <jching@core2>
+
+	* src/configure, src/Makefile.in, src/configure.in, src/swig/vbs_swig.i:
+	Allow the same library to be used for both Tcl and perl.
+
+	* src/common/dumpvcd.cc: Update variable for future references.
+
+	* src/misc/msetup.cc, src/misc/partsel.cc, src/misc/partsel.h:
+	Optimize range selection since the expression is constant.
+
+2001-12-23  Jimen Ching  <jching@core2>
+
+	* src/common/dumpinfo.cc:
+	Use C++ coding style to extract text from qouted string.
+	This is more efficient too.
+
+	* src/common/error.cc:
+	Null terminate string stream to remove garbage at the end.
+
+2001-12-22  Jimen Ching  <jching@core2>
+
+	* src/swig/vbs_swig.i:
+	Perl uses "list" as a macro name?  This is bad for C++/Perl combined code.
+
+	* src/common/st_util.cc: Allow base16 to use non-aligned data.
+	Increment the memory index for readmem after assignment.
+
+	* EXAMPLES/ivl.sh:
+	Place the test suite components in the current directory so the
+	run-time paths are accessible.
+
+	* src/config.h.in: Sync with new configure.in tests.
+
+	* src/configure, src/Makefile.in, src/configure.in:
+	New build method for scripting support.
+
+	* src/swig/vbs_swig.i: Use standard header filename.
+
+	* src/common/error.cc: Conform better to C++ standard.
+
+2001-12-21  Jimen Ching  <jching@core2>
+
+	* src/sim.h, src/sim.cc: Reorganized error handling.
+	Moved dump processing into timewheel handler.
+	These changes should make libvbs.so better suited for scripting.
+
+	* src/parser.c, src/vbs.cc:
+	Use callback to handle warnings and fatal errors.
+	Moved POSIX code out of application file (vbs.cc -> parser.c).
+
+	* src/common/error.cc, src/swig/vbs_api.cc:
+	Use callback to handle warnings and fatal errors.
+
+	* src/common/error.h:
+	Made state value increase with the processing flow.
+
+	* src/parser.h, src/stmt/strigger.cc: Updated comment.
+
+2001-12-20  Jimen Ching  <jching@core2>
+
+	* src/Makefile.in, src/common/st_net.cc, src/common/st_net.h, src/common/st_util.cc, src/sim.cc, src/stmt/readmem.cc, src/stmt/readmem.h, src/stmt/ssetup.cc, src/stmt/ssetup.h, src/stmt/stmtbase.h, src/stmt/strigger.cc, src/stmt/strigger.h:
+	Add support for readmemb/h.
+
+	* src/vbs.cc: Moved header inclusion closer to usage.
+
+	* EXAMPLES/ivl.sh: Better parameter checking.
+	Improved results output.
+
+	* src/common/bvector.cc:
+	Skip underscores when determining the number of digits in a number.
+
+2001-12-15  Jimen Ching  <jching@core2>
+
+	* src/configure, src/configure.in: Only specify -fPIC it needed.
+
+	* src/common/logic.h: Make const so C++ can optimize away the inline.
+
+2001-12-14  Jimen Ching  <jching@core2>
+
+	* src/common/dumpinfo.cc, src/common/dumpinfo.h, src/common/dumpstrm.cc, src/common/dumpstrm.h, src/sim.cc, src/vbs.cc:
+	Specify compression level from command line.
+
+	* src/swig/vbs_api.cc: Use private strdup symbol for portability.
+
+	* src/common/dumpvcd.cc, src/common/scp_tab.cc:
+	Use operator instead of member function for a more natural style.
+
+	* src/common/st_util.cc: Use standard symbol and scope.
+
+	* src/Makefile.in: Build SWIG support if available.
+
+	* src/vbs.cc: Remove Guile support.
+
+	* src/swig/vbs_api.cc, src/swig/vbs_swig.i:
+	SWIG support.  Replace guile with a more generic scripting support.
+
+2001-12-11  Jimen Ching  <jching@core2>
+
+	* src/common/st_util.cc:
+	Simulation run-time check of out-of-range for evaluation also.
+
+	* src/common/st_util.cc:
+	Simulation run-time check for out-of-range memory access.
+
+	* src/common/dumpvcd.cc, src/common/scp_tab.cc:
+	$dumpvar fixes from G.V.
+
+2001-12-07  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc, src/common/bvector.h, src/common/logic.h, src/expr/eeval.cc, src/expr/erdwr.cc, src/expr/erdwr.h, src/expr/unary_op.cc, src/expr/unary_op.h, src/p_expr.cc, src/vbs.y:
+	Support unary and/or/xor operators.
+
+	* src/expr/binary_op.h: Remove unnecessary enumeration.
+
+	* src/expr/binary_op.cc:
+	Force compile warning if new operator is added without updating
+	the switch statement.
+
+2001-12-05  Jimen Ching  <jching@core2>
+
+	* src/configure, src/Makefile.in, src/configure.in, src/install-sh:
+	Removed Guile, replaced with SWIG.
+	Add install target.
+	Build libvbs.a|so and link to vbs.
+
+	* src/expr/emon.cc, src/expr/emon.h, src/expr/esetup.cc, src/misc/bitsel.cc, src/misc/bitsel.h, src/misc/mmon.cc, src/misc/mmon.h, src/misc/partsel.cc, src/misc/partsel.h, src/misc/selbase.h, src/Makefile.in:
+	Allow monitoring of an identifier in a bit select.
+
+2001-12-04  Jimen Ching  <jching@core2>
+
+	* src/expr/qstr.cc: Qouted string is a contant expression.
+
+2001-12-03  Jimen Ching  <jching@core2>
+
+	* src/common/dumpstrm.cc: Forgot namespace scoping.
+
+2001-12-02  Jimen Ching  <jching@core2>
+
+	* BUGS: New bug that will take a while to fix.
+
+	* README: Mention namespace is now needed.
+	Mention how to submit patches.  Also available in the FAQ.
+	New features for next release.
+
+	* FAQ: Instructions for VCD/ASCII waveform dumping.
+
+	* EXAMPLES/testv-all.tmpl:
+	Treat decimal integer constants as 32bit values.
+
+	* src/moditm/d_setup.cc: Set net type names correctly.
+
+	* src/common/bvector.cc: Default decimal integer to 32bits.
+
+	* EXAMPLES/ivl.sh: Count unsupported errors as inconclusive.
+
+2001-12-01  Jimen Ching  <jching@core2>
+
+	* src/common/st_util.cc, src/expr/esetup.cc, src/expr/esetup.h, src/stmt/ssetup.cc:
+	Refactored symbol lookup.  Use common function to lookup nested scope.
+
+	* src/vbs.y: Allow scoped task/function enable.
+
+	* src/expr/esetup.cc, src/p_expr.cc:
+	Return better error code for unsupported 'concatenated lvalue' error.
+
+	* src/moditm/func.cc, src/moditm/func.h, src/moditm/mibase.h, src/moditm/task.cc, src/moditm/task.h, src/p_moditm.cc:
+	Re-order tf declaration to expose symbol to task/function enable.
+
+2001-11-30  Jimen Ching  <jching@core2>
+
+	* src/misc/decrdwr.cc, src/misc/decsetup.cc, src/misc/dectrig.cc, src/misc/delayid.cc, src/misc/delayid.h, src/p_misc.h, src/vbs.y, src/p_misc.cc:
+	Support delay by expression (not just delay by identifier).
+
+	* EXAMPLES/ivl.sh, src/Makefile.in:
+	Use shell script to process IVL test suite.
+
+	* src/common/dumpstrm.cc, src/vbs.cc:
+	Exit with more consistent return values.
+
+2001-11-29  Jimen Ching  <jching@core2>
+
+	* src/moditm/mirdwr.cc, src/stmt/srdwr.cc:
+	Do not save non-existant objects.
+
+2001-11-27  Jimen Ching  <jching@core2>
+
+	* src/p_stmt.cc:
+	Non-blocking assignment "a <= b" is the same as "a <= #0 b".
+
+	* EXAMPLES/testv-all.tmpl: Update output of non-blocking assignment.
+
+	* EXAMPLES/stmt010_nbassign.v: Swap register contents.  Better test.
+
+	* src/configure, src/Makefile.in, src/configure.in:
+	Remove check for X11.
+
+2001-11-24  Jimen Ching  <jching@core2>
+
+	* src/common/dumpstrm.cc:
+	Null terminate stringstream before writing to output file.
+
+	* src/common/dumpvcd.cc: Code cleanup.
+
+	* src/common/error.cc: Clarify the requirement for a top-level module.
+
+	* src/misc/decbase.h, src/misc/dectrig.cc, src/misc/dectrig.h, src/stmt/strigger.cc, src/stmt/strigger.h:
+	Correctly handle delay of zero.
+
+2001-11-23  Jimen Ching  <jching@core2>
+
+	* src/common/bvector.cc, src/common/bvector.h, src/expr/eeval.cc, src/tests/testbv.cc:
+	Support divide and modulo operators.
+
+2001-11-21  Jimen Ching  <jching@core2>
+
+	* src/common/dumpvcd.cc: Do not process empty net list.
+
+	* src/moditm/misetup.cc: Setup identifier used as parameter.
+
+2001-11-15  Jimen Ching  <jching@core2>
+
+	* src/common/st_util.cc, src/stmt/strigger.cc:
+	Support %% format specifier.
+
+2001-11-14  Jimen Ching  <jching@core2>
+
+	* src/p_stmt.cc, src/sim.cc, src/stmt/stmtbase.h, src/stmt/strigger.cc:
+	To support "always @(ec) #1 ;" constructs, a new event control object
+	was needed.  Re-arranged the trigger of the delay or event control
+	to handle this new object.
+
+	Updated the time wheel handler to repeatedly run always statements.
+	This better conforms to IEEE-1364.
+
+	* src/stmt/ssetup.h:
+	Moved delay or event control setup into common function.
+
+	* src/stmt/ssetup.cc: Removed some dead code.
+	Moved delay or event control setup into common function.
+
+	* src/stmt/assign.cc, src/stmt/case.cc, src/stmt/ifelse.cc, src/stmt/loopstmt.cc, src/stmt/seqblk.cc, src/stmt/taskenbl.cc:
+	Move display output into common function.
+
+	* src/moditm/misetup.cc:
+	Place statements from 'initial' and 'always' constructs into time wheel
+	for processing, as described by IEEE-1364.
+
+	Setup new event control object to support: "always @(ec) #1 ;" constructs.
+
+	* src/misc/decbase.h, src/misc/dectrig.cc, src/misc/dectrig.h, src/misc/delayid.cc, src/misc/delayid.h, src/misc/delaynum.cc, src/misc/delaynum.h, src/misc/evntexpr.cc, src/misc/evntexpr.h:
+	Triggering delay or event control now returns whether statement was
+	placed on time wheel or event queue.
+
+	* EXAMPLES/testv-all.tmpl: Corrected timing deviation.
+
+	* src/common/dumpstrm.cc: Use C++ semantics.
+
+	* src/common/time_whl.h: More informative debug output.
+
+2001-11-11  Jimen Ching  <jching@core2>
+
+	* src/p_stmt.cc:
+	Move a procedural timing control statement into a sequential block to
+	avoid a double delay/event control.
+
+	* src/common/st_util.cc: Specify index in case it is a memory variable.
+
+	* src/expr/concat.cc: Increment iterator so it is not displayed twice.
+
+	* src/expr/eeval.cc: Return zero for repeat count of zero.
+
+	* src/expr/esetup.cc:
+	Initialization unnecessary, set by called function.
+
+	* src/vbs.l: Allow spaces between the base specifier and the number.
+
+	* src/stmt/stmtbase.h: Output null statement.
+
+2001-11-08  Jimen Ching  <jching@core2>
+
+	* src/moditm/d_setup.cc:
+	Default output declaration of a port to 'wire' type.
+
+	* src/common/st_setup.cc:
+	Place parent scope at the top of the stack to allow recursive calls (task).
+
+	* src/common/st_net.cc: Use proper name for new declarations.
+
+	* src/vbs.l: Typo; using wrong qoute character.
+
+2001-11-02  Jimen Ching  <jching@core2>
+
+	* src/p_stmt.cc, src/p_stmt.h, src/vbs.l, src/vbs.y:
+	Fix ternary operator precedence.
+	Support additional constructs:
+		delay or event control in non-blocking assignment
+		hierarchical identifiers
+
+	* src/Makefile.in: New test cases.
+	Fix generated files dependencies.
+
+	* src/vbs.cc: Remove unneccesary command line option.
+
+	* EXAMPLES/x_hier.v, EXAMPLES/expr_ternary.v, EXAMPLES/mi011_wiredecl.v, EXAMPLES/testv-all.tmpl:
+	Updated test cases for new features.
+
+2001-10-31  Jimen Ching  <jching@core2>
+
+	* src/expr/esetup.cc: Must use explicit scope when searching hierarchy.
+
+	* src/common/st_setup.cc: Formating improvement.
+
+2001-10-30  Jimen Ching  <jching@core2>
+
+	* BUGS, src/moditm/d_net.cc, src/moditm/d_net.h, src/moditm/d_param.h, src/moditm/d_rdwr.cc, src/moditm/d_setup.cc, src/p_moditm.cc, src/p_moditm.h, src/p_types.h, src/vbs.y:
+	Implement net declaration assignment.
+
+2001-10-29  Jimen Ching  <jching@core2>
+
+	* src/moditm/d_param.h: Unnecessary header.
+
+2001-10-28  Jimen Ching  <jching@core2>
+
+	* src/common/st_setup.cc:
+	Place parent scope at the top of the stack to allow recursive calls.
+
+	* src/common/st_util.cc:
+	Allow a function call to pass constant numbers as parameters.
+
+	* src/common/sym_tab.cc:
+	Do not empty out scope variable, might be used again later.
+
+	* src/vbs.y: Stricter conformance with IEEE-1364.
+
+	* EXAMPLES/x_taskdec.v:
+	Task definition does not allow input declarations.
+
+	* src/common/st_util.cc, src/expr/number.cc: Support %t output format.
+
+	* src/p_expr.cc: Support unsized constant numbers.
+
+	* src/sim.cc:
+	Filename was missing a period before the extension when report error.
+
+	* EXAMPLES/contrib_net1.v:
+	Remove unsupported (and unnecessary) construct.
+
+	* BUGS: Update with new features.
+
+	* src/p_misc.cc:
+	Do not bother keeping an empty port list in module definition.
+
+	* src/expr/esetup.cc, src/expr/esetup.h:
+	Implement hierarchical reference.
+
+	* src/moditm/cassign.cc: Output first object once only.
+
+2001-10-27  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/stmt002_bassign.v, EXAMPLES/testv-all.tmpl, src/common/bvector.cc:
+	Typo, using wrong index.
+
+	* src/common/st_util.cc: Allow both indices to be used.
+
+	* src/common/bvector.cc: Left pad number.
+
+	* src/common/error.cc, src/common/error.h, src/moditm/misetup.cc:
+	Detect recursive module instantiations.
+
+	* src/common/hash.h: Add comprison operator for recursion checking.
+
+	* src/common/dstack.h:
+	Allow iterating through content.  Needed by recursion checking.
+
+	* src/expr/emon.cc:
+	Function call argument expressions can be monitored.
+
+	* src/Makefile.in: Add target to run through IVL test suite.
+
+	* src/p_expr.cc, src/p_expr.h, src/vbs.y:
+	Parse lvalue concatenation.  Use yytext in parse error reporting.
+
+	* src/parser.h, src/configure, src/config.h.in, src/configure.in:
+	Detect declaration format of yytext.
+
+	* src/Makefile.in:
+	Fixup dependencies so vbs_yacc.h.h don't get generated.
+	Run config.status if Makefile.in changes.
+
+2001-10-26  Jimen Ching  <jching@core2>
+
+	* src/common/st_setup.cc, src/expr/esetup.cc:
+	Stricter error checking on task and function enables.
+
+	* src/moditm/always.cc, src/moditm/d_int.cc, src/moditm/d_io.cc, src/moditm/d_net.cc, src/moditm/d_param.cc, src/moditm/d_reg.cc, src/moditm/func.cc, src/moditm/initial.cc, src/moditm/task.cc:
+	Cleanup display format.
+
+	* src/stmt/assign.cc, src/stmt/case.cc, src/stmt/ifelse.cc, src/stmt/loopstmt.cc, src/stmt/seqblk.cc, src/stmt/taskenbl.cc:
+	Cleanup 'display' format.
+
+2001-10-14  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/y_namedarg.v, src/Makefile.in, src/moditm/misetup.cc:
+	Do not segment on unsupported feature.
+
+	* EXAMPLES/testv-all.tmpl, EXAMPLES/x_range2.v, src/Makefile.in:
+	New test for register ranges.
+
+-------------------------------------------------------------------------------
+2001-09-29  Jimen Ching  <jching@core2>
+
+	* src/Makefile.in: New target to create tarball.
+
+	* README: New release information.
+
+	* src/configure, src/configure.in:
+	Update version number for new release.
+
+	* FAQ, vbs.txt: Informations were out of date.
+
+	* COPYRIGHT: Update year list.
+
+	* CONTRIBUTORS: I moved.
+
+	* BUGS: Updated to reflect the latest features.
+
+2001-09-28  Jimen Ching  <jching@core2>
+
+	* src/configure src/configure.in:
+	Change tests for HPUX to make it more generic.
+
+2001-09-26  Jimen Ching  <jching@core2>
+
+	* src/configure: Better algorithm for detecting getopt.
+
+	* src/config.h.in, src/configure.in, src/vbs.cc:
+	Better algorithm for detecting getopt.
+	Define macro needed on HPUX.
+
+2001-08-30  Jimen Ching  <jching@core2>
+
+	* src/configure, src/configure.in:
+	Check for sstream so it can be created if not exist.
+
+2001-08-14  Jimen Ching  <jching@core2>
+
+	* src/common/st_setup.cc, src/common/st_trig.cc, src/common/st_trig.h, src/stmt/strigger.cc:
+	Bug fix: delay inside task definition statement causing event starvation.
+
+	* EXAMPLES/testv-all.tmpl, EXAMPLES/x_taskdec.v, src/Makefile.in:
+	New test case to verify bug fix.
+
+2001-08-05  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/expr_concat.v, EXAMPLES/testv-all.tmpl, src/expr/concat.cc, src/expr/concat.h, src/expr/eeval.cc, src/expr/esetup.cc, src/p_expr.cc, src/p_expr.h, src/vbs.y:
+	Add support for multiple concatenation.
+
+2001-07-31  Jimen Ching  <jching@core2>
+
+	* src/guile/guile_api.cc, src/guile/vbs_guile.cc, src/guile/vbs_guile.h:
+	Code cleanup.
+
+	* src/expr/number.cc: Use C++ style header inclusion.
+
+	* src/common/sym_tab.cc: C++ conformance.
+
+	* src/vbs.cc, src/stmt/strigger.cc: Use C++ style header inclusion.
+
+2001-07-29  Jimen Ching  <jching@core2>
+
+	* src/tests/testbv.cc, src/tests/testptr.cc, src/tests/testtw.cc:
+	Update to latest API.
+
+	* src/guile/guile_api.cc: Use C++ style header.
+
+	* src/common/combase.h, src/common/dstack.h, src/common/dumpasc.cc, src/common/dumpasc.h, src/common/dumpinfo.cc, src/common/dumpinfo.h, src/common/dumpstrm.cc, src/common/dumpstrm.h, src/common/dumpvcd.cc, src/common/dumpvcd.h, src/common/error.cc, src/common/error.h, src/common/event.h, src/common/scp_tab.cc, src/common/scp_tab.h, src/common/st_func.h, src/common/st_mod.h, src/common/st_mon.h, src/common/st_net.h, src/common/st_setup.cc, src/common/st_setup.h, src/common/st_task.h, src/common/st_trig.cc, src/common/st_util.cc, src/common/st_util.h, src/common/sym_tab.h, src/common/time_whl.h, src/common/tmpl_utl.h, src/expr/concat.h, src/expr/emon.cc, src/expr/emon.h, src/expr/erdwr.h, src/expr/esetup.cc, src/expr/funccall.h, src/misc/decrdwr.h, src/misc/decsetup.cc, src/misc/decsetup.h, src/misc/delaynum.cc, src/misc/delaynum.h, src/misc/evntexpr.h, src/misc/module.h, src/misc/mrdwr.h, src/misc/msetup.cc, src/misc/msetup.h, src/moditm/cassign.h, src/moditm/d_int.h, src/moditm/d_io.h, src/moditm/d_net.h, src/moditm/d_param.h, src/moditm/d_rdwr.h, src/moditm/d_reg.h, src/moditm/d_setup.h, src/moditm/func.h, src/moditm/mirdwr.cc, src/moditm/mirdwr.h, src/moditm/misetup.h, src/moditm/modinst.h, src/moditm/task.h, src/moditm/tfrdwr.h, src/p_expr.cc, src/p_misc.cc, src/p_moditm.cc, src/p_stmt.cc, src/stmt/case.h, src/stmt/seqblk.h, src/stmt/srdwr.cc, src/stmt/srdwr.h, src/stmt/ssetup.cc, src/stmt/ssetup.h, src/stmt/taskenbl.h:
+	More C++ conformance.  Use typedef's more consistently.
+
+	* src/misc/delayid.h: Unnecessary typedef.
+
+	* src/expr/eeval.cc: Constructor needs correct type, so cast.
+
+	* src/common/hash.cc, src/common/hash.h: Use object typedefs.
+
+	* src/sim.cc: Better C++ conformance.
+
+	* src/common/bvector.cc, src/common/bvector.h, src/common/logic.h:
+	C++ cleanup.
+
+	* src/vbs.cc: Use C++ style headers.
+
+2001-07-22  Jimen Ching  <jching@core2>
+
+	* src/stmt/stmtbase.h, src/moditm/mitfbase.h, src/moditm/tfbase.h, src/moditm/mibase.h, src/misc/partsel.h, src/misc/portconn.cc, src/misc/portconn.h, src/misc/selbase.h, src/misc/decbase.h, src/misc/lvalue.cc, src/misc/lvalue.h, src/misc/module.cc, src/misc/port.cc, src/misc/port.h:
+	Avoid using ostream from global scope.
+
+	* src/misc/bitsel.h, src/expr/exprbase.cc, src/expr/exprbase.h, src/expr/number.h, src/common/st_node.h:
+	Update copyright.
+
+	* src/misc/bitsel.h: Avoid using ostream from global scope.
+
+	* src/expr/number.h:
+	Make function prototype consistent with definition.
+
+	* src/expr/exprbase.h, src/expr/exprbase.cc, src/common/st_node.h:
+	Avoid using ostream from global scope.
+
+	* src/configure, src/configure.in:
+	Check GCC major version also, when detecting -frepo.
+
+2000-11-01  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/mi006_assign.v: Correct comment.
+
+2000-10-31  Jimen Ching  <jching@core2>
+
+	* src/common/debug.cc, src/common/debug.h:
+	Removed GNU C++ extension dependencies.
+
+	* src/vbs.cc: Made ANSI compliant.
+
+	* src/vbs.l: Cleanup warning.
+
+	* src/common/event.h:
+	Embedded type is used by public, so make it available.
+
+2000-09-08  Jimen Ching  <jching@core2>
+
+	* src/common/dumpstrm.cc: Casting wrong variable.
+
+	* src/common/dumpasc.h: Whoops, duplicate typedef statement.
+
+2000-05-11  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/testv-all.tmpl:
+	Removed version info from output.  Diff's should show less junk.
+
+	* src/common/dumpinfo.cc, src/stmt/ssetup.cc, src/sim.cc, src/vbs.cc:
+	When the format is not specified at the command line, and the Verilog
+	code enables one of the $dump* system tasks, default the format to VCD.
+
+2000-05-03  Jimen Ching  <jching@core2>
+
+	* src/vbs.l: Parse preprocessor directives explicitly.
+
+	* src/vbs.cc: Do not enable VCD dump by default.  Add arg to enable it.
+
+	* src/common/dumpinfo.cc:
+	Do not process dump messages if format not specified (null ptr reference).
+
+2000-04-30  Jimen Ching  <jching@core2>
+
+	* src/tests/testst.cc: Update to new st_node_base contructor signature.
+
+2000-04-15  vgeorge  <vgeorge@core2>
+
+	* src/common/dumpvcd.cc: Net changed reset upon read
+
+	* src/common/st_util.cc: net.changed reset upon read
+
+2000-04-12  Jimen Ching  <jching@core2>
+
+	* src/common/hash.cc: Use 16bit storage while calculating hash value.
+
+	* src/common/sym_tab.cc: Passing wrong value into rehash.
+
+2000-04-11  Jimen Ching  <jching@core2>
+
+	* CHANGELOG, CONTRIBUTORS: Per request.
+
+	* CONTRIBUTORS: Updated comment to reflect additional contributions.
+
+	* src/common/bvector.h, src/expr/eeval.cc, src/common/bvector.cc:
+	add multiply operator to bvector.
+
+2000-03-13  vgeorge  <vgeorge@core2>
+
+	* src/common/dumpvcd.h:
+	Changes for dump header creation from scopetable info
+
+	* src/stmt/ssetup.cc:
+	Changes for dump header creation from netlist in scope table
+
+	* src/moditm/misetup.cc: Instance level now registered.
+
+	* src/common/scp_tab.cc, src/common/scp_tab.h:
+	Changes for dump header creation from netlist in scope table
+
+	* src/common/dumpvcd.cc:
+	Changes for dump header creation from netlist in scope table
+	Also this fixes "lvls" problem..
+
+	* src/common/dumpstrm.cc: casting of c_in_length..
+
+	* src/common/dumpinfo.cc, src/common/dumpinfo.h:
+	Changes for dump header creation from netlist in scope table
+
+	* src/common/dumpasc.h:
+	Changes for dump header creation from scope table info
+
+	* src/common/dumpasc.cc: create header now gets info from scopetable.
+
+2000-03-11  vgeorge  <vgeorge@core2>
+
+	* src/common/dumpstrm.h:
+	_compress added for displaying compressed file extension.
+
+	* src/common/dumpinfo.cc: Compressed file extension displayed properly.
+
+	* src/vbs.cc: Spelling correction for --dump_compress
+
+	* src/stmt/ssetup.cc:
+	dumpvars setup to turn on dump. This lets time 0 events to dump values.
+
+2000-03-06  Jimen Ching  <jching@core2>
+
+	* src/Makefile.in, src/vpi_user.c, src/vpi_user.h:
+	Added support for VPI.
+
+	* src/parser.c: Cleanup header.
+
+2000-03-06  vgeorge  <vgeorge@core2>
+
+	* src/common/dumpvcd.cc:
+	puts the time at the end of vcd dump, to get dinotrave display
+	the last segment.
+
+	* src/sim.cc, src/common/dumpinfo.h, src/stmt/ssetup.cc, src/stmt/strigger.cc, src/common/dumpinfo.cc:
+	dumpvars; support
+
+2000-03-05  vgeorge  <vgeorge@core2>
+
+	* src/common/dumpinfo.cc: Changes for default dump file name vbs.dmp
+
+	* src/common/dumpinfo.h: changes for default dump file name vbs.dmp
+
+	* src/stmt/strigger.cc: executing dumpvars should turn on dump - LRM
+
+2000-03-03  vgeorge  <vgeorge@core2>
+
+	* src/stmt/dumptsk.cc, src/stmt/dumptsk.h, src/common/scp_tab.h, src/common/scp_tab.cc:
+	Header update
+
+	* src/guile/vbs_guile.h: Header added
+
+	* src/guile/vbs_guile.cc: Header update
+
+	* src/guile/guile_api.cc: Header updated.
+
+	* src/stmt/strigger.cc: dump_values removed..
+
+	* src/common/dumpasc.h, src/common/dumpinfo.h:
+	dumpon/off/all related changes
+
+	* src/common/dumpinfo.cc: dumpall/dumpon/dumpoff related changes
+
+	* src/common/dumpvcd.h: dumpon/off/all related changes
+
+	* src/common/dumpvcd.cc: dumpon/dumpoff/dumpall related changes
+
+	* src/common/dumpasc.cc: dumpon/off/all task related changes
+
+2000-02-26  Jimen Ching  <jching@core2>
+
+	* src/common/scp_tab.h, src/common/dumpasc.cc, src/common/dumpasc.h, src/common/dumpinfo.cc, src/common/dumpinfo.h, src/common/dumpstrm.cc, src/common/dumpstrm.h, src/common/dumpvcd.cc, src/common/dumpvcd.h, src/common/scp_tab.cc, src/sim.cc, src/sim.h, src/vbs.cc, src/Makefile.in, src/configure, src/config.h.in, src/configure.in:
+	Add dump compression support.
+
+2000-02-18  Jimen Ching  <jching@core2>
+
+	* src/common/dumpvcd.cc: Remove reference to "top".
+
+2000-02-17  Jimen Ching  <jching@core2>
+
+	* EXAMPLES/mi006_assign.v, src/expr/emon.cc:
+	Handle ternary expressions in continuous assignment.
+
+	* EXAMPLES/x_dump.v: Dump from top level.
+
+	* src/sim.cc: Add comment about fast simulation.
+
+	* src/moditm/misetup.cc: Save instance scope for dump.
+
+	* src/common/dumpvcd.cc, src/common/scp_tab.cc, src/common/scp_tab.h, src/sim.cc:
+	Remove use of "top" as top level module instance name.
+
+2000-02-16  Jimen Ching  <jching@core2>
+
+	* src/stmt/strigger.cc, src/stmt/ssetup.cc:
+	For now, set dump file in first pass setup.
+
+	* src/common/error.cc, src/common/error.h, src/stmt/ssetup.cc:
+	Cleanup error checking.  Added error code.
+
+	* src/sim.cc: Add toplevel module name to scope table.
+
+2000-02-15  Jimen Ching  <jching@core2>
+
+	* src/expr/esetup.cc: Temp checkin, what does this mod do?
+
+2000-02-14  vgeorge  <vgeorge@core2>
+
+	* src/guile/guile_api.cc, src/guile/vbs_guile.h:
+	updates for Jimen new sim.cc. Can execute small guile scripts now.
+
+2000-02-11  Jimen Ching  <jching@core2>
+
+	* src/common/scp_tab.cc, src/sim.cc: Clean up compiler warnings.
+
+2000-02-10  Jimen Ching  <jching@core2>
+
+	* src/common/time_whl.h, src/sim.cc, src/sim.h, src/stmt/strigger.cc, src/vbs.cc:
+	Modified startup procedure to support tcl/guile.
+	Enabled dump output (but still does not work).
+
+	* EXAMPLES/x_dump.v: Test case for $dump API.
+
+2000-02-01  Jimen Ching  <jching@core2>
+
+	* src/common/st_task.h, src/common/st_util.cc, src/common/sym_tab.h, src/moditm/misetup.cc, src/stmt/ssetup.cc, src/stmt/ssetup.h, src/stmt/stmtbase.h, src/stmt/strigger.cc, src/stmt/strigger.h, src/Makefile.in, src/common/st_func.cc, src/common/st_func.h, src/common/st_inst.cc, src/common/st_inst.h, src/common/st_mod.cc, src/common/st_mod.h, src/common/st_net.cc, src/common/st_net.h, src/common/st_node.h, src/common/st_setup.cc, src/common/st_task.cc, src/sim.cc:
+	Added $dump API from George Varughese <vgeorge@computer.org>.
+	$dump* from the simulator does not yet work.  No actual output is
+	generated.  But the code is stable enough to commit.
+
+	* src/stmt/dumptsk.cc, src/stmt/dumptsk.h, src/common/scp_tab.cc, src/common/scp_tab.h:
+	George Varughese <vgeorge@computer.org>: $dump API.
+
+	* src/common/dumpvcd.cc, src/common/dumpvcd.h, src/common/dumpasc.h, src/common/dumpinfo.cc, src/common/dumpinfo.h, src/common/dumpasc.cc:
+	George Varughese <vgeorge@computer.org>: $dump* API.
+
+2000-01-31  Jimen Ching  <jching@core2>
+
+	* src/vbs.cc: Code cleanup.
+
+2000-01-30  Jimen Ching  <jching@core2>
+
+	* src/parser.h, src/vbs.l, src/p_expr.cc, src/parser.c:
+	Rename my_strdup to vbs_strdup.
+
+	* src/guile/guile_api.cc:
+	George Varughese <vgeorge@acm.org>: usability changes.
+
+2000-01-27  Jimen Ching  <jching@core2>
+
+	* src/guile/guile_api.cc, src/sim.cc, src/sim.h, src/vbs.cc:
+	vgeorge@computer.org: cleaned up libguile support.
+
+2000-01-24  Jimen Ching  <jching@core2>
+
+	* CONTRIBUTORS: Added George Varughese <vgeorge@computer.org>.
+
+	* src/vbs.l, src/vbs.y:
+	vgeorge@computer.org: scoping identifier support.
+
+	* src/Makefile.in: Opps, minor syntax error.
+
+	* src/configure: Sync with configure.in
+
+	* src/Makefile.in, src/config.h.in, src/configure.in, src/guile/guile_api.cc, src/guile/vbs_guile.cc:
+	Added Guile support.
+
+-------------------------------------------------------------------------------
+Mon Oct 19 21:10:17 1999  Jimen Ching <jching@flex.com>
+
+	* [sim.cc]
+	Fixed compiler warning about variable being clobbered by longjmp.
+
+Wed Sep 1 12:37:21 1999  anonymous
+
+	* [sim.cc random.cc random.h ..]
+	Added $random system function.
+
+-------------------------------------------------------------------------------
+Sat Sep 26 21:23:40 1998  Jimen Ching <jching@flex.com>
+
+	* [configure.in]
+	Added --with-template-depth to fix problems with latest egcs compiler.
+	Used better method of detecting the need for -frepo.
+
+	* [Makefile.in]
+	Changed assignment of VPATH to fix Makefile generation problem.
+	Other cleanups for Debian 2.0.
+
+Sat Sep 19 10:11:23 1998  Jimen Ching <jching@flex.com>
+
+	* [sim.cc]
+	Test return value of string.find_last_of for error conditions.
+	Fixed compile errors from latest egcs and libc6 (glibc2).
+
+-------------------------------------------------------------------------------
+Sat Feb 14 19:30:14 1998  Jimen Ching  <jching@flex.com>
+
+	* [vbs.cc]
+	Changed option letters.
+
+Thu Feb 5 10:26:34 1998  Jimen Ching  <jching@flex.com>
+
+	* [configure.in Makefile.in *.*]
+	Compilable by egcs 1.0.x.
+
+-------------------------------------------------------------------------------
+Fri Dec 26 22:19:28 1997  Jimen Ching  <jching@flex.com>
+
+	* [event.h]
+	Added nonblock_event for non-blocking assignment.
+
+	* [vbs.y]
+	Fixed bug where invert (~) did not accept expressions in parenthesis.
+	Fixed bug where a parser error could segfault.
+
+Sat Dec 13 13:41:48 1997  Jimen Ching  <jching@flex.com>
+
+	* [emon.cc]
+	Fixed constant in continuous assignment.
+
+	* [msetup.cc]
+	Port connections can now be expressions.
+
+Sun Dec  7 22:52:19 1997  Jimen Ching  <jching@flex.com>
+
+	* [misc/dectrig.cc expr/rangeid.cc]
+	Fixed bug where event control in loop causes segfault.
+
+Sat Dec  6 17:52:58 1997  Jimen Ching  <jching@flex.com>
+
+	* [p_expr.* expr/concat.* expr/esetup.cc expr/etrigger.cc vbs.y]
+	Added concatenation expression (for right-hand-value only).
+
+	* [sim.cc]
+	Added --quite option to not display statistics.
+
+-------------------------------------------------------------------------------
+Sun Nov 30 20:42:22 1997  Jimen Ching  <jching@flex.com>
+
+	* [event.h]
+	Moved event name output into base class.
+
+	* [sim.cc]
+	Use pid for temporary file.
+	Use setjmp/longjmp to remove temporary file in case of parse error.
+
+Sun Nov 30 01:40:26 1997  Jimen Ching  <jching@flex.com>
+
+	* [sim.cc]
+	Added CPU time and event count to end of simulation.
+
+	* [esetup.cc]
+	range_id index should be calculated on every setup, not just once.
+
+Fri Nov 28 22:33:54 1997  Jimen Ching  <jching@flex.com>
+
+	* [msetup.cc d_setup.cc misetup.cc]
+	Set scope when adding new node to symbol table.
+
+	* [d_setup.cc]
+	Cleaned up error checking in net declaration.
+
+	* [st_net.cc]
+	Fixed bug where _storage in st_net is not deleted with
+	'delete []' for cases that need it.
+
+Thu Nov 27 17:15:37 1997  Jimen Ching  <jching@flex.com>
+
+	* [sim.cc]
+	Fixed temporary file name construction.
+
+-------------------------------------------------------------------------------
+Sat Sept 27 11:33:10 1997  Jimen Ching  <jching@flex.com>
+
+	* [d_setup.* d_param.* st_setup.* misetup.*]
+	Added support for parameter value assignment in module instantiation.
+
+Thu Sept 7 23:01:08 1997  Jimen Ching  <jching@flex.com>
+
+	* [d_setup.* d_param.* p_moditm.c p_types.h vbs.y]
+	Added support for parameter declaration.
+
+Thu Sept 6 11:00:15 1997  Jimen Ching  <jching@flex.com>
+
+	* [error.*]
+	Made error messages into class.
+
+Thu Sept 6 10:36:20 1997  Jimen Ching  <jching@flex.com>
+
+	* [Makefile]
+	Cleaned up some targets
+
+-------------------------------------------------------------------------------
+Thu Aug 14 10:50:35 1997  Jimen Ching  <jching@flex.com>
+
+	* [common/st_setup.cc]
+	Display variable name when declaration is incomplete, instead of
+	the module name.
+
+Wed Jun 29 09:26:41 1997  Jimen Ching  <jching@flex.com>
+
+	* [expr/mintypmax.* p_expr.* vbs.y]
+	Added support for mintypmax expression.
+
+Wed Jun 11 21:36:11 1997  Jimen Ching  <jching@flex.com>
+
+	* [bvector.*]
+	Made bit_vector more IEEE Std 1364 compliant.
+
+Wed Jun 7 14:15:27 1997  Jimen Ching  <jching@flex.com>
+
+	* [eeval.*] [etrigger.*] [p_expr.*] [p_types.h] [vbs.l/y]
+	Added support for ternary operator (?:).
+
+-------------------------------------------------------------------------------
+Tue Apr 8 22:54:00 1997  Jimen Ching  <jching@flex.com>
+
+	* [sim.cc] [common/sym_tab.*]
+	Free module objects before starting simulation.
+
+Mon Apr 7 22:28:00 1997  Jimen Ching  <jching@flex.com>
+
+	* [sim.cc] [moditm/modinst.*] [common/st_mod.*]
+	Removed requirement that the top-level module be named main.
+
+-------------------------------------------------------------------------------
+Thu Apr 4 21:15:00 1997  Jimen Ching  <jching@flex.com>
+
+        * [FAQ] [README]
+	Changed my email address.

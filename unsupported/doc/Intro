@@ -1,0 +1,50 @@
+Preface
+
+	Verilog is a hardware description language (HDL) created by 
+Cadence Design Systems.  Verilog was later released to the public domain 
+to compete with the Department of Defence's VHSIC HDL (VHDL).  Because 
+Verilog was a commercial product, many early designs using HDLs were done 
+in Verilog.  The purpose of this project was to provide a tool for VLSI 
+design students to learn Verilog and have a simulator to use without 
+extra cost.  This simulator supports only synthesizable behavioral 
+constructs.  This means we do not support switch level or functional 
+level constructs, which the Verilog HDL also allows as a description.
+
+	This project was not meant to compete with commercial Verilog 
+simulators.  In the spirit of the GNU Project for Operating Systems, the 
+members of this project believed that source code can only enhance the 
+functionality of a software tool.  Thus, providing source code, for a 
+Verilog simulator, was the ultimate goal of this project.  As you will 
+find out later in this document, this simulator is far from professional 
+quality.  Therefore, we encourage the readers and users to consider 
+commercial solutions when this simulator begins to show its limitations.
+
+
+Introduction
+
+	This documentation describes the features and implementation of the 
+Verilog Behavioral Simulator (VBS).  This documentation has three parts:
+
+	1.  Usage
+	2.  Implementation details
+	3.  Implementation decisions
+
+We will not describe how to write Verilog descriptions of circuits.  That
+is left to the reader to find books on the subject.  See the References
+document for a list of books on how to write Verilog circuit descriptions. 
+Part one of this document describes how to use the VBS system.  If you
+want to find out which constructs are supported or which ones are not,
+then this is the section to read.  Part two describes the simulator
+internals.  For those who wish to learn how a simulator can be implemented
+or how to add features, this is the section you need to read.  Part three
+describes the implementation decisions that were made, such as the
+representation of a register or the implementation of the simulation
+procedure.
+
+These documentations do not describe the VBS program thoroughly.  There
+are many little details that are left out.  This is not intentional.  As
+the authors get more time, the documentation will be updated to include as
+much detail as possible.  The source code is going through a lot of
+changes, so the documentation can not follow as closely as the authors
+would like.  Thank you for your understanding. 
+

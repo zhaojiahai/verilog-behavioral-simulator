@@ -1,0 +1,501 @@
+# Verilog Behavioral Simulator
+# Copyright (C) 1996-2001 Jimen Ching
+#
+# This file is part of the Verilog Behavioral Simulator package.
+# See the file COPYRIGHT for copyright and disclaimer information.
+# See the file COPYING for the licensing terms and conditions.
+# See the file CONTRIBUTORS for a list of contributing authors.
+#
+# Makefile
+#
+# Makefile for VBS.  This makefile contains targets for all parts of
+# the VBS package.  Type 'make' by itself for a list of targets.
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+
+# Select your compiler.
+CC = @CC@
+CXX = @CXX@
+LEX = @LEX@
+YACC = @YACC@
+@SET_MAKE@
+
+# C and C++ options.
+DEFS = @DEFS@
+PERLDEFS = @PERLDEFS@
+GUILE_LD = @GUILE_LD@
+CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+PERLLIBS = @PERLLIBS@
+
+# Some system commands.  Change if your system's version is broken.
+INSTALL = @INSTALL@
+COMPRESS = @COMPRESS@
+
+# Version numbering.
+MAJOR = @MAJOR@
+MINOR = @MINOR@
+PATCHLEVEL = @PATCHLEVEL@
+
+#
+# NO NEED TO MODIFY BELOW THIS LINE!!!
+#
+
+CFLAGS := $(DEFS) -I$(srcdir) -I. $(CFLAGS)
+CXXFLAGS := $(DEFS) -I$(srcdir) -I. $(CXXFLAGS)
+SFLAGS := -c++ -I$(srcdir)
+LDFLAGS := $(LDFLAGS)
+LFLAGS :=
+YFLAGS := -d
+LIBS := $(LIBS)
+
+# Extra packages.
+SWIG = @SWIG@
+SRCS_TCL = @SRCS_TCL@
+SRCS_PERL = @SRCS_PERL@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+
+# Generated files
+SRCSP = vbs_yacc.c vbs_lex.c
+
+# C files
+SRCSC = parser.c vpi_user.c
+
+# Scripting object files.
+SWIG_DIR = swig
+SWIG_SRCS = vbs_api.cc
+
+# Common object files.
+SRCS1_DIR = common
+SRCS1 =	\
+		debug.cc \
+		bvector.cc \
+		error.cc \
+		hash.cc \
+		sym_tab.cc \
+		scp_tab.cc \
+		dumpinfo.cc \
+		dumpasc.cc \
+		dumpvcd.cc \
+		dumpstrm.cc \
+		st_mod.cc \
+		st_net.cc \
+		st_func.cc \
+		st_task.cc \
+		st_inst.cc \
+		st_util.cc \
+		st_mon.cc \
+		st_setup.cc \
+		st_eval.cc \
+		st_trig.cc
+
+# Expression object files.
+SRCS2_DIR = expr
+SRCS2 =	\
+		exprbase.cc \
+		funccall.cc \
+		concat.cc \
+		number.cc \
+		qstr.cc \
+		rangeid.cc \
+		unary_op.cc \
+		binary_op.cc \
+		ternary_op.cc \
+		mintypmax.cc \
+		erdwr.cc \
+		emon.cc \
+		esetup.cc \
+		eeval.cc \
+		etrigger.cc
+
+# Statement object files.
+SRCS3_DIR = stmt
+SRCS3 =	\
+		finish.cc \
+		display.cc \
+		write.cc \
+		dumptsk.cc \
+		monitor.cc \
+		readmem.cc \
+		strobe.cc \
+		xtime.cc \
+		stime.cc \
+		random.cc\
+		seqblk.cc \
+		taskenbl.cc \
+		assign.cc \
+		ifelse.cc \
+		case.cc \
+		loopstmt.cc \
+		srdwr.cc \
+		ssetup.cc \
+		strigger.cc
+
+# Misc. object files.
+SRCS4_DIR = misc
+SRCS4 =	\
+		port.cc \
+		portconn.cc \
+		module.cc \
+		partsel.cc \
+		bitsel.cc \
+		lvalue.cc \
+		delaynum.cc \
+		delayid.cc \
+		evntexpr.cc \
+		decrdwr.cc \
+		decsetup.cc \
+		dectrig.cc \
+		mrdwr.cc \
+		mmon.cc \
+		msetup.cc \
+		mtrigger.cc
+
+# Module item object files.
+SRCS5_DIR = moditm
+SRCS5 =	\
+		always.cc \
+		initial.cc \
+		d_io.cc \
+		d_net.cc \
+		d_reg.cc \
+		d_int.cc \
+		d_param.cc \
+		d_rdwr.cc \
+		d_setup.cc \
+		func.cc \
+		task.cc \
+		modinst.cc \
+		cassign.cc \
+		tfrdwr.cc \
+		tfsetup.cc \
+		mirdwr.cc \
+		misetup.cc
+
+# General C++ modules
+SRCS6 =	\
+		p_misc.cc \
+		p_moditm.cc \
+		p_stmt.cc \
+		p_expr.cc \
+		sim.cc
+
+OBJS_PERL = $(subst .cc,.o,$(SRCS_PERL))
+OBJS_TCL = $(subst .cc,.o,$(SRCS_TCL))
+OBJS =	\
+		$(subst .c,.o,$(SRCSP)) \
+		$(subst .c,.o,$(SRCSC)) \
+		$(subst .cc,.o,$(SRCS1)) \
+		$(subst .cc,.o,$(SRCS2)) \
+		$(subst .cc,.o,$(SRCS3)) \
+		$(subst .cc,.o,$(SRCS4)) \
+		$(subst .cc,.o,$(SRCS5)) \
+		$(subst .cc,.o,$(SRCS6)) \
+		$(subst .cc,.o,$(SWIG_SRCS))
+
+SRCS_SUBDIR = \
+		$(srcdir) \
+		$(srcdir)/$(SRCS1_DIR): \
+		$(srcdir)/$(SRCS2_DIR): \
+		$(srcdir)/$(SRCS3_DIR): \
+		$(srcdir)/$(SRCS4_DIR): \
+		$(srcdir)/$(SRCS5_DIR): \
+		$(srcdir)/$(SWIG_DIR)
+
+TST_DIR = tests
+
+VPATH += $(SRCS_SUBDIR):$(srcdir)/$(TST_DIR)
+
+.SUFFIXES:
+
+%.d: %.c
+	$(SHELL) -ec '$(CC) -M $(CFLAGS) $< | sed "s/$*.o/& $@/g" > $@'
+
+%.d: %.cc
+	$(SHELL) -ec '$(CXX) -M $(CXXFLAGS) $< | sed "s/$*.o/& $@/g" > $@'
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+%.o: %.cc
+	$(CXX) $(CXXFLAGS) -c $<
+
+all:
+	@echo ""
+	@echo "Type 'make target', where target is one of"
+	@echo "the targets below:"
+	@echo ""
+	@echo "     vbs ............. compile simulator"
+	@echo "     vbs-static ...... compile static simulator"
+ifneq ($(GUILE_LD),)
+	@echo "     vbs-guile ....... compile Guile script program"
+endif
+ifneq ($(SRCS_PERL),)
+	@echo "     vbs.so .......... compile library for Perl scripting"
+endif
+ifneq ($(SRCS_TCL),)
+	@echo "     libvbs.so ....... compile library for TCL scripting"
+endif
+	@echo "     test-bv ......... test bit_vector class"
+	@echo "     test-db ......... test debug class"
+	@echo "     test-ptr ........ test pointer type class"
+	@echo "     test-eq ......... test event class"
+	@echo "     test-st ......... test symbol table class"
+	@echo "     test-tw ......... test time wheel class"
+	@echo "     test-all ........ test all the above"
+	@echo "     testv-ivl ....... test IVL testsuite, set IVL to directory"
+	@echo "     testv-all ....... test all .v, or list below:"
+	@echo "       testv-module, testv-dec, testv-expr,"
+	@echo "       testv-mi, testv-stmt, testv-x"
+	@echo ""
+
+#
+# Public targets
+#
+
+vbs: libvbs.a vbs.o
+	$(CXX) $(LDFLAGS) -o $@ vbs.o libvbs.a $(LIBS)
+
+vbs-static: libvbs.a vbs.o
+	$(CXX) -static $(LDFLAGS) -o $@ vbs.o libvbs.a $(LIBS)
+
+ifneq ($(GUILE_LD),)
+vbs-guile: libvbs.a vbs_guile.o
+	$(GUILE_LD) $(LDFLAGS) -o $@ vbs_guile.o libvbs.a $(LIBS)
+else
+vbs-guile:
+	@echo "Guile scripting support is not available."
+endif
+
+vbs.so: version.h $(OBJS_PERL) $(OBJS)
+	$(CXX) -shared $(LDFLAGS) -o $@ $(OBJS_PERL) $(OBJS) $(LIBS) $(PERLLIBS)
+
+libvbs.so: version.h $(OBJS_TCL) $(OBJS)
+	$(CXX) -shared $(LDFLAGS) -o $@ $(OBJS_TCL) $(OBJS) $(LIBS)
+
+libvbs.a: version.h $(OBJS)
+	ar rc $@ $(OBJS)
+
+Makefile: $(srcdir)/Makefile.in
+	./config.status
+
+version.h:
+	echo "#define VERSION" \"$(MAJOR).$(MINOR).$(PATCHLEVEL)\" > version.h
+
+vbs_lex.c: $(srcdir)/vbs.l
+	$(LEX) $(LFLAGS) -o$@ $<
+
+vbs_yacc.h: vbs_yacc.c
+vbs_yacc.c: $(srcdir)/vbs.y
+	$(YACC) $(YFLAGS) -o $@ $<
+
+maintainer-clean: distclean
+	rm -f *.i
+	rm -f config.cache config.log config.status
+	rm -f config.h Makefile sstream
+
+distclean: clean clean-repo
+	rm -f *.d
+	rm -f vbs_guile*.[^i]* vbs_perl*.[^i]* vbs_tcl*.[^i]*
+	rm -f vbs.pm
+	rm -f vbs_yacc.c vbs_yacc.h
+	rm -f vbs_lex.c
+	rm -f version.h
+
+clean:
+	rm -f *.o
+	rm -f *.a
+	rm -f *.so
+	rm -f vbs a.out tst core
+
+clean-repo:
+	if test -d ptrepository; then rm -rf ptrepository; fi
+	rm -f *.rpo
+
+install:
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) vbs $(DESTDIR)$(bindir)
+
+tarball:
+	@echo "===== Tar ball ======"
+	cd $(srcdir)/../..; \
+	echo "CVS" > .exclude-files; \
+	echo "Entries" >> .exclude-files; \
+	echo "Repository" >> .exclude-files; \
+	echo "Root" >> .exclude-files; \
+	ln -s vbs vbs-$(VERNAME); \
+	tar -X .exclude-files -chf vbs-$(VERNAME).tar vbs-$(VERNAME); \
+	gzip -9 vbs-$(VERNAME).tar; \
+	rm .exclude-files; \
+	rm vbs-$(VERNAME); \
+	echo The snapshot is created at `pwd`.
+
+#
+# Test modules for common objects.
+#
+
+TST_OBJS := $(addprefix $(srcdir)/$(TST_DIR)/,$(TST_OBJS))
+tst_build: $(TST_OBJS)
+	$(CXX) $(LDFLAGS) -o tst $(TST_OBJS)
+	if test -x tst; then ./tst; fi
+
+test-all: test-bv test-db test-ptr test-eq test-st test-tw
+
+test-bv:
+	@echo "Testing bit vector class"
+	$(MAKE) TST_OBJS="testbv.o bvector.o" tst_build
+
+test-db:
+	@echo "Testing debug class"
+	$(MAKE) TST_OBJS="testdb.o debug.o" tst_build
+
+test-ptr:
+	@echo "Testing pointer type class"
+	$(MAKE) TST_OBJS="testptr.o" tst_build
+
+test-eq:
+	@echo "Testing event queue class"
+	$(MAKE) TST_OBJS="testeq.o debug.o" tst_build
+
+test-st:
+	@echo "Testing symbol table class"
+	$(MAKE) TST_OBJS="testst.o sym_tab.o hash.o bvector.o" tst_build
+
+test-tw:
+	@echo "Testing time wheel class"
+	$(MAKE) TST_OBJS="testtw.o debug.o" tst_build
+
+#
+# Examples.
+#
+
+EX_COM = ./vbs -q
+EX_DIR = $(srcdir)/../EXAMPLES
+
+testv-all: testv-module testv-dec testv-expr testv-mi testv-stmt testv-x
+
+testv-module:
+	$(EX_COM) $(EX_DIR)/000module.v
+
+testv-dec:
+	$(EX_COM) $(EX_DIR)/dec001_delay.v
+	$(EX_COM) $(EX_DIR)/dec002_posneg.v
+	$(EX_COM) $(EX_DIR)/dec003_posneg.v
+
+testv-expr:
+	$(EX_COM) $(EX_DIR)/expr_add.v
+	$(EX_COM) $(EX_DIR)/expr_andand.v
+	$(EX_COM) $(EX_DIR)/expr_eqeq.v
+	$(EX_COM) $(EX_DIR)/expr_grteq.v
+	$(EX_COM) $(EX_DIR)/expr_grtthan.v
+	$(EX_COM) $(EX_DIR)/expr_invert.v
+	$(EX_COM) $(EX_DIR)/expr_leseq.v
+	$(EX_COM) $(EX_DIR)/expr_lesthan.v
+	$(EX_COM) $(EX_DIR)/expr_logand.v
+	$(EX_COM) $(EX_DIR)/expr_logor.v
+	$(EX_COM) $(EX_DIR)/expr_logxor.v
+	$(EX_COM) $(EX_DIR)/expr_lshift.v
+	$(EX_COM) $(EX_DIR)/expr_not.v
+	$(EX_COM) $(EX_DIR)/expr_noteq.v
+	$(EX_COM) $(EX_DIR)/expr_oror.v
+	$(EX_COM) $(EX_DIR)/expr_rshift.v
+	$(EX_COM) $(EX_DIR)/expr_sub.v
+	$(EX_COM) $(EX_DIR)/expr_qstr.v
+	$(EX_COM) $(EX_DIR)/expr_eqeqeq.v
+	$(EX_COM) $(EX_DIR)/expr_noteqeq.v
+	$(EX_COM) $(EX_DIR)/expr_ternary.v
+	$(EX_COM) $(EX_DIR)/expr_mintypmax.v
+	$(EX_COM) $(EX_DIR)/expr_concat.v
+
+testv-mi:
+	$(EX_COM) $(EX_DIR)/mi001_regdecl.v
+	$(EX_COM) $(EX_DIR)/mi002_always.v
+	$(EX_COM) $(EX_DIR)/mi003_modinst.v
+	$(EX_COM) $(EX_DIR)/mi004_function.v
+	$(EX_COM) $(EX_DIR)/mi005_task.v
+	$(EX_COM) $(EX_DIR)/mi006_assign.v
+	$(EX_COM) $(EX_DIR)/mi007_intdecl.v
+	$(EX_COM) $(EX_DIR)/mi008_memdecl.v
+	$(EX_COM) $(EX_DIR)/mi009_paramdecl.v
+	$(EX_COM) $(EX_DIR)/mi010_paramdecl.v
+	$(EX_COM) $(EX_DIR)/mi011_wiredecl.v
+
+testv-stmt:
+	$(EX_COM) $(EX_DIR)/stmt001_task.v
+	$(EX_COM) $(EX_DIR)/stmt002_bassign.v
+	$(EX_COM) $(EX_DIR)/stmt003_if.v
+	$(EX_COM) $(EX_DIR)/stmt004_ifelse.v
+	$(EX_COM) $(EX_DIR)/stmt005_case.v
+	$(EX_COM) $(EX_DIR)/stmt006_for.v
+	$(EX_COM) $(EX_DIR)/stmt007_forever.v
+	$(EX_COM) $(EX_DIR)/stmt008_repeat.v
+	$(EX_COM) $(EX_DIR)/stmt009_while.v
+	$(EX_COM) $(EX_DIR)/stmt010_nbassign.v
+
+testv-x:
+	$(EX_COM) $(EX_DIR)/x_allev.v
+	$(EX_COM) $(EX_DIR)/x_allexpr.v
+	$(EX_COM) $(EX_DIR)/x_bases.v
+	$(EX_COM) $(EX_DIR)/x_bit.v
+	$(EX_COM) $(EX_DIR)/x_comment.v
+	$(EX_COM) $(EX_DIR)/x_counter.v
+	$(EX_COM) $(EX_DIR)/x_cport.v
+	$(EX_COM) $(EX_DIR)/x_dae.v
+	$(EX_COM) $(EX_DIR)/x_delayedloop.v
+	$(EX_COM) $(EX_DIR)/x_display.v
+	$(EX_COM) $(EX_DIR)/x_divmain.v $(EX_DIR)/x_dividev1.v
+	$(EX_COM) $(EX_DIR)/x_divmain.v $(EX_DIR)/x_dividev2.v
+	$(EX_COM) $(EX_DIR)/x_hier.v
+	$(EX_COM) $(EX_DIR)/x_inflp.v
+	$(EX_COM) $(EX_DIR)/x_lpevctl.v
+	$(EX_COM) $(EX_DIR)/x_lvalue.v
+	$(EX_COM) $(EX_DIR)/x_monitor.v
+	$(EX_COM) $(EX_DIR)/x_mulmain.v $(EX_DIR)/x_multv1.v
+	$(EX_COM) $(EX_DIR)/x_mulmain.v $(EX_DIR)/x_multv2.v
+	$(EX_COM) $(EX_DIR)/x_nds.v
+	$(EX_COM) $(EX_DIR)/x_nested.v
+	$(EX_COM) $(EX_DIR)/x_range.v
+	$(EX_COM) $(EX_DIR)/x_range2.v
+	$(EX_COM) $(EX_DIR)/x_taskdec.v
+	$(EX_COM) $(EX_DIR)/x_gareth.v
+#	$(EX_COM) $(EX_DIR)/x_vpp.v
+
+testv-y:
+	-$(EX_COM) $(EX_DIR)/y_namedarg.v
+
+testv-ivl:
+	$(EX_DIR)/ivl.sh ./vbs $(IVL)
+
+#
+# Explicit dependencies.
+#
+
+vbs_guile.cc: vbs_guile.i
+	$(SWIG) -guile $(SFLAGS) -o $@ $<
+
+vbs_tcl.cc: vbs_tcl.i
+	$(SWIG) -tcl $(SFLAGS) -o $@ $<
+
+vbs_perl.cc: vbs_perl.i
+	$(SWIG) -perl5 $(SFLAGS) -o $@ $<
+
+vbs_perl.o: vbs_perl.cc
+	$(CXX) $(PERLDEFS) -c $<
+
+# Grab generated dependencies.
+-include $(SRCSP:.c=.d)
+-include $(SRCSC:.c=.d)
+-include $(SRCS1:.cc=.d)
+-include $(SRCS2:.cc=.d)
+-include $(SRCS3:.cc=.d)
+-include $(SRCS4:.cc=.d)
+-include $(SRCS5:.cc=.d)
+-include $(SRCS6:.cc=.d)
+-include $(SWIG_SRCS:.cc=.d)

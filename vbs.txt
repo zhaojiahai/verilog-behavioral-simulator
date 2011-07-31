@@ -1,0 +1,1385 @@
+Introduction
+
+The documentation for the Verilog Behavioral Simulator is being redone. 
+Because VBS is a simulator, it is hard to know what kind of documentation
+to write for it.  This project started out as a senior design project, and
+thus the documentation was based on design project requirements.  But now,
+VBS has gone beyond that and require a different type of documentation.  We
+do not know who will be reading these documentations and what they need to
+know, so this document might not answer their questions.  Instead of going
+into great details of the implementation, we've decided to document the
+design and architecture of the project.  We will refer to some files and
+classes, here and there, as pointers to where to look.  But basically,
+there will be no code in this document.  We will assume the reader is
+familiar with programming and has knowledge of the C++ programming language.
+
+This document will discuss the following topics:
+
+1.  Source code structure
+
+	a.  File location
+	b.  Class hierarchy
+
+2.  Program structure
+
+	a.  Parser procedure
+	b.  Setup procedure
+	c.  Simulation procedure
+
+3.  Supported constructs
+
+Previously, the documentation was broken up into implementation details
+and implementation decisions.  This was fine for design project
+documentation, but inadequate for general purpose use.  Therefore, this
+document will contain all the information about VBS, so that the reader
+does not have to flip back and forth between two documents.  Hopefully,
+this will make it easier for the reader to understand the system.  So
+let's start with the structure of the source code.
+
+
+Source code structure
+
+A description of the structure of the source code is important to this
+document because it does not include any of the code.  As a result, the
+reader will be directed to the appropriate files for the actual
+implementation.  We will begin with the source code directory structure,
+then we'll describe the class hierarchy, and finally a short description
+of some of the utility objects used by the entire project. 
+
+
+Directory structure
+
+All the source code to the project is located under the 'src' directory in
+the source distribution.  Under this directory, the source code is
+seperated into their Verilog construct category.  The following categories
+are used:
+
+	1.  Expressions (src/expr)
+	2.  Statements (src/stmt)
+	3.  Module items (src/moditm)
+	4.  Misc Verilog constructs (src/misc)
+	5.  Utilities (src/common)
+
+Each directory contains only the source file(s) needed to implement that
+category of objects.  If an object does not belong in any of the specific
+categories, it is placed in the miscelaneous directory.  The 'common'
+directory contains source code for the utilities used by the entire
+project.  This directory does not include any source files for Verilog
+constructs. 
+
+The rest of the source code are for the simulator proper.  These source
+codes are in the base directory, 'src'.  Code in this directory include
+the parser tools, and the main driver.  This directory also contain the
+makefile for the entire directory structure.  A single makefile is used to
+build the entire directory tree.  This method was used because we did not
+want to maintain multiple makefiles for each directory and thus open the
+door for errors. 
+
+
+Class Hierarchy
+
+The objects used in VBS are divided into two types;  simulation objects
+and utilities.  Simulation objects used to be called parser objects.  This
+is because when a Verilog description is parsed, these objects are used to
+store information about the description.  But these objects are used for
+more than storing information about the Verilog description.  They are
+used throughout the simulation process.  Thus simulation object is a
+better name for these objects.  Utility objects are anything that are not
+simulation objects.  These objects include tools such as symbol table and
+time wheel.  But they also include function objects.  We will describe
+these objects later in the setup and simulation section, which is where
+these objects are used.  Let's begin with the simulation objects. 
+
+
+Simulation objects
+
+We will describe each type of objects in the order they are introduced
+above, starting with the expression simulation objects.  We should also
+note that all objects in VBS contain a member called <display>.  This
+function member simply display the object to the output stream supplied as
+an argument.  This function is used in debugging to display the object
+information.
+
+
+Expression objects
+
+Expression objects model the behavioral expressions in Verilog.  Thus we
+have addition (+), invert (~), etc.  Expression objects are derived from
+a common base class, <expr_base>.  The class definition for <expr_base>
+can be found in exprbase.h.  This file also includes a list of all of the
+supported expressions, in the form of class names.  The base class for
+expressions contain four virtual member functions;  <monitor>, <evaluate>,
+<setup>, and <trigger>. 
+
+<monitor> is used to traverse the expression syntax tree to append an
+event to the variable.  When this variable is modified, this event is
+triggered, or executed.  Thus, we have an illusion of this variable being
+monitored.  <monitor> can both be used at setup time and during
+simulation. 
+
+<evaluate> is used to evaluate an expression tree.  This is used mainly in
+simulation to evaluate an expression.
+
+<setup> is used to setup the expression.  For many of the expressions,
+there is nothing to do for setup.  The only expressions that need setup
+are function enables (func_enable) and range identifiers (range_id, a
+variable name in Verilog).  Thus, this function simply traverses an
+expression tree until one of these objects are found and setup that
+object. 
+
+<trigger> is used to display the evaluated value of the expression to
+an output stream.  This function is used by Verilog system functions and
+tasks which produce output for expressions. 
+
+To reduce the code bloat, expressions are divided into three catagories; 
+binary expressions, unary expressions, and others.  Binary expressions,
+such as add, bit-wise and, less than (comparison), have data members which
+point to the left and right sub-expressions.  Similarly, unary expressions
+have a data member that points to their sub-expression.  The other
+expression types; <func_enable>, <range_id>, <number> and <qouted_string>,
+do not have sub-expressions, so they are the leaves of the expression
+tree.  The class definition can be found in the following files:
+binary_op.h, unary_op.h, funccall.h, rangeid.h, number.h, and qstr.h.
+
+Constant expressions are not seperate types.  Const-ness of an expression
+is an attribute in VBS.  This attribute is stored in the base class.  See
+the setup section on the usage of this data member.  Expression objects
+also have a deep copy constructor.  The reason for this will also be
+explained in the setup section.
+
+
+Statement objects
+
+Statement objects, like expressions, model the equivalent descriptions in
+Verilog.  Thus all that is said about expressions also apply to
+statements.  There are a few differences, due to the differences in
+behavior.  But like the expression objects, statement objects also derive
+from a common base class, <stmt_base>.  The definition for <stmt_base> can
+be found in stmtbase.h.  The member functions <monitor> and <evaluate> are
+not used here because they are not needed.  But <setup> and <trigger> does
+exist.  The data members are more complicated in the statement objects
+than in expressions.  Because no two statements are the same, there are
+different data members to model the statements.  Here are two examples
+which will give a good overview of what can be expected from a statement
+object.
+
+<assignment_stmt> statement contains a left-hand value (lvalue) and a
+right-hand value (rvalue). The definition can be found in assign.h. 
+<lvalue> is an object defined in lvalue.h in the misc directory.  You can
+already guess that when the assignment statement is simulated, the result
+of evaluating the rvalue (an expression) will be stored in the <lvalue>. 
+This statement object is used for both blocking and non-blocking
+assignments. The only difference between the two types of assignments is
+the time unit when the <rvalue> is saved into the <lvalue>.  Since the
+behavior is the same for both, they are combined for simplicity.
+
+<case_stmt> statement models the case, or switch statement in Verilog. 
+The definition can be found in case.h.  The Verilog syntax requires that a
+case statement contain an expression, and one or more case items.  Thus,
+this object has a data member that points to an expression, and a list of
+case items.  A case item object is also defined in the same file.  The
+Verilog syntax also requires that a case item contain an expression, and a
+statement.  Thus, the case item object contains a data member that points
+to an expression and a data member that points to a statement. 
+
+From these two examples, you can guess how other statements are
+implemented.  All you need to do to define a new statement is find out
+what the Verilog syntax requires in that statement.  Then create a data
+member to point to that construct.  Modeling a statement is very easy,
+simulating it is another story.  A special note should be mentioned about
+the sequential block statement, <seq_block_stmt>.  The class definition,
+in seqblk.h, also contain some extra data members.  These members are used
+in simulation only.  Thus, see the section on simulation of sequential
+blocks for details. 
+
+Statements do have some common data members.  Because these data members
+are common in all statements, they are placed in the base class.  One
+member is the delay or event control object, <_dec>.  See the delay or
+event control object for more details.  A member function called
+<keep_dec> is used to modify the delay or event control for loop
+statements.  See the setup section for more details.  The other data
+member is a flag that indicates whether the statement is part of an always
+procedural block or an initial procedural block.  This flag is needed for
+simulation, so see that section for more details. 
+
+
+Module item objects
+
+Module item objects are very different from expressions and statements. 
+Module items are constructs like register declarations and user function
+definitions.  They are not simulated, but simply contain information about
+that construct.  As a result, only the <setup> member function is common
+among all module item objects. 
+
+For module items, there are no single base class, but two base classes. 
+This is due to the fact that the net declarations and the I/O declarations
+can both be used in module definitions and function/task definitions. 
+Because of this, net and I/O declarations are derived from two base
+classes.
+
+<module_item_base> is used to model all module items in a module
+definition.  The class definition can be found in mibase.h.
+
+<tfdecl_base> is used to model all declarations, for both inside module
+definitions and function/task definitions.  The class definition can be
+found in tfbase.h.
+
+Module items are the top of the syntax tree.  They are used to store
+descriptions until it is setup by the simulator.  Thus, these objects are
+simple and does very little in VBS.
+
+
+Miscelaneous Verilog objects
+
+Miscelaneous objects include any objects that does not belong in one of
+the above categories.  Most of these objects do not belong together.  But
+since there are only a few of them, they are grouped together for
+convenience.  Some of the objects in this directory are here because they
+are used in more than one place.  I.e. port connections and bit/part
+selection.  Here is a brief description to some of the more non-obvious
+objects. 
+
+
+Bit and Part Select
+
+Bit and part selection is derived from a common base class, <select_base>. 
+The definition of this class can be found in selbase.h.  <select_base> is
+used in the range identifier class to support both part and bit selection.
+Part selection is defined in partsel.h and bit selection is defined in
+bitsel.h.  A member function, <get_data>, is used to retrieve the numbers
+for the indices.  In the case of bit selection, both left and right
+indices have the same value. 
+
+
+Delay or Event Control
+
+Delay and event controls are also derived from a common base class,
+<dec_base>.  This class is defined in decbase.h.  Like all other objects
+in VBS, delay and event controls contain data members to support the
+necessary constructs.  To support simulation of loops and continuous
+assignments, the <dec_base> class also contain two extra data members;
+<_persist> and <_delayed_loop>.  See the simulation section for more
+details.  Since delay and event controls are attached to statements, they
+also have <setup> and <trigger> member functions. 
+
+
+Module and Port(connections)
+
+The rest of the object in the misc directory are support objects for
+module descriptions.  Port connections are used by module instantiation,
+but since setting up a module instantiation requires both port and port
+connection objects, they are placed together for convenience.  Like module
+instantiation, module, port and port connections are used only to store
+Verilog descriptions.  Thus, these objects do not need to be simulated and
+only have <setup> member functions.
+
+
+Utility objects
+
+VBS contain a few utility objects to support simulation and debugging. 
+These utilities are often used by the entire program, thus they are put
+into a common directory.  The following few paragraphs will give a brief
+description of these utilities. 
+
+
+Bit Vector
+
+The bit vector class is used as the number representation.  The definition
+can be found in bvector.h.  The implementation is based on the GNU's
+String class.  Many ANSI features were added later to make it as versatile
+as possible.  Other consideration were also taken into account.
+
+To allow support for the largest decimal number on the machine that VBS is
+compiled on.  We allow a type called <decimal_type> to be defined at
+compile time.  Create a macro called DECTYPE in the makefile and define it
+to the largest integral type that the compiler/host can support, and the
+bit vector class will use it.  The type used should be an unsigned type. 
+The bit vector class does not support the concept of a signed number.
+Since we are dealing with a bit array, it does not make sense to give
+meaning to a certain single bit position.  It is up to the user to
+interpret the meaning of each bit in the bit vector.
+
+The addition operation in bit vector allows the creation of a carry bit. 
+I.e. an addition of two 16 bit numbers will result in a 17 bit sum.  But
+it is not required that the user allocate space for this extra bit.  The
+sum is returned in a C++ temporary variable.  Thus, if this bit is not
+saved, it will be lost after the expression goes out of scope.  The
+subtract operation has an equivalent borrow bit and behaves the same as
+the carry bit.
+
+To support part and bit selection, the bit vector class uses a
+<sub_bit_vector> object.  This object takes a reference to the original
+bit vector to retrieve the data.  Thus, sub-bit vectors can not be
+instantiated on it's own.  The only way to create a sub-bit vector is
+through the use of the overloaded function operators, i.e. operator()(). 
+The other detail to part selection is the Verilog construct of using [0:7]
+as opposed to [7:0] to declare a register.  This construct is supported
+through a use of a flag to indicate which construct was parsed.  Note,
+this flag is only used in part selection (through the overloaded function
+operator).  All logic and arithmetic operations assume a least significant
+to most significant bit ordering.  I.e. the lowest index has the least
+significant bit.
+
+The logic values supported are now implemented as a class.  Overloaded
+logic operators are used to support logic operations.  This implementation
+was chosen to support the OO philosophy.  It also allows addition of more
+logic values without affecting other parts of VBS.  The current
+implementation of logic values use table lookup to do logic operations. 
+This required large static matrices that take up much space.
+
+
+Symbol Table
+
+The symbol table implementation in VBS is implementated to be replacable. 
+Thus it has a very simple public interface.  The only functions allowed
+are <add>, <find>, and <get>.  It is obvious what these member functions
+are used for.  The implementation is based on the book "Compiler Design in
+C" [Holub90].  The implementation is based on the use of a fixed size
+array.  Each element of the array is a list of nodes.  We call these list
+storage--buckets.  Thus, a symbol table is simply an array of buckets
+that contain nodes.  The index to this array uses a special object called
+a <hash_value>.
+
+A hash value is a class that contains two data members.  One is the index
+into the symbol table array, the other is the scope number used to support
+scoping in the Verilog description.  The symbol table keeps track of the
+next free scope.  When a new scope is created, this scope number is
+increased.  Thus it prevents any collision between variables of the same
+name in different scopes.  The scope value also doubles as the error
+indicator for symbol node lookup.  A scope value of -1 is an error.  A
+scope value of 0 (zero) is the global scope.  The index value used to
+index into the symbol table array is created from hashing the name of the
+symbol.  The hash function is taken from "Compiler Design in C" [Holub90]. 
+The function can be found in hash.c.
+
+
+Symbol Table Nodes
+
+The nodes stored in each bucket of the symbol table are defined
+differently for each type of construct in Verilog.  The nodes are derived
+from a common base class called <st_node_base>.  The definition can be
+found in st_node.h, which also contain a list of node types.  Like the
+simulation objects in VBS, symbol table node objects contain the
+<monitor>, <evaluate>, <setup>, and <trigger> member functions.  We used
+these names to be consistent with the rest of VBS.
+
+
+st_function
+
+st_function node class is used to hold a user function definition.  The
+definition of this class can be found in st_func.h.  It contains a list of
+I/O variables to check with the calling statement.  <st_function> objects
+are created during setup time, when the function definition is enabled. 
+If the function returns a value, that value is stored into this node's
+<_storage> data member.  The assignment statement or expression evaluation
+would retrieve this value for further processing.  This is required
+because triggering the statement in the function does not return a result. 
+Thus, the return value must be stored elsewhere to be retrieved later.  A
+special function member also exist in a <st_function> object.  The
+<assignment> member function is used in the return of a value.  This
+function behaves the same as the equivalent <assignment> member function
+in <st_net>.  See <st_net> for more details. 
+
+
+st_instantiation
+
+<st_intantiation> node class is used to store the name of the instance
+when a module is instantiated.  The definition of this class can be found
+in st_inst.h.  Currently, there are no support for the use of this name,
+and thus this object has no useful purpose.
+
+
+st_module
+
+<st_module> node class is used to hold a definition of a module.  The
+definition of this class can be found in st_mod.h.  When a complete
+description of a module is parsed, the <module> object is stored in this
+node.  Each time this module is instantiated, the setup procedure will
+lookup the definition stored in this node and call the setup function. 
+The current implementation does not remove this node once all
+instantiations are done.  This means the memory used by this node is
+wasted because simulation no longer requires the module definition to be
+in memory.
+
+
+st_net
+
+<st_net> node class is used to store all variables in Verilog.  The
+definition of this class can be found in st_net.h.  When a register, port
+or I/O declaration is found, one of these objects is created.  These
+objects also handle the actual assignment operation.  When something needs
+to be stored away, this object does the storing, and checking of changes
+to the variable and handle the event queuing.  A member function called
+<assignment> handles all of these procedures.  When an expression is
+evaluated, the expression also comes to this object to get the value.
+
+
+st_task
+
+<st_task> node class is used to store the user task definition.  The
+definition of this class can be found in st_task.h.  It behaves the same
+as the <st_function> object.  The two differences are the <_storage> data
+member and the <evaluate> function member.  These members are not needed
+in the simulation of a task.  So they are removed.
+
+
+Time Wheel
+
+The time wheel class, <time_wheel>, is implemented like the symbol table. 
+Except, instead of an array, we needed a linked list, so that it can add
+more buckets.  Thus the time wheel class consists of a linked list of
+linked lists, a two dimensional storage object.  The 'buckets' are called
+<time_wheel_node>'s.  It stores the time unit number and each node points
+to a statement.  <time_wheel_node>'s are created only when an event is to
+be executed at that time.  A member function is provided to add an event
+to the time wheel, so the user does not have to find the correct node to
+insert.  The entire time wheel object definition can be found in
+time_whl.h.  This is done because GCC does not yet support seperating the
+interface and the implementation of a template class.
+
+
+Event Queue
+
+The event queue class is implemented as a linked list of events.  There
+are multiple event types, which are derived from a common event base
+class, <event_base> defined in event.h.  This base class implements all
+the data and function members of all event types.  Each derived class only
+has to keep track of it's own identity.  The base class member function do
+all the work.  This implementation allowed us to reuse the member
+functions, and save some space.  The <event_base> class uses a counted
+pointer-like object to store the actual object to be queued.  This is
+required because the object to be queued could be queued with multiple
+types of events.  I.e. the same object could be queued for positive edge
+trigger and level change.  Thus, we do not want to trigger the same object
+twice simply because of this.  The <event_queue> object stores these
+events and trigger it when the trigger function is called, with a handler
+passed as argument.
+
+The IEEE Std 1364-1995 specifies the scheduling semantics.  These
+scheduling semantics are supported by VBS.  To support these semantics,
+the event queue object contains multiple queues;  active, inactive,
+monitor, and strobe.  The active queue stores events that are to be
+executed in the current time unit.  These events were placed here because
+of changes in variables or the time wheel triggered a statement to be
+executed.  The inactive queue are for non-blocking events.  Currently,
+only the non-blocking assignment construct uses this event.  But
+theoretically, any event that wishes to be triggered after all of the
+active events should be in this queue.  The monitor queue stores all
+events for the $monitor system task.  The strobe queue stores all events
+for the $strobe system task.  No other events besides $monitor and $strobe
+events should be put on the monitor and strobe queues, respectively.
+
+To support event triggers in assignment statements of initial procedural
+blocks, a flag is used to indicate this construct.  Such events are called
+volatile events.  When these statements are triggered, the events are
+marked for removal.  When the actual events occur, the event is removed
+from the list of monitored events and the statement is evaluated.
+
+
+Debug and Errors
+
+The rest of the objects are tools to help simulation.  They are the debug
+objects and error reporting objects.  Because we were unable to create
+streamable classes with GCC, these objects are not true objects.  Regular
+C function access points are used to access the data in these objects. The
+error object is implemented as an array of strings to be displayed and an
+enumeration of errors to be detected.  With this implementation it is easy
+to add new errors to be detected by the simulator.  Most errors are
+detected during setup and parsing.  See the file error.h for a list of
+errors detected. 
+
+The debugging object is used to display messages during run time to follow
+the flow of execution.  The debug object provides C function access points
+to access the internal data.  These C functions are hidden behind macro
+front-ends.  Thus, these macros can be disabled at compile time to remove
+debugging code.  Command line arguments are also provided to enable and
+disable debugging output.  See the files debug.h and debug.cc to learn how
+to use these macros.
+
+
+Program Structure
+
+
+The VBS program structure is divided into three procedures.  First, it
+parses the Verilog description to create a <module> object described
+above.  Each module created is placed in the symbol table.  When all the
+input files are parsed, the 'top_level' module is retrieved from the
+symbol table and the setup procedure begins.  Once the setup is done, the
+main simulation starts and continues until the last event is triggered or
+the '$finish' system task is enabled.  The rest of the documentation
+describes the implementation of each of these procedures.  We will start
+with the parser.
+
+
+Parser Procedure
+
+The parser is implemented with a lexical analyzer and a grammar parser. 
+The source code follows the POSIX standard, thus any lex or yacc program
+should be able to generate the correct code.  The lex grammar is provided
+in vbs.l.  This file contains all the keywords used by Verilog. 
+Therefore, keywords can not be used as variable names.  The yacc grammar
+is provided in vbs.y.  This file does not contain all Verilog constructs. 
+It only contains the constructs that are supported.  See the supported
+section.
+
+The parser is implmented using an interface function between the yacc
+grammar and the C++ object creation.  The yacc program will generate a C
+source file.  The code in this file will call a series of functions with
+'p_create' prefixed to the function name which creates the objects.  The
+'p_create' functions are stored in p_expr.cc, p_misc.cc, p_moditm.cc, and
+p_stmt.cc, to create expressions, miscelaneous objects, module items, and
+statements, respectively.  All 'p_create' functions do the same thing,
+create larger objects from smaller objects.  The only exception is when a
+complete module object is created.  Once this object is created, it is
+placed in the symbol table under its module definition name, then the next
+file is parsed.  VBS does not allow module definitions to cross file
+boundaries.  Note, we will not go into how to create lex and yacc grammar. 
+Other reading materials are available to discuss this in detail.
+
+
+Function Objects
+
+Before we begin with the setup and simulation procedure.  We should have a
+brief discussion of function objects.  Function objects are classes which
+contain only the operator()(...) member function.  Thus, these objects can
+only be used as functions (or what looks like a function call).  These
+function objects are used througout setup and simulation.  Objects such as
+expressions have function objects called <expr_monitor>, <expr_evaluate>,
+<expr_setup> and <expr_trigger>.  These classes are used as base classes
+to the actual function objects which contain the source codes to monitor,
+evaluate, setup and trigger the expressions, respectively.  Providing this
+middle layer allows us to compile the expression objects without first
+defining the setup and trigger functions, which would take up lots of
+space and time.  Moving these operations into a function object made most
+of the objects very small and easy to manage.  The draw back to this
+implementation is that each object must make these function objects a
+friend object.  Otherwise, we would have to write lots of access member
+functions to access the data members.  We want to simplify this function
+object concept.  It is too complicated to code and maintain.  We want to
+use a single member function in the simulation objects for all types of
+actions on the object, i.e. evaluate, monitor, setup, and trigger.  The
+problem with this is that with polymorphic types, such as expressions,
+statements and module items, we can only instantiate a single function
+object to handle the action.  This prevents us from implementing a
+seperate function object for each simulation object.  The current method
+combines all the individual function objects into a common class which is
+instantiated.
+
+All function objects have a common file naming convention.  The filename
+begins with the first letter of the Verilog construct type, then followed
+by the type of function object.  For example, the expression function
+objects are in eeval.h, emon.h esetup.h, and etrigger.h, for evaluation,
+monitor, setup and trigger, respectively.  With this said, now we can
+begin with the discussion of setup and simulation.
+
+
+Setup Procedure
+
+The setup procedure is used to initialize objects so they can be used for
+simulation.  Objects like <range_id> have a data member called <_index>
+which contains the index to the symbol table node with the value for this
+range identifier.  We could have recalculated the index every time we
+needed it, but that would be too slow for simulation.  The setup procedure
+is also a good time to do some error checking.  For example, we want to
+make sure that the range identifier actually exist in the symbol table.
+There are a few interesting setups we must do for simulation.  We will now
+discuss them.  We'll start from the top-level module and traverse down. 
+
+
+Top-level Module
+
+The first operation in the setup procedure is to obtain the top-level
+module and setup that module.  Setting up the top-level module goes
+through the same process as instantiating a module.  The only difference
+between setting up the top-level module and instantiating a module is that
+the top-level module is an anonymous instance.  This means you can't look
+up the name of the instance in the symbol table.  Keep this in mind when
+we discuss module instantiation later.  Other than this, setup of the
+top-level module uses the exact same procedure.  A special note should be
+mentioned about the setup procedure.  Each simulation object we've
+discussed earlier has a member function called <setup>.  This function
+handles the setup procedure for the entire object.  In most cases, this
+function simply calls the <setup> member function of the enclosed object.
+Thus, we traverse this syntax tree, calling the respective <setup>
+function to do the actual work.  The final work done is usually in the
+symbol table nodes.  Instead of discussing each symbol table node setup,
+we'll traverse through the syntax tree and discuss the node when we come
+to it.
+
+
+Module Item
+
+When the top-level module is setup, we go through each module item in the
+top-level module.  We will now discuss each one, starting with module
+instantiation.  Then we'll go through the rest, including; IO and net
+declarations, initial and always procedural blocks, function and task
+definitions and continuous assignments.
+
+
+Module instantiation
+
+Module instantiation setup is at the very highest point of the setup
+procedure.  The first thing we do is to obtain the module definition from
+the symbol table.  Once we have the module definition, we call the setup
+function, <setup>, for each instance in the list in the
+<module_instantiation> object.  The setup function of each
+<module_instance> object will first create a symbol table node for the
+name of the instance, <st_instantiation>.  You'll notice this object has
+no useful feature.  It has a scope, to look it up, and a name.  Thus we
+have no need to setup an <st_instantiation> node.  The next thing is to
+setup the port connections.  This needs to be done before we setup the
+module because port connections are usually range identifiers
+(expressions).  Thus it has an index into the symbol table for the node
+that contains the actual data.  We need this index later.  Therefore, we
+call the setup function for each port connection in our list.  Finally, we
+can begin setting up the module definition.  We call the setup function
+for the <st_module> object.
+
+The setup function for the <st_module> object begins by creating a new
+scope for this module instance.  Then the port list is setup, with the
+port connection passed as argument.  We'll discuss this in more detail in
+the misc. section of setup.  This needs to be done now because an IO
+declaration expects the port to be in the symbol table when the
+declaration is setup.  Note, the top-level module does not usually have a
+port list, but most other modules do.  Before we begin the setup of the
+module items, we create a list for IO variables.  This list will be
+updated with the IO declarations found in the module item list.  We will
+then use this list to check that the number of IO declarations match the
+number of ports provided.  This of course means that you must provide
+dummy port connections even if the port is not actually used. 
+
+Finally, we call the setup function of each module item in the module
+definition's module item list.  This function will handle the rest of the
+setup.  If the next module item happens to be a module instantiation, then
+we have a recursive call.
+
+
+Declarations (IO and Net)
+
+All IO declaration setups are the same, independent of whether it is
+input, output or inout type declarations.  Thus we provide one function to
+handle all three types of declarations.  We also did the same for the net
+declarations.  The function names are <io_setup>, and <net_setup>,
+respectively.  The functions can be found in d_setup.cc.
+
+IO setup first looks in the symbol table for an <st_net> node.  This node
+should exist if it is an IO net.  Since IO nets need a port, it should be
+setup before hand.  Once we obtained the node, we update the
+<_iodirection> data member to the correct IO type.  We also create a
+storage area if one is needed.  This is the case for an output direction
+net type.  Finally, we update the <_iovariable> list used by the module
+definition setup. 
+
+Net setup does the same thing as IO setup.  Except, it is valid if the
+symbol table node does not exist.  If it does not exist, one is created. 
+Then storage is allocated if necessary.  Note, a wire net also needs
+storage.  The storage is for temporary use, but we still need it.  If the
+declaration is a register declaration for a memory object, we allocate an
+array of bit vectors.  The size of this array is saved for later testing,
+i.e. in a memory reference.
+
+
+Initial and Always Procedural Block
+
+Setup for both initial and always procedural blocks are very similar.  We
+simply call the <trigger> function of the delay or event control attached
+to the statement.  They then decide how to handle the statement.  If the
+delay or event control is null, we append the initial procedural block to
+the time wheel at time zero.  We do not support a null delay or event
+control for an always procedural block.  I believe the parser would
+produce a syntax error, so this should not happen if we get passed the
+parser code.  We'll discuss what the delay or event control does in the
+misc. section of the simulation procedure.  Notice we called a simulation
+function to setup these objects.  As you'll find out, this is the
+beginning of the simulation procedure.
+
+One difference between the two setup functions is that for the always
+procedural block, we set a data member, <_always>, in the statement
+object.  This flag is used by the simulation procedure to indicate the
+statement is used with an always procedural block.  We should also note
+here that the statement is copied, using a deep copy constructor, to
+preserve the original statement of the inital and always procedural block.
+This is done so that multiple instances can be made which will not affect
+each other.  If a copy was not made, then the same statement will be
+triggered for two different instances.  This is why the deep copy
+constructor is needed for all objects below the statement object. 
+
+
+Functions and Tasks
+
+Function and task definitions are not setup during module item setup. 
+They are setup when the function or task is enabled.  Thus, if they are
+not enabled, we never set it up for execution.  The only thing to be done
+now is to add an <st_function> or <st_task> node type to the symbol table. 
+This will allow the enable statement to find the definition.  For the case
+of a function definition, we also create a temporary storage area for
+return values.  Otherwise, there's nothing else to be done.  We should
+note that function and task definitions, unlike C, are local to a module. 
+Thus, they only have access to variables local to a module instance.  The
+scope is stored in the <_scope> data member, of <st_function> and
+<st_task>, so any accesses outside of the module is prevented. 
+
+
+Continuous Assigments
+
+Continuous assignments have many similarities with other Verilog
+constructs.  One is that it is like an always procedural block where a
+change in any one of the variables in the expression cause the statement
+to be triggered.  It is also like a loop with delay controls, where the
+delay control can not be removed once it is used.  With these in mind, we
+can begin the setup.  First, to keep the delay control, we set the
+<_persist> data member in the delay control to be true.  Then, for each
+assignment in the list, we create an event object and call the setup
+function for the statement, passing in the event object as argument.  The
+setup function for the statement should handle the event object correctly.
+See the discussion for statement setup.  Of course, this applies only to
+assignment statements, and not other statements.
+
+
+Statements
+
+Statements, as we all know, are the main simulation objects.  They are at
+the top of object hierarchy for simulation.  Because of this, setting up a
+statement simply means calling the setup functions for all the objects it
+encapsulates.  This is exactly what happens in each of the setup functions
+for the statements.  We will forego the discussion of <if_else_stmt> and
+<seq_block_stmt> statements, since they simply contain other statements
+and/or expressions.  But we will discuss all other statements.  We'll
+begin with the assignment statement.  Note, for all statements, we call
+the setup function for the delay or event control. 
+
+
+(Non-)Blocking Assignment Statement
+
+Setting up the assignment statement means doing two things;  setting up
+the left hand value and setting up the expression.  Setting up the lvalue
+means setting the <_index> data member in the range identifier, and doing
+some error checking.  For the expression, we also call the setup function. 
+But we also handle the event object which was passed in from the
+continuous assignment setup function.  We call the <monitor> member
+function of the expression to append the event object to each leaf of the
+expression tree.  We leave it up to the <monitor> function to do the right
+thing.
+
+
+Loop Statements
+
+The only thing to be said about all loop statements is that they all call
+the <keep_dec> member function of the statement.  This function will
+update the <_persist> data member so that it will not be deleted once the
+delay or event control is used.  See the simulation procedure for more
+details.  Other than this, the regular setup functions are called. 
+
+
+Case Statement
+
+There is only one interesting setup procedure for case statements.  When,
+and if, the default case is found; it is removed from the case item list
+and stored in the <_def> data member.  This is done to help in the
+simulation procedure for <case> statements.  This data member is triggered
+if no other case item was selected with the same expression.  Other than
+this procedure, all other operations are to call the setup function for
+the encapsulated objects.
+
+
+Task Enable Statement
+
+When a task enable statement is found, the task definition is setup.  This
+is done by looking up the task definition in the symbol table.  The setup
+function is called for the node, and the parameter list for the task
+enable is passed as argument.  We also need to handle system task enables,
+if this statement enables a system task.
+
+The setup function for the task definition first checks to see if the task
+definition has been setup already.  Remember task definitions are not
+setup until enabled.  A task can be enabled many times, but we only need
+to setup once.  Next, a new scope number is obtained from the symbol table
+for this task scope.  Then the local IO and net declarations are setup. 
+This needs to be done now because the statement might access the nets.
+Setting up the declarations calls the same setup function as the
+declarations in the module definition.  This is why we have two base
+classes for declarations, but only one setup function object.  We can
+reuse the setup function for both cases of declaration, i.e. in module
+items and in tf declarations.  Finally, the setup function is called for
+the statement.
+
+Next we verify the argument list to the task.  We want to make sure the
+parameters to the task matches the declarations.  But in the case of
+enabling a system task, such as <$write> and <$monitor>, the parameters
+can be variable.  Thus, we do not check the number of arguments, but do
+check the format string of these task enables.  Lastly, if the task is a
+$monitor or $strobe, we call the <monitor> function to append an event
+object to the argument list.
+
+
+Expression
+
+Setting up expressions follow the same procedure as all other objects. 
+Each expression calls the <setup> function of the enclosed objects. 
+This, of course, means calling the setup function of another expression. 
+The leafs of all expressions are either range identifiers or function
+enables.  Thus, these are the two things we will discuss.  Other leaves do
+exist, such as numbers (<number>) and string constants (<qouted_str>), but
+they do not need to be setup.
+
+
+Range Identifier
+
+Range identifiers are not only setup through expressions, but also through
+the lvalue in the assignment statement.  We need to keep this in mind
+because setting up an lvalue is a little different from setting up an
+expression.  The procedure for setting up a range identifier is first
+obtain the index into the symbol table for the named node.  Then we check
+to see if the node is valid.  This means we check the range of the node to
+make sure the range in the identifier is not referencing beyond the bit
+vector.  For the case of an integer type node, we do not allow any bit or
+part select for this range identifier.  As for memory nodes, we make sure
+the range identifier has an index to the element of the memory object. 
+Any reference to a memory object must have an index.  We also make sure
+this expression is not expected to be a constant.  A flag is used to
+indicate that this expression is part of the part select object.  In which
+case, it is an error to use a variable name.
+
+To support hierarchical name references, a scope stack with the following
+algorithm is used to search the symbol table.
+
+1.  Lookup the first component of the hierarchical name in the provided
+scope stack.
+2.  Get the instance node from the symbol table and save the scope of
+this module instance.
+3.  Lookup the next component of the name using the scope value that was
+just found.
+4.  Repeat until a non-module instance node is found.  This indicates
+the end of the hierarchy.
+5.  The hash value for this node is saved as the index.
+
+This algorithm is also used for both task and function enables.  Since
+they also allow hierarchical references.
+
+
+Function Enable
+
+Enabling a function is similar to enabling a task.  All the same setups
+are done.  The setup procedure is simpler than a task enable because VBS
+can not monitor function enables.  Thus we do not need to append any event
+objects to expressions.  See the task enable discription for the setup
+procedure for function enables.  Like the range identifier, we must also
+check for const-ness of the expression.  If the flag is set, we display
+an error.
+
+
+Miscelaneous Objects
+
+We now discuss the rest of the objects in the misc. directory.  We already
+discussed the setup of module definitions, so we will not discuss it here. 
+Two objects, part and bit selection, are simple objects.  The only thing
+they do is call the <setup> function of the enclosed expression.  Thus we
+will not discuss them either.  So the only thing to discuss is the delay
+and event control, port and port connections. 
+
+
+Port/Port Connection
+
+Port setup is done to create a net node type in the symbol table.  VBS
+currently requires that each port also have a matching port connection. 
+Thus, if a port is not used, a dummy port connection must be provided to
+pass this setup procedure.  Once the net node is created, a data member
+called <_port_index> is assigned the index value of the port connection. 
+This value is used when the port has changed in the module and it wants to
+update the instantiating module's port connection.  See the simulation
+procedure.  Lastly, if the port connection expression in the instantiating
+module is changed, we want to be updated with that value.  This is called
+propagating the event.  To allow this to happen, we must add our port
+index to the propagation list of the port connection net node.  Thus, we
+obtain the node from the symbol table and add our index to the propagation
+list of this node. 
+
+
+Delay or Event Control
+
+Only two of the three delay and event controls need setup.  The delay by a
+constant, <delay_num>, does not need any setup.  The delay by a variable,
+<delay_id>, only needs to update the <_index> data member to point to the
+correct symbol table node.  So we'll only discuss the event control,
+<event_expr>.  The <ored_event_expr> simply calls the setup function for
+each <event_expr> in the list.
+
+
+Event Expression
+
+First, the range identifier expression is setup. This sets the <_index>
+data member.  The rest of the setup procedure is for error checking.  We
+call the <monitor> function to check whether this expression can be
+monitored.  A function enable can not be monitored, and will be flaged as
+an error.  Then we check to make sure if the expression evaluates to a
+single bit for level change events.
+
+This concludes the setup procedure.  We now begin the discussion of the
+simulation procedure.
+
+
+Simulation Procedure
+
+The simulation procedure used in VBS is a simple method of emulating an
+event.  When an event needs to be triggered, a function is called to
+handle that event.  This method is very simple and easy to implement. 
+There are lots of disadvantages, but we'll discuss those somewhere else.
+The discussion of the simulation procedure is done in the same way we
+discussed the setup procedure.  We'll start from the top and describe how
+each object handles the simulation.  The function that handles the event
+trigger is called <trigger>.  We will start our discussion from the top of
+the simulation procedure.  In the setup procedure, an initial procedural
+block was appended to the time wheel.  This statement forms the entry
+point to the simulation. 
+
+
+Time Wheel
+
+The <trigger> member function of the time wheel object is called with a
+handler for the data.  The handler is the main loop of the simulation
+procedure and can be found in sim.cc.  It is passed the list of events in
+that time unit. The data in the event is triggered by calling the
+<trigger> function.  The data we are talking about is, of course, the
+statement object.  Thus, we begin the simulation procedure by talking
+about the statement objects.  But before we proceed with that, we should
+also mention something about the event queue.
+
+
+Event Queue
+
+When a no more events are found in a time unit node in the time wheel, we
+call the <trigger> function of the event queue.  During the simulation of
+the statements, some events objects were appended to the queue in either
+the inactive queue, the monitor queue or the strobe queue.  We've already
+described what each queue is for.  To simulate the events, we move the
+inactive and monitor queues into a temporary queue.  We then trigger the
+event objects in this temporary queue to simulate them.  Using a temporary
+queue was necessary because the IEEE Std 1364-1995 scheduling semantics
+requires this behavior.  This procedure is repeated if more inactive or
+monitor events were appended to the original inactive and monitor queues. 
+I.e. we would move these new events into the temporary queue and repeat
+the procedure.  When no more events are appended to these queues, we
+trigger all the events in the strobe queue, as required by the IEEE
+standard.  Now we'll see what happends when each of the statement object
+types are triggered. 
+
+
+Statements
+
+Most often, the first statement to be triggered is the sequential block
+statement of an initial procedural block.  We will begin our discussion of
+this object.  Then we'll talk about the rest of the statement objects. 
+Like the setup procedure, the actual work done in the simulation procedure
+is done in the symbol table nodes.  Thus we will discuss these nodes as we
+come to them.
+
+A word about the simulation procedure should be mentioned at this point. 
+Each trigger function, <trigger>, has two steps.  First, it tries to
+handle the delay or event control of the statement, if one exist.  Second,
+it takes care of triggering the statement.  The second step depends on the
+type of statement.  We'll discuss this step in the comming sections.  But,
+basically, the function just calls the trigger function of the enclosed
+statement.  The first step, on the other hand, is the same for all
+statements. 
+
+Once the delay or event control is tested to be non-null, we call the
+trigger function of the delay or event control to handle the statement.
+Otherwise, we need to update certain flags to allow other statements to
+behave correctly.  Here are two situations we can expect.  The <_always>
+data member determines which situation we will handle.
+
+1.  Statement is part of an always procedural block (<_always> is true).
+
+In this situation, we always call the trigger function for the delay
+control.  We know we have a delay control because an event control would
+have been handled by the setup procedure.  The delay control would append
+this statement in the time wheel, but we still need to trigger this
+statement.  So we continue with the procedure, which depends on the
+statement. 
+
+2.  Statement is part of an initial procedural block (<_always> is false).
+
+In this situation, we have to make sure that delay controls are handled
+correctly. Two things are checked. 
+
+2a.  If the delay control is asked not to persist, <_persist> is false in
+the <_dec> object, then the delay control is triggered and deleted.  Then
+we return false, indicating that the statement was not actually triggered,
+but delayed.  The next time we come to this statement, no delay control
+will exist, and the statement will be triggered.
+
+2b.  Once we've passed the delay control checking, we check for loop
+statement handling.  In a loop;  if we were delayed, we want to mark the
+situation so that the next time we try to trigger the statement we know it
+was delayed already and we can trigger the statement then.  See the
+section on the simulation procedure for the loop statements.
+
+These two procedures are always done for each statement object.  The
+following sections deal with the simulation procedure for a specific
+statement type.  As we did in the setup procedure, we will skip the
+discussion of the <if_else_stmt> statements because they simply call the
+<trigger> and <evaluate> function of the enclosed objects.  Now let's
+begin with the sequential block statement.
+
+
+Sequential Block Statement
+
+The sequential block statement has a special purpose in the simulation
+procedure.  Only the sequential block statement can contain a list of
+statements with delay or event controls.  Because of this, we need to
+handle this object differently.  To handle nested blocks, we need to keep
+track of the current statement being triggered.  This is done using a few
+extra data members in the sequential block statement. 
+
+First, the <_curstmt> in the statement object always point to the current
+statement in the sequential block to be triggered next.  In the case of
+delays, the <_curstmt> is not changed until the statement it points to is
+actually triggered, usually on the next pass.  Two other data members are
+used to keep track of what to trigger;  <_pushed> and <_stk>.  <_stk> is a
+stack of sequential blocks.  <_pushed> is a flag indicating whether the
+current sequential block is already pushed onto the stack.  Whether this
+procedure of using the stack is necessary is still under study.  These two
+data members could be removed in the future. 
+
+The simulation procedure, step two in the above discussion, is done using
+a search and trigger implementation.  The search is done by going through
+the stack of sequential blocks.  If we come to the end of one sequential
+block, a node in the stack, we return to the caller.  This is done so that
+nested statements, such as the <for> loop, can update variables at the end
+of a block.  Once a statement is found, we attempt to trigger it.  If a
+delay is found, we return to let other statements get a chance to trigger.
+We usually return to the main loop and get the next statement from the
+time wheel.  If no statements are left in the current time unit, the next
+time unit is fetched and this process repeats.  When no time unit is left,
+or a $finish system task is enabled, we exit without error.
+
+This concludes the sequential block simulation procedure.  It is the most
+complicated statement to trigger.  The rest of the section will discuss
+the interesting points of other statements, starting with the blocking and
+non-blocking assignment statements.
+
+
+Blocking Assignment Statement
+
+The blocking assignment and non-blocking assignment statements are very
+similar in behavior.  The only difference is that a flag is used to delay
+the actual assignment in a non-blocking assignment statement.  A data
+member, <_value> is used to store the expression on the right hand side. 
+The statement is then queued on the event queue.  When this statement is
+triggered at the end of the time unit, the procedure is the same as the
+blocking assignment statement.  We will discuss the procedure now. 
+
+The assignment procedure begins by calling the <trigger> function of the
+data member, <_lval>, in the assignment statement.  This trigger function
+will then look up the net node in the symbol table and the <assignment>
+member function of the net node is called to do the actual handling of
+assignments.  Notice we used the <assignment> function rather than the
+<trigger> function.  This is because the <trigger> function of the node is
+used in the trigger of an expression, see below.
+
+The <assignment> function will then call the <st_net_assign> function
+object to do the real work.  This object does four things;
+
+1.  Save the value into the <_storage> member.
+
+And if the value has changed:
+
+2.  Update the port connection, if any (and they are inout or out
+direction).
+
+3.  Propagate the value to instantiated modules, if any (and they are in
+or inout direction).
+
+4.  Handle any events that monitor this variable, if any.  Any events
+found in this step will be appended to the event queue for later
+triggering (inactive events).
+
+This concludes the description of the assignment statements.  This
+procedure is used by both blocking and non-block assignment, and is the
+lowest level simulation procedure.  Next we'll discuss the loops, which
+require special handling.
+
+
+Loop Statements
+
+The <for>, <forever>, <repeat> and <while> loops are combined into a
+single object.  The loop statement has two attributes;  a flag indicating
+whether a delay was encounted, and a label to goto when that flag has been
+detected.  The flag is called <_delayed>, the label is called
+<continue_from_delay>.  The statement in the loop is triggered inside a
+while loop in C++.  If a delay is encountered, the <_delayed> flag is set
+and the whole loop is appended to the time wheel.  When the statement is
+triggered again, this flag is toggled and we jump into the while loop to
+continue from where we left off.  To handle the conditions of each
+different type of loops, a switch statement in C++ is used to handle the
+pre- and post-conditions.  For example, in the <for> loop, a post
+assignment is done.  Thus in the case where the loop type is the <for>
+loop, we call the <trigger> function of the assignment statement.  Thus,
+for each type of loop, we have a different case to handle the pre- and
+post-conditions.
+
+
+Case Statement
+
+The <case> statement like all other statements, call the <trigger>
+function to handle the simulation.  The expression is evaluated and each
+case item is given a chance to be triggered, by calling the <trigger>
+function of the case item and passing the result of the expression
+evaluation. If none of the case items were triggered, the default item is
+triggered if it exists.
+
+
+This concludes the simulation procedure for all the supported statements. 
+Other objects are also triggered, including expressions and system tasks
+and functions.  Triggering these objects does not simulate it.  The
+trigger functions for these objects output the result, the expression, to
+the standard output.  Thus there is not enough details to talk about to
+create another section.
+
+
+Evaluation of Expressions
+
+Evaluating expressions is the second most basic operating in simulation.
+It is the operation done right before a value is assigned in the
+assignment statement.  There are three general types of expression
+evaluation groups:  binary operators, unary operators, others.  For binary
+and unary operators, we simply call the sub-expression evaluation
+functions to return the result.  The result is usually a number object,
+which has overloaded arithmetic and logical operators.  The operators are
+applied to the result and returned to the caller.  This is done
+recursively for each binary and unary operator simulation object.
+
+
+Function
+
+Evaluating a function is similar to triggering a task.  The difference is,
+of course, no return value is allowed in a task.  Otherwise, the
+description of function calls can be applied to task enables.  The
+procedure begins by looking up the function definition in the symbol
+table.  This does not depend on whether we're calling a system function or
+a user defined function.  This still needs to be done.  Once the function
+is found (setup should have checked), we call the <st_node_evaluate>
+function object to do the actual work.
+
+This object will do the following:
+
+1.  Setup the argument variables (input, inout).  This step updates the
+local variables of the function definition with the arguments, if any.
+Note, this step is not an assignment of the variables, we are simply
+initializing the local variables.
+
+2.  Call the function statement.  This step is equivalent to triggering a
+statement from the time wheel.  The actual actions taken depends on the
+statement.  See above for a list.
+
+3.  Setup the argument variables (output, inout).  This step assigns the
+result of local variables to the calling modules variables.  This is only
+done at the end of the function.  I.e. if a variable was changed multiple
+times through the function statement, only the last value is actually
+assigned to the calling module's variable.  Of course, the purpose of a
+user defined function is to model a combinational circuit.  Thus, a
+variable is not expected to have multiple values, i.e. no memory.
+
+
+Identifiers
+
+Evaluating an identifier requires handling three different types of
+Verilog storage units:  ports, registers, and memory.  The evaluation
+procedure begins at the evaluation of a <range_id>.  This looks up the
+identifier index in the symbol table.  The <st_node_evaluate> function
+object is called, which instantiates a <st_net_evalaute> function object.
+<st_net_evaluate is called with the indices for the port connection
+and the indices for the bit/part select.  These values may be invalid, so
+the following procedure would detect the identifier type and do the
+correct action.
+
+1.  Ports:  to evaluate a port, we need to look up the port connections.
+This usually requires the port index and the bit/part select indices to
+obtain the requested bits.  We use a recursive ascend of the module
+hierarchy to retrieve the correct value.  This is done by instantiating
+another <st_net_evaluate> and calling it for the port connection.  This is
+repeated as long as this object is a port.
+
+2.  Registers:  to evaluate registers, we test the bit/part select
+indices for bit select or part select.  For bit selection, only the 'ms'
+index is valid.  For part select, both 'ms' and 'ls' indices are valid.
+We return the sub-bit_vector object for these cases.  For the case of
+neither 'ms' nor 'ls' are valid, we return the entire bit_vector.
+
+3.  Memories:  to evaluate memories, we have to determine the index of the
+memory location.  All memory locations must have an index (the setup
+procedure should have checked).  We then index the storage array and
+return the associated value.
+
+The only other types of expression objects are qouted strings and numbers. 
+For the case of a number, we do not even need to call a evaluation
+function object.  We can simply return the value of the number object. 
+For qouted strings, we need to convert the string into an octet string. 
+The octet string (array of 8 bits) is the result of converting each
+character in the qouted string to a number using the ASCII table.  The
+resulting array of number is returned as the evaluation.
+
+This concludes the description of the simulation procedure.  The following
+section will describe the supported constructs.
+
+
+Supported Construct
+
+As with other parts of this document, we'll start the description of
+supported constructs from the top of the object hierarchy.  Since some
+objects, most of the misc. objects, does not fit well in it's own section,
+they will be described in their original syntax.  I.e. the delay or event
+control will be discribed in the statements section.  We will also touch a
+little on the bit vector and logic types. 
+
+Note:  When a construct is not supported in simulation, but the construct
+is parsed correctly by the grammar parse, no errors or warnings are
+produced. 
+
+
+Module Items
+
+VBS, of course, supports module definition.  The following are module
+items that are supported.
+
+
+1.  IO declaration, input, output and inout, is fully supported.  Invalid
+variable names will be detected by the grammar parser. 
+
+2.  Register declaration is fully supported.
+
+3.  Net declaration is fully supported.
+
+4.  Integer declaration is fully supported.
+
+5.  Function/Task definition is fully supported.  The implementation might
+not be ANSI standard compliant.
+
+6.  Initial and always procedural blocks are fully supported.  See also
+the delay and event control support in the statements section. 
+
+7.  Continuous assignment is fully supported.
+
+8.  Module instantiation is supported.  The port connections cannot be
+multi-variable expressions.  I.e.
+
+module_name instance_name (port1, port2 + port3, port4);
+
+is not supported.  Each port connection must be a single variable.  Part
+select is supported, but bit select is not for the port connections.
+Though the grammar parser will correctly parse a bit select.  Also, port
+connections can not be null.  I.e. 
+
+module_name instance_name (port1, , port4);
+
+Is an error.  The setup procedure will detect that an expression is
+missing and will not continue. 
+
+
+Statements
+
+0.  Delay by constant number, delay by a variable, '@' event control with
+or without posedge/negedge is supported.  Function enables are the only
+expression types not allowed in the event control.  Though the grammar
+parser will parse it correctly.
+
+Though delay by a variable is only partially supported.  It is not
+supported in initial and always procedural blocks.  If a delay is
+encountered during setup, the statement is appended to the time wheel.  In
+most cases, the value of the variable at this point is invalid, thus the
+statement will be appended to the wrong time unit.
+
+Delay by a constant of the following type is supported: 
+
+#1 a = b;
+a = #1 b;
+
+1.  Blocking and non-block assignment is fully supported.
+
+2.  <for>, <forever>, <repeat>, and <while> loops are fully supported.
+
+3.  <if> and <if ... else ...> are fully supported.
+
+4.  <case> is fully supported.  The expression in the case item can be a
+variable.  <casex> and <casez> are also supported.
+
+5.  Task enable is supported.  <$finish>, <$write>, <$strobe> and
+<$monitor> are the only currently supported system tasks.  <$write>,
+<$strobe> and <$monitor> task enables must provide a format string as the
+first argument.  Even if only a register is displayed to standard output,
+a format string must be used to format the output.  It is a setup error if
+the first argument is not a qouted string.  The available format
+specifiers are: 
+
+\n (new line)
+\t (tab)
+\\ (slash)
+\" (double qoute)
+%b, %o, %d, %h, %s (base specifier, width is allowed)
+
+6.  Null statement is fully supported.
+
+7.  Sequential block is supported.  Nested blocks with delays are
+supported.  Named blocks are not.  I.e.
+
+	begin : my_block
+	end
+
+Will be seen as a syntax error.  Declarations inside a block is also not
+supported. 
+
+
+Expressions
+
+1.  The following arithmetic and logic operators are fully supported:
+
+	+ (addition, unary and binary)
+	- (subtraction, unary and binary)
+	& (bit-wise and)
+	| (bit-wise or)
+	^ (bit-wise xor)
+	~ (invert)
+	! (not)
+	<< (left shift)
+	>> (right shift)
+
+2.  The following relational operators are fully supported:
+
+	==
+	!=
+	===
+	!==
+	<
+	<=
+	>
+	>=
+
+3.  Identifiers supported for expressions and lvalue:
+
+	variable_name
+	variable_name [variable_bit]
+	variable_name [0:7]
+
+4.  Constant numbers are supported.  Only 32 bit decimal numbers are
+supported.  All numbers are inputed as positive numbers.  A '-' (negative
+sign) in front of a constant number will be flaged as a syntax error. 
+Hexadecimal, octal, decimal and binary bases are supported with constant
+numbers.  Numbers can be seperated by underscores, but not spaces.  Four
+logic values are supported:  LO, HI, DC (don't cares), and Z (high
+impedance).  All logical operations are supported for these values. 
+Infinite sized bit vectors are supported.
+
+5.  Function enable is supported.  $time is the only currently supported
+system function. 
+
+6.  Qouted strings are fully supported.
+
+7.  Partial support for $dump* API.
+
+8.  Multiple/lvalue concatenation is supported.
+
+9.  Net declaration assignment is supported.
+
+10. Delay or event control in non-blocking assignment is supported.
+
+11. Hierarchical variable reference (i.e. moda.modb.varc) is supported.

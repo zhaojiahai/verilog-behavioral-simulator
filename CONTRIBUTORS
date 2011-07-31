@@ -1,0 +1,39 @@
+Persons who have contributed patches:
+
+George Varughese <vgeorge@computer.org>
+	$dump* system tasks.
+	scoping identifiers.
+	shell interpreter.
+	Tcl/Tk, Guile interface
+	various other new features.
+
+Chris Moller <moller@moller.bops.com>
+	Patch to detect return value of string.find_last_of.
+
+Mitchell Perilstein <mitch@mail.enetis.net>
+	Patch to fix build problems with glibc2 and egcs.
+
+Gregory S. Stark <gsstark@mit.edu>
+	Makefile.in and configure.in suggestions and patch.
+
+Robin Ericsson <lobbin@lobbin.ml.org>
+	Patch for correct VPATH handling.
+
+hmthaker@tddcae99.fnts.com (Himanshu M. Thaker)
+	Original VPP package author.
+
+Udi Finkelstein <fink@post.tau.ac.il>
+	Patches for additional Verilog loop syntax.
+
+Original Authors:
+
+Lay Hoon Tho
+	8, Jalan Setia 6 Chamek,
+	Kluang, 86000 Johore,
+	Malaysia
+
+Jimen Ching
+	1450 Young St. Apt. #2107
+	Honolulu, HI 96814
+	USA
+	<jching@flex.com>

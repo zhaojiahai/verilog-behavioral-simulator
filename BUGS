@@ -1,0 +1,107 @@
+Bug/Todo List
+2003 January 20
+
+
+Bugs:
+	The following Verilog code should only produce one output, but
+	generates two.
+
+module test;
+task a;
+        input b;
+        #0 $write("Hello world %d\n", b);
+endtask
+initial
+        begin
+        a(0);
+        a(1);
+        end
+endmodule
+
+	The problem is that the second task enable causes the trigger
+	of the $write which already has a delay.
+
+
+--------------------------------------------------------------------------------
+
+
+This is a list of features that are lacking in the current implementation
+of the Verilog Behavioral Simulator.  This list is sorted according to
+priority.
+
+1.	There doesn't seem to be a portable way of detecting a premature
+	EOF using yacc.  The current method works for Linux, but not BSDI.
+	Need to find a new way to fix this problem.
+
+	The inheritance tree for module items and tf declarations are not
+	clean.  We should use a pure virtual class to specify the interface.
+	Currently, GCC front end for C++ is not very ANSI conformant so this
+	would be hard to achieve at the moment.  The class hierarchy of the
+	symbol table node objects is also out of control.  A new method is
+	needed to handle actions on these objects.
+
+2.  Add more constructs:
+
+	Here's a list that's been requested:
+		instantiation by name
+		non-blocking assignments inside loops.
+
+3.  Add logfile support.
+	Decide what should be logged and where in the code to log it.
+	Including sanity checks in all objects seems too paranoid.  But
+	if we are to support a logfile, this is basically what we need
+	to do.  The best way to do this is to start at the highest
+	level in the object hierarchy.
+	(Sanity check: have the object tell us what it is doing.)
+
+4.  Wave viewer.  This was suggested by an interested user.  Since
+	I know nothing about such viewers, it will be a while before
+	one is available.  Support for a wave viewer can be added, though.
+	The dumpvar* system tasks will be supported in a future release.
+
+5.  PLI support.  Since I am mostly interested in synthesizable constructs,
+	I don't know how plausible this support would be.
+
+7.  Update docs:
+
+   0123 4567 8911 1111 1111 2222 2222 2233
+               01 2345 6789 0123 4567 8901
+
+   0000_0000_0000_0000_0000_0000_0000_0000
+
+	0     flag
+	1-7   object type (group)
+	8-15  sub-type
+	16-19 object information
+	20-31 object type
+	
+
+	expr = 0x01
+	dec  = 0x02
+	misc = 0x03
+	decl = 0x04
+	module item = 0x05
+	module instance = 0x06
+	lvalue = 0x07
+	case item = 0x08
+	stmt = 0x09
+
+8.  Code clean up:
+
+	When RTTI is supported, remove the use of get_* member functions to
+	retrieve the derived class when only the base class is available.
+
+	Remove templates from common objects, event queue, time wheel,
+	symbol table.  Use a base class to reference the actual object
+	'T'.  Removing templates reduces compile time.  The problem is,
+	how do we define the base class?
+
+	Change all access to symbol table node types to be pointers
+	to the base class.  This requires an assignment member function
+	in st_node_base.
+
+These are only a few suggestions for enhancement.  It will take some time
+to add all these features.  We might also have missed other Verilog
+constructs that are important.  If so, they should have higher priority.
+
+Jimen Ching

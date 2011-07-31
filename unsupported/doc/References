@@ -1,0 +1,31 @@
+References
+
+[Thomas91] "The Verilog hardware description language",
+	by D.E. Thomas and Philip Moorby, (C) 1991 Kluwer Academic Pub.
+
+[Sternheim90] "Digital design with Verilog HDL",
+	by Eliezer Sternheim, (C) 1990 Automata Publishing Co.
+
+[Hennessy90] "Computer Architecture:  A Quantitative Approach",
+	by Hennessy and Paterson, (C) 1990 Morgan Kaufmann Pub.
+
+[Hennessy94] "Computer Organization & Design:
+	The Hardware/Software Interface", by Patterson & Hennessy,
+	(C) 1994 Morgan Kaufmann Publ., Inc.
+
+[Levine90] "lex & yacc 2nd Edition",
+	by John R. Levine, Tony Mason & Doug Brown, (C) 1990
+	O'Reilly & Associates, Inc.
+
+[Holub90] "Compiler Design in C",
+	by Allen I. Holub, (C) 1990 Prentice Hall
+
+[Stroustrup90] "The Annotated C++ Reference Manual",
+	by M. Ellis and B. Stroustrup, (C) 1990 Addison-Wesly Publ. Co.
+
+[OVI92] "Verilog Hardware Description Language Reference Manual",
+	by Open Verilog International, (C) 1992 Open Verilog International.
+
+[Cheng92] "ftp://ic.berkeley.edu/pub/stchengvl2mv.tar.Z"
+	by Szu-Tsung Cheng,  (C) 1992 University of California, Berkeley
+	stcheng@ic.berkeley.edu

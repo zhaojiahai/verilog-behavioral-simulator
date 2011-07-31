@@ -1,0 +1,74 @@
+.TH WELCOME "1" "December 2003" "vbs" "User Commands"
+.SH NAME
+vbs \- simulate Verilog behavioral descriptions
+.SH SYNOPSYS
+\fBvbs\fR [\fIOPTION\fR]... \fISOURCE\fR...
+.SH DESCRIPTION
+Simulate SOURCE files.
+.HP
+\fB\-a\fR, \fB\-\-ascii_dump\fR
+.IP
+Dump using ascii format.
+.HP
+\fB\-c\fR, \fB\-\-compile\-only\fR
+.IP
+Stop after compilation, do not simulate.
+.HP
+\fB\-d\fR, \fB\-\-debug\-enable\fR=\fITYPE\fR
+.IP
+Enables the specified TYPE of debug output, where TYPE is one of the
+following: sim_state, parser, symbol_table, time_wheel, event,
+user[1-4], userx. This option may be used multiple times, but is only
+available if debug is enabled.
+.HP
+\fB\-D\fR, \fB\-\-define\fR
+.IP
+Define macro for preprocessing (only for vpp).
+.HP
+\fB\-E\fR, \fB\-\-preprocess\-only\fR
+.IP
+Stop after preprocessing, do not compile.
+.HP
+\fB\-I\fR, \fB\-\-incdir\fR
+.IP
+Search directory for include files (only for vpp).
+.HP
+\fB\-l\fR, \fB\-\-debug\-outfile\fR=\fIFILE\fR
+.IP
+Specifies the file to write debug output. If not specified and debug
+is enabled, output will go to stdout. Available only if debug is
+enabled.
+.HP
+\fB\-q\fR, \fB\-\-quiet\fR
+.IP
+Do not output statistics.
+.HP
+\fB\-v\fR, \fB\-\-vcd_dump\fR
+.IP
+Dump using VCD format.
+.HP
+\fB\-x\fR, \fB\-\-delays\fR={min,typ,max}
+.HP
+\fB\-z\fR \fI#\fR
+.IP
+Compress dumpfile with zlib at the specified compression level, #
+(from 1 to 9).
+.HP
+\fB\-h\fR, \fB\-\-help\fR
+.IP
+Display this message.
+.SH "AUTHOR"
+Written by Lay Hoon Tho and Jimen Ching.
+
+This manual page was written by Shaun Jackman <sjackman@debian.org>
+for the Debian system.
+.SH "REPORTING BUGS"
+Report bugs to Jimen Ching <jching@flex.com>.
+.SH "COPYRIGHT"
+Copyright 1995, 1996, 1997, 2001 Lay Hoon Tho, Jimen Ching
+
+This is free software; see the source for copying conditions. There
+is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+.SH "SEE ALSO"
+http://www.flex.com/~jching/

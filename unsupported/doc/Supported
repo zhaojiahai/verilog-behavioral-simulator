@@ -1,0 +1,383 @@
+Supported
+
+Synthesizable Constructs
+
+
+	This file is maintained to keep track of what is supported and
+what is not.  Any changes done to the source code that change the
+supported constructs need to be reported in here.  To make this file easy
+to read and follow, I tried to follow the format in the Appendix D of the
+Verilog Hardware Description Language Reference Manual, OVI [92], as
+closely as possible.  All the supported constructs are grouped under
+different titles according to Appendix D.  The title of each group
+reflects the level of support of the constructs in this program.  However,
+there are some constructs that have more, and some have less feature than
+the title of the group described.  These cases will be noted accordingly. 
+
+
+Datatypes:
+
+Four-state logic (HI, LO, DC, Z) are used.  They represent high, low,
+"don't care" and high impedance value, respectively. 
+
+
+A.  List of Supported Constructs
+The construct listed under this section fall under the minimum acceptable 
+level for synthesis.
+
+
+A.1 Fully Supported
+
+	According to the Verilog LRM [OVI92], the constructs listed under
+this category should be supported fully.  However, there are some
+constructs that are listed under this category in Appendix D, but we do
+not support them in their entirety due to the limited time we have for
+this single semester effort.  There is a file named Todo, it is a list of
+things and constructs that we wish to do and support.  Interested
+developers can take a look in there. 
+
+
+data values:
+Values can be assigned and output in all bases(2, 8, 10,16).  For example, 
+representing a decimal 18 in base sixteen (hexadecimal) will be:
+
+	'h12
+
+identifiers:
+Minimum escape identifiers are supported.  Things like new line, tab and
+some others (see Systask.h for a complete list).
+
+	\n, \t, \\ ...
+
+All keywords have to be non-escape identifiers.  Keywords are supported in
+its entirety.  This means the keyword must be all lower case.
+
+However all `keyword (macros) are not supported. 
+
+
+subranges and slices:
+Fully supported on both sides of the assignment.  Range specification is
+used in the registers to give the address of each of the corresponding
+bits.  Subranges are supported.  It is used for accessing several
+contiguous bits in a vector register, which is known as part-selects. 
+Accessing part of a register can be done like this: 
+
+	reg[7:0] a;
+	reg[0:7] b;
+	a[7:4] = 13;	/* a = 1101 XXXX */
+	b = 13;		/* b = 0000 1101 */
+
+	* a[ms_expr:ls_expr] is a subrange specification to access data in
+	  register
+	* if add1 = 4 and addr2 = 1 then the returned value is 1XXX
+	* addr1 >= addr2 in this case, otherwise a parsing error of wrong 
+	  order of bit access will be given
+	* the most significant bit of register a is a[7] but the most 
+	  significant bit of register b is b[0].
+
+We do not support bit select using 'a[7] = 1'.  To access this bit you 
+need to express it in the following form:
+
+	a[7:7] = 1;
+	
+Slices, which is grouped together with subranges, are not supported.
+
+shift operators:
+Both logical shift left and shift right are fully supported.  All vacated
+bit positions are filled with zeroes. 
+
+begin, end:
+This is a pair of keywords used to specify an enclosed sequential block. 
+They are used like the open and close braces in C, i.e. '{' and '}'.  It
+has to be used in pairs, leaving out any one of them will cause a parsing
+error.  Sequential blocks are fully supported in all statements like if
+statements and initial blocks. 
+
+	if (a == b)
+		begin
+		a = 10;
+		b = 20;
+		end
+
+The two expressions within the 'begin' and 'end' are to be executed if the
+expression a == b is true. 
+
+case statement:
+Case statements with don't cares are not supported, they require support
+for 'casex' and 'casez'.  Regular case statements are fully supported. 
+That is;  "case (expression) (case_item)+ endcase" is supported.  This
+'case' statement supports multiple cases and also the default case.  The
+default case is taken when none of the cases stated are true.  An example
+of case statement: 
+
+
+	case (c)
+		0,6	: a = 7;
+		1, 10, 2: b = 7;
+		3, 4, 5 : c = 7;
+		default : begin
+			  a =8;
+			  b =8;
+			  c =8;
+			  end
+	endcase
+
+
+if, else, else if:
+These are supported completely.  These constructs behave exactly like
+their C counterparts.  An example of how it is used is: 
+
+	if (a==0)
+		a = 9;
+	else if (b==0)
+		b = 9;
+	else
+		$write("This is like the default case in case statement!!");
+
+module declarations:
+Modules are defined within a pair of keywords 'module' and 'endmodule'. 
+The identifier after the module gives the module a unique name.  Within a
+module, the following modules items are fully supported:  register
+declarations, initial statements, always satements.  Below is an example
+of a module declaration: 
+
+	module test;		/* The module named test begins */
+		reg [0:3] a, b;	/* Registers declarations */
+		initial		/* Initial block begins */
+		  begin
+		  $write("time %d: a = %b\n", $time, a);
+		  a = 0;
+		  b = a;
+		  end
+		  #2 $finish;
+		  end
+	endmodule
+
+reg:
+Register declarations support range specification and declaration of a
+list of register variables.  All range declaration formats are 
+supported.  The following examples demonstrate some of these constrcuts:
+
+	reg[0:3] a;	(1)
+	reg[3:0] b;	(2)
+	reg[1:4] c;	(3)
+	a = 4'b1111;	(1a)
+	b = 4'b1111;	(2a)
+	c = 4'b1111;	(3a)
+
+All three declarations and assignments will give the same result, All of
+them have a size of 4, and store the value of 15 in the register.  The
+difference is the internal representations of the numbers.  In case (2),
+the internal representation of the number is in reversed order.  Case
+(3) represent the number same as the order in case (1), but bit 0 in case
+(3) is not used and should not be used or assigned to any value in the
+future.  Unlike Verilog-XL from Cadence, register declarations do not
+attach the range with the variable name.  I.e. the following is not 
+supported.
+
+	reg	abc,
+		def,
+		[7:0] ghi;
+
+To make this work, the following must be used:
+
+	reg	abc, def;
+	reg [7:0] ghi;
+
+
+A.2  Optional-Abort
+
+According to the [OVI92], constructs under this category are optional for
+synthesis, but the program must abort if the program is unable to
+synthesize a construct from this category. 
+
+logical operators:
+Operators !, &&, ||, ~ are all fully supported.
+
+reduction operators:
+Operators & and | are both supported.
+
+arithmetic operators:
+Operators + and - are both fully supported.
+
+relational operators:
+All relational operators <, >, <=, >=, == and != are supported.
+
+
+A.3  With Specific Limitations
+
+According to the LRM [OVI92], the following constructs need to meet the
+following restrictions, or else it will be consider as optional-abort
+constructs. 
+
+always:
+It has met the minimum requirement of supporting edge-triggered events. 
+But this implementation can also support other trigger types, such as 
+level trigger.
+
+for:
+Supported and behaves like its C counterpart.  Note that delays in 'for'
+loops are not supported, see below.
+
+posedge, negedge:
+It is only used with "always @".
+
+
+B.  List of Optional-Ignore Constructs
+
+Constructs that can be parsed and ignored.  However, if the program does 
+not support them, it should generate a warning.
+
+delay specifications:
+In the behavioral model, delay specifications and time are optional-ignore
+constructs and they are both supported.  Delays are supported in all
+statements and sequential blocks.  The first release did not support delays
+in nested blocks, but current versions have fixed this.  Please refer to
+the implementation decisions file named Impl_decisions. 
+
+
+C.  List of Optional-Abort constructs
+
+assignment:
+Variable used as bit select is not supported.  In other words, accessing a 
+single bit using this method is not supported:
+
+	reg[6:0] a;
+	** a[3] will generate parsing error
+
+But there is a way of accessing a single bit using the part-select to get 
+around this limitation.  A part-select of a vector register is done with 
+the following syntax:
+
+	reg[ms_expr:ls_expr]
+
+For example, to access bit a[3] we can do the following:
+
+	reg[3:3]
+
+This is supported on both side of assignment instead of the minimum 
+requirement which is only on the left hand side.
+
+initial:
+All the sequential blocks that are supported are supported here, except 
+for delay specification in the nested blocks.
+
+
+Non-synthesizable Constructs
+
+event control:
+Event control can take an identifier or an event expression.  Events can
+support expressions, posedge scalar event expressions, negedge scalar
+event expression or a list of or'ed event expressions.  Event control can 
+only be used with 'always' procedural blocks.
+
+event 'or' constructs:
+Or'ing two or more of the event expressions are supported.  Occurrence of
+any one of the expressions will return true and trigger the corresponding
+statement(s).  All the event expressions that are mentioned above are
+supported here. 
+
+
+block statements:
+
+sequential blocks:
+sequential blocks are enclosed with a pair of keywords 'begin' and 
+'end'.  Here is an example of how to use it.
+
+	begin
+		/* can have zero or more statements */
+		a list of statements_or_null
+	end
+
+or
+
+	/* name of block is any type of identifier */
+	/* name_of_block is not parsed, but space is allocated for it */
+	begin : name_of_block
+		block_declaration(s)
+		a list of statements_or_null
+	end
+
+A sequential block can be named with an identifier after the 'begin' and
+the ':'.  In the block_declaration only register declaration is supported. 
+There are no limits on the number of sequential blocks in one module, Any
+number of nested blocks are allowed in the module for all supported
+constructs.  Note that delay control is not working for nested blocks as 
+mentioned above. 
+
+
+always:
+'Always' statement takes all the statements that are supported.
+
+assignment
+Part-select in assignment is fully supported.  Here are some examples:
+
+
+	reg[6:0] a;
+
+	a[3:0] = 10;	/* a becomes xxx1010 */
+	** if address is 4 through 6, the returned value is x, this means 
+	   the stored value is don't care.
+
+	a = 10;
+	** a[3:0] will return 1010
+	** a[0:3] will will generate an error for wrong order of bit
+	   selection.
+	** a[5:1] will return 00101
+
+
+Special notes:
+
+Nested block delays:
+Delays in nested blocks are fully supported.  But delays inside a block
+in a 'for' loop are not supported.  This is a bug.
+
+Scope rules:
+Scope rules can now be used.  See the implementation details document on
+how this works. 
+
+$Write, expressions and first argument:
+$Write does not currently support expressions.  The simulator will simply
+ignore any expressions and not output anything at all.  This will be fixed
+in a later release.  This feature is not used often, thus it has a lower
+priority.  The first argument of $write must also be a qouted string. 
+Anything else can result in undefined behavior. 
+
+Module instantiation:
+Module instantiation can not take an expression other than a range id.
+In other words, the following won't work:
+
+module mymod ( ... );
+ ...
+endmodule
+
+
+module main;
+	reg a, b;
+	mymod mod1 ( a + b );
+endmodule
+
+"a + b" is not a valid expression.  This is because instantiating a 
+module requires an index into the symbol table for the port connection.  
+The expression "a+b" does not have an index into the symbol table, so 
+there's no port connection associated with it.
+
+Top level module:
+With the addition of module instantiation, there is an implementation
+requirement on the top level module name.  The name of the top level
+module, or the module containing the test vector, must necessarily be
+called "main".  In other words, if you use the following command line; 
+
+vbs mod1.v mod2.v mod3.v mod4.v
+
+one, and only one, module in these four files must necessarily have the
+name "main".  This is a limitation of the implementation.  Unless there
+are complaints about this requirement, we will continue to use this
+method to signify the start of simulations.
+
+
+The above is a summary of all the constructs that are supported in this 
+program.  For some of the constructs I used example to illustrate how it 
+is supported and behave in this program and hope that they will help 
+future developers to improve the supporting constructs or to add new 
+constructs.
