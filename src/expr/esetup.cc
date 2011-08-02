@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -374,6 +374,7 @@ setup_expr::operator()(mintypmax_expr *p) const
 		case mintypmax_expr::MAXDELAY:
 			if (p->_max_expr != 0)
 				rs = p->_max_expr->setup(setup_expr(_scope, _check_const));
+			break;
 		default:
 			// Non mintypmax expression.
 			rs = p->_min_expr->setup(setup_expr(_scope, _check_const));
