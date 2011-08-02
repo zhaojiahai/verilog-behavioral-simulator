@@ -2,7 +2,7 @@
 // Copyright (C) 2000-2001 George Varughese
 //
 // With modifications from:
-//  Jimen Ching <jching@flex.com>
+//  Jimen Ching <jimen.ching@gmail.com>
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.

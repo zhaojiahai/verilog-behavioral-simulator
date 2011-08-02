@@ -8,10 +8,10 @@ constructs that are synthesizable, but still allow complex test vectors
 for simulation. 
 
 
-What's New in 1.4.1
+What's New in 1.5.0
 
 $stime API support
-Support GCC 3.4.0 builds
+Support GCC 4.2 builds
 
 
 What's New in 1.4.0
@@ -160,18 +160,12 @@ docs/		Directory of documentation.
 
 Getting the source code:
 
-Source code to this project can be obtained from the Linux archive site
+Source code to this project can be obtained from the Google code site
 on the world wide web.  The URL is:
 
-ftp://sunsite.unc.edu/pub/Linux/apps/circuits/vbs-X.X.X.tar.gz
-ftp://ftp.geda.seul.org/pub/geda/dist/vbs-X.X.X.tar.gz
+http://code.google.com/p/verilog-behavioral-simulator/
 
-The authors do not maintain this site, so the location could change without
-notice.  Or...
-
-http://www.flex.com/~jching
-
-This is the official home page for VBS.  The author does maintain this site. 
+This is the official home page for VBS.
 
 
 Compiling VBS
@@ -183,7 +177,7 @@ The following is needed:
 		POSIX yacc should work too.  Must be able to create the
 		header file 'yy.tab.h', as well as ANSI C code.  (**)
 	Any ANSI C compiler
-		Tested with GCC 2.7.2, 2.95.x and 3.0.
+		Tested with GCC 2.7.2, 2.95.x, 3.0 and 4.2.
 	C++ compiler that supports templates and namespace.
 		Tested with G++ 2.7.2 with the -frepo patch.  (***)
 		Version G++ 2.7.0 is known not to compile the simulator.

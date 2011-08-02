@@ -5,7 +5,7 @@ VBS distribution.  Because of the requirements to compile VBS, some
 users might have problems compiling the source code.  I hope the
 following questions (with answers) will help these users.
 
-This FAQ was last modified on June 7, 2003.
+This FAQ was last modified on August 1, 2011.
 
 Q1.  What Verilog constructs are supported by VBS?
 Q2.  Which compilers do I need to compile VBS?
@@ -71,7 +71,7 @@ vbs (directory where vbs was installed)
 Q5.  I've found a problem (bug/defect), what should I do?
 
 A5.  Well, you have access to the source code.  Try fix the problem
-and send the patch (diff -u) to jching@flex.com.  Or email me the
+and send the patch (diff -u) to jimen.ching@gmail.com.  Or email me the
 sample verilog code that produced the bug and I will work on it as
 soon as possible.  If you want the fix when found, please also specify
 how you would want to receive it.
@@ -89,7 +89,7 @@ Q6.  Where can I go to find updates?
 
 A6.  I have now put up a web site for new updates.  The URL is:
 
-http://www.flex.com/~jching
+http://code.google.com/p/verilog-behavioral-simulator/
 
 --------------------------------------------------------------------------------
 
@@ -183,6 +183,6 @@ ignored.
 
 If you have any other questions, please email them to me at
 
-jching@flex.com.
+jimen.ching@gmail.com.
 
-Copyright (C) 1996-1997,2001-2003, Jimen Ching
+Copyright (C) 1996-1997,2001-2003,2011 Jimen Ching
