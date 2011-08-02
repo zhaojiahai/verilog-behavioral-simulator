@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2000,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2000,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -19,7 +19,7 @@
 using namespace std;
 
 debug::debug()
-	: _enabled(DEBUG_NONE), _state(DEBUG_NONE)
+	: _enabled(NONE), _state(NONE)
 	{
 	_output_file = 0;
 	_debug_out = 0;

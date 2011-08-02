@@ -6,7 +6,7 @@
 // See the file COPYING for the licensing terms and conditions.
 // See the file CONTRIBUTORS for a list of contributing authors.
 //
-// vbs.cc
+// main.cc
 //
 // Main driver.  This file is kept as simple as possible.  All work should
 // be done by other modules.
@@ -15,6 +15,7 @@
 #include "config.h"
 #endif
 #include <cstring>
+#include <cstdlib> // exit()
 #if defined(HAVE_GETOPT_H)
 #include <getopt.h>
 #elif defined(HAVE_PROTO_GETOPT)
@@ -28,13 +29,16 @@ extern "C" int getopt(int argc, char * const argv[], const char *optstr);
 #endif
 
 #include <csetjmp> // longjmp()
+#include <string>
+#include <sstream>
 #include <iostream>
 #include "expr/mintypmax.h"
 #include "sim.h" // Starting point...
-#include "parser.h" // Initialize parser...
 #include "version.h"
 
 #include "common/debug.h"
+
+using namespace std;
 
 char help_message1[] =
 "\t-a or --ascii_dump\n"
@@ -140,7 +144,7 @@ getopt(int argc, char *argv[], const char *optstr)
 
 	return c;
 	}
-#endif
+#endif // !HAVE_GETOPT && !HAVE_GETOPT_LONG
 
 int
 parse_args(int argc, char *argv[])
@@ -343,15 +347,15 @@ main(int argc, char *argv[])
 	}
 
 void
-vbs_warn(int code, const char *state, const char *message)
+vbs_warn(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
-	cout << message << endl;
+	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str());
 	}
 
 void
-vbs_fatal(int code, const char *state, const char *message)
+vbs_fatal(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
-	cout << endl << message << endl << endl;
-	cout << "Error detected during " << state << "...exiting" << endl;
-	exit(code);
+	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str());
+	cout << "Error detected during " << st << "...exiting" << endl;
+	exit(c);
 	}

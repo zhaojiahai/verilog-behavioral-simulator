@@ -677,6 +677,8 @@ ac_user_opts='
 enable_option_checking
 enable_debug
 with_template_depth
+with_vcdfile
+with_vcdver
 with_vppprog
 with_vppdir
 '
@@ -1310,6 +1312,8 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-template_depth   Template depth (--with-template_depth=n)
+  --with-vcdfile          Default VCD output filename (--with-vcdfile="vbs.dmp")
+  --with-vcdver           Version string used in VCD output file
   --with-vppprog          Compile without preprocessor support (default is "vpp")
   --with-vppdir           Preproccesor directory (--with-vppdir=dir)
 
@@ -2258,6 +2262,24 @@ fi
 
 
 
+# Check whether --with-vcdfile was given.
+if test "${with_vcdfile+set}" = set; then :
+  withval=$with_vcdfile; vcdfile="$withval"
+else
+  vcdfile="vbs.dmp"
+fi
+
+
+
+# Check whether --with-vcdver was given.
+if test "${with_vcdver+set}" = set; then :
+  withval=$with_vcdver; vcdver="$withval"
+else
+  vcdver="\tVBS Value Change Dump (VCD) v1.0"
+fi
+
+
+
 # Check whether --with-vppprog was given.
 if test "${with_vppprog+set}" = set; then :
   withval=$with_vppprog; vppprog="$withval"
@@ -2271,6 +2293,15 @@ fi
 if test "${with_vppdir+set}" = set; then :
   withval=$with_vppdir; vppdir="$withval"
 fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define VCDFILEDFLT "\"$vcdfile\""
+_ACEOF
+
+cat >>confdefs.h <<_ACEOF
+#define VCDVERSION "$vcdver"
+_ACEOF
 
 
 if test "$vppprog" = no

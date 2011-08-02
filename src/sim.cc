@@ -15,6 +15,7 @@
 #include <iomanip>
 #include <string>
 #include <list>
+#include <sstream>
 #include <fstream>
 #include "common/ptr.h"
 #include "common/dstack.h"
@@ -86,6 +87,7 @@
 
 using std::string;
 using std::list;
+using std::stringstream;
 using std::ofstream;
 using std::ifstream;
 using std::setfill;
@@ -746,6 +748,32 @@ vbs_sim_start(int amt, char **lst)
 	DEBUG_OUTPUT("DEBUG_SIM_STATE:  Starting simulation...\n");
 	vbs_sim_run(-1);
 	vbs_err.pop_filename();
+	}
+
+const char *
+sim_errmsg(const char *prog, const char *m, const char *fn, int ln, int c, const char *cs)
+	{
+	stringstream s;
+
+	s << endl;
+	s << prog << ": ";
+	s << fn << '[';
+	if (ln > 0)
+		s << ln;
+	else
+		s << '?';
+	s << "] ";
+
+	if (c != 0)
+		s << "-" << c;
+	else
+		s << "-?";
+	s << "- " << cs;
+
+	// Display the message.
+	s << " (" << m << ")." << endl << endl;
+
+	return s.str().c_str();
 	}
 
 void

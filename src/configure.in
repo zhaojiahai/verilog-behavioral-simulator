@@ -24,6 +24,14 @@ AC_ARG_WITH(template_depth,
 	[  --with-template_depth   Template depth (--with-template_depth=n)],
 	[template_depth="$withval"])
 
+AC_ARG_WITH(vcdfile,
+	[  --with-vcdfile          Default VCD output filename (--with-vcdfile="vbs.dmp")],
+	[vcdfile="$withval"],[vcdfile="vbs.dmp"])
+
+AC_ARG_WITH(vcdver,
+	[  --with-vcdver           Version string used in VCD output file],
+	[vcdver="$withval"],[vcdver="\tVBS Value Change Dump (VCD) v1.0"])
+
 AC_ARG_WITH(vppprog,
 	[  --with-vppprog          Compile without preprocessor support (default is "vpp")],
 	[vppprog="$withval"],[vppprog="vpp"])
@@ -31,6 +39,9 @@ AC_ARG_WITH(vppprog,
 AC_ARG_WITH(vppdir,
 	[  --with-vppdir           Preproccesor directory (--with-vppdir=dir)],
 	[vppdir="$withval"])
+
+AC_DEFINE_UNQUOTED(VCDFILEDFLT, "\"$vcdfile\"")
+AC_DEFINE_UNQUOTED(VCDVERSION, "$vcdver")
 
 if test "$vppprog" = no
 then

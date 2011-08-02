@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2000-2001 George Varughese
+// Copyright (C) 2000-2001,2011 George Varughese
 //
 // With modifications from:
 //  Jimen Ching <jimen.ching@gmail.com>
@@ -11,6 +11,9 @@
 //
 // dumpinfo.cc
 
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
 #include "common/time_whl.h"
 #include "common/dumpinfo.h"
 #include "common/dumpvcd.h"
@@ -20,6 +23,7 @@
 #include "sim.h" // sim_run_status()
 
 extern time_wheel<stmt_base> timewheel;
+
 
 dump_info::dump_info()
 	{
@@ -199,7 +203,7 @@ dump_info::pre_second_pass()
 	if (_dump_base != 0)
 		{
 		if (_dump_file.compare("*invalid*") == 0)
-			dump_file("\"vbs.dmp\""); // No file specified, use default.
+			dump_file(VCDFILEDFLT); // No file specified, use default.
 		_dump_base->pre_second_pass();
 		}
 	}

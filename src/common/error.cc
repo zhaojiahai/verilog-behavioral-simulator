@@ -68,15 +68,15 @@ vbs_error::str_type vbs_error::messages[] =
 	str_type("internal simulator error"),
 	str_type("no top-level module found:\n"
 			 "\tA top-level module is a module that is not instantiated by\n"
-			 "\tany other module.  VBS needs a top-level module as a driver\n"
-			 "\tto initiate test vectors"),
+			 "\tany other module.  Simulation requires a top-level module\n"
+			 "\tas a driver to initiate test vectors"),
 	str_type("invalid range"),
 	str_type("order of indices are wrong"),
 	str_type("only one default case is allowed"),
 	str_type("invalid type for this usage"),
 	str_type("not an lvalue"),
 	str_type("repeated operation"),
-	str_type("error in VBS object file"),
+	str_type("error in object file"),
 	str_type("error in executing program")
 	};
 
@@ -95,22 +95,8 @@ vbs_error::out(strstream_type &mesg)
 void
 vbs_error::out(const str_type &mesg)
 	{
-	extern void vbs_warn(int, const char *, const char *);
-	extern void vbs_fatal(int, const char *, const char *);
-	strstream_type s;
-
-	s << _program_name << ": ";
-	s << _file_name.top() << '[';
-	if (_line_number > 0)
-		s << _line_number;
-	s << "] ";
-
-	if (_value != SE_NONE)
-		s << "-" << (int) _value;
-	s << "- " << messages[_value];
-
-	// Display the message.
-	s << " (" << mesg << ").";
+	extern void vbs_warn(int, const str_type &, const char *, const str_type &, int ln, const str_type &, const str_type &);
+	extern void vbs_fatal(int, const str_type &, const char *, const str_type &, int ln, const str_type &, const str_type &);
 
 	const char *state;
 	switch (_state)
@@ -119,14 +105,14 @@ vbs_error::out(const str_type &mesg)
 		case SS_SETUP: state = "setup"; break;
 		case SS_COMPILE: state = "compilation"; break;
 		case SS_PREPROCESS: state = "preprocess"; break;
-		default: state = "unknown state"; break;
+		default: state = "unknown"; break;
 		}
 
 	// Should never return.
 	if ((_state & SS_PREPROCESS) || (_state & SS_COMPILE))
-		vbs_warn(_value, state, s.str().c_str());
+		vbs_warn(_value, messages[_value], state, _file_name.top(), _line_number, mesg, _program_name);
 	else
-		vbs_fatal(_value, state, s.str().c_str());
+		vbs_fatal(_value, messages[_value], state, _file_name.top(), _line_number, mesg, _program_name);
 	}
 
 const vbs_error::str_type &

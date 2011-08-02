@@ -68,11 +68,4 @@ inline number
 operator>>(number &l, number &r)
 	{ return (l >> r); }
 
-
-// This function finds the base and size of a format string.  It is usually
-// called by the $write system task.  But Number needs it, so it is here.
-
-void get_base_size(const number::nstr_type &, number::base_type &,
-	unsigned long &);
-
 #endif // _NUMBER_H

@@ -11,8 +11,10 @@
 //
 // dumpvcd.cc
 
+#if defined(HAVE_CONFIG_H)
+#include "config.h"
+#endif
 #include <ctime> // For ctime.
-
 #include "common/scp_tab.h"
 #include "common/time_whl.h"
 #include "common/st_net.h"
@@ -24,6 +26,7 @@
 
 extern scope_table scopetable;
 extern time_wheel<stmt_base> timewheel;
+
 
 dump_vcd::dump_vcd(dump_stream &d)
 	: dump_base(d),
@@ -176,7 +179,7 @@ dump_vcd::create_header()
 			<<  "\t" << ctime(&_tm) // ctime appends newline already.
 			<< "$end"  << endl 
 			<< "$version" << endl
-			<< "\tVBS Value Change Dump (VCD)" << endl
+			<< VCDVERSION << endl
 			<< "$end" << endl
 			<< "$timescale" << endl
 			<< "\t1ns" << endl

@@ -12,8 +12,10 @@
 // vbs_api.cc
 
 #include <csetjmp> // longjmp()
+#include <cstdlib> // exit()
 #include <list>
 #include <sstream>
+#include <iostream>
 #include "common/hash.h"
 #include "common/error.h"
 #include "common/time_whl.h"
@@ -25,6 +27,7 @@
 #include "common/dumpinfo.h"
 #include "common/scp_tab.h"
 
+using std::endl;
 using std::list;
 using std::string;
 using std::stringstream;
@@ -276,16 +279,18 @@ vbs_pop_scope()
 	}
 
 void
-vbs_warn(int code, const char *state, const char *message)
+vbs_warn(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
+	extern const char *sim_errmsg(const char *, const char *, const char *, int, int, const char *);
 	extern jmp_buf vbs_sim_finish;
-	cout << endl << message << endl << endl << state << endl;
+	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str()) << st << endl;
 	longjmp(vbs_sim_finish, 1);
 	}
 
 void
-vbs_fatal(int code, const char *state, const char *message)
+vbs_fatal(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
-	cout << endl << message << endl << endl << state << endl;
-	exit(code);
+	extern const char *sim_errmsg(const char *, const char *, const char *, int, int, const char *);
+	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str()) << st << endl;
+	exit(c);
 	}

@@ -29,6 +29,7 @@ extern void vbs_sim_init(const char *);
 extern void vbs_sim_start(int, char **);
 extern long int vbs_sim_run(int);
 
+extern const char *sim_errmsg(const char *, const char *, const char *, int, int, const char *);
 extern void sim_perror(char *, char *, char *, int);
 extern void sim_set_state(int);
 extern void sim_set_dump(int);

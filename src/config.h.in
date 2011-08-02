@@ -9,6 +9,12 @@
 /* Extra packages support. */
 #undef HAVE_ZLIB_H
 
+/* Default VCD output filename. */
+#undef VCDFILEDFLT
+
+/* Version string used in VCD output file. */
+#undef VCDVERSION
+
 /* Preprocessor support (using this name). */
 #undef VERILOGVPP_PROG
 

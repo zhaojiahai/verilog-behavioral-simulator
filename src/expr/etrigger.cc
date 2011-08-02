@@ -27,6 +27,38 @@
 extern symbol_table symboltable;
 
 void
+get_base_size(const trigger_expr::str_type &fmt,
+		trigger_expr::num_type::base_type &base, unsigned long &size)
+	{
+	size_t j = 0;
+	number::nstr_type buf(fmt.length(), '\0');
+	for (size_t i = 0; i < fmt.length(); ++i)
+		{
+		// There should be no errors in <fmt>, so we will not
+		// do error checking...
+		if (fmt[i] >= '0' && fmt[i] <= '9')
+			buf[j++] = fmt[i];
+		else if (fmt[i] == 'h')
+			{ base = number::BASE16; break; }
+		else if (fmt[i] == 'd')
+			{ base = number::BASE10; break; }
+		else if (fmt[i] == 'o')
+			{ base = number::BASE8; break; }
+		else if (fmt[i] == 'b')
+			{ base = number::BASE2; break; }
+		// s for ascii, t/T for current time format.
+		else if (fmt[i] == 's')
+			{ base = number::BASESTR; break; }
+		else if (fmt[i] == 't' || fmt[i] == 'T')
+			{ if (j == 0) { buf[j++] = '2'; buf[j++] = '0'; } break; }
+		}
+	buf[j] = '\0';
+
+	// Convert to format.
+	size = atoi(buf.data());
+	}
+
+void
 display_output(const trigger_expr::str_type &s, const trigger_expr::num_type &n)
 	{
 	trigger_expr::num_type::base_type base = trigger_expr::num_type::BASE10;
