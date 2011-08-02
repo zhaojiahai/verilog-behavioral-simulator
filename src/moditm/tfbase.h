@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -20,6 +20,7 @@
 struct tfdecl_base;
 struct tfdecl_read
 	{
+	virtual ~tfdecl_read() {}
 	virtual tfdecl_base *operator()() const { return 0; }
 	};
 

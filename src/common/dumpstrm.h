@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2001,2011 George Varughese
+// Copyright (C) 2001,2011,2011 George Varughese
 //
 // With modifications from:
 // Jimen Ching <jimen.ching@gmail.com>
@@ -51,7 +51,7 @@ class dump_stream_nc : public dump_stream
 public:
 	dump_stream_nc()
 		{ compress(false); }
-	~dump_stream_nc()
+	virtual ~dump_stream_nc()
 		{}
 
 	bool open(const str_type &);
@@ -70,7 +70,7 @@ public:
 		: level(lvl)
 #endif
 		{ compress(true); }
-	~dump_stream_c()
+	virtual ~dump_stream_c()
 		{}
 
 	bool open(const str_type &);

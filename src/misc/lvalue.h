@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -76,16 +76,19 @@ lvalue::ostream_type &operator<<(lvalue::ostream_type &s, const lvalue &);
 struct lvalue_setup
 	{
 	typedef lvalue::size_type size_type;
+	virtual ~lvalue_setup() {}
 	virtual size_type operator()(lvalue *) const { return 0; }
 	};
 
 struct lvalue_trigger
 	{
+	virtual ~lvalue_trigger() {}
 	virtual void operator()(lvalue *) const {}
 	};
 
 struct lvalue_write
 	{
+	virtual ~lvalue_write() {}
 	virtual void operator()(const lvalue *) const {}
 	};
 

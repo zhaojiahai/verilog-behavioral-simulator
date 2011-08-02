@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -188,9 +188,9 @@ evaluate_expr::operator()(const binary_op_expr *p) const
 		case binary_op_expr::LOGIC_NXOR:
 			logic_xnor(*p->_result, left, right); break;
 		case binary_op_expr::LEFT_SHIFT:
-			binary_lshf(*p->_result, left, right); break;
+			binary_lshf(*p->_result, left, static_cast<unsigned long>(right)); break;
 		case binary_op_expr::RIGHT_SHIFT:
-			binary_rshf(*p->_result, left, right); break;
+			binary_rshf(*p->_result, left, static_cast<unsigned long>(right)); break;
 		}
 	return *p->_result;
 	}

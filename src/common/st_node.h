@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997, 2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -98,6 +98,8 @@ operator<<(st_node_base::ostream_type &s, const st_node_base &d)
 
 struct st_node_monitor
 	{
+	virtual ~st_node_monitor()
+		{}
 	virtual bool operator()(st_function *) const
 		{ return false; }
 	virtual bool operator()(st_net *) const
@@ -108,6 +110,8 @@ struct st_node_evaluate
 	{
 	typedef st_node_base::num_type num_type;
 
+	virtual ~st_node_evaluate()
+		{}
 	virtual const num_type &operator()(const st_function *) const
 		{ static num_type dummy(DC); return dummy; }
 	virtual const num_type &operator()(const st_net *) const
@@ -116,6 +120,7 @@ struct st_node_evaluate
 
 struct st_node_setup
 	{
+	virtual ~st_node_setup() {}
 	virtual void operator()(st_function *) const {}
 	virtual void operator()(st_instantiation *) const {}
 	virtual void operator()(st_module *) const {}
@@ -125,6 +130,7 @@ struct st_node_setup
 
 struct st_node_trigger
 	{
+	virtual ~st_node_trigger() {}
 	virtual bool operator()(st_task *) const { return true; }
 	};
 

@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002,2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -17,7 +17,6 @@
 #include "misc/evntexpr.h"
 #include "misc/dectrig.h"
 
-extern symbol_table symboltable;
 extern time_wheel<stmt_base> timewheel;
 extern event_queue<stmt_base> eventqueue;
 

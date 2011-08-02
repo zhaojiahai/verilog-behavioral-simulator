@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -19,24 +19,28 @@ struct select_base;
 
 struct select_monitor
 	{
+	virtual ~select_monitor() {}
 	virtual bool operator()(const bit_select *) const { return false; }
 	virtual bool operator()(const part_select *) const { return false; }
 	};
 
 struct select_setup
 	{
+	virtual ~select_setup() {}
 	virtual void operator()(bit_select *) const {}
 	virtual void operator()(part_select *) const {}
 	};
 
 struct select_write
 	{
+	virtual ~select_write() {}
 	virtual void operator()(const bit_select *) const {}
 	virtual void operator()(const part_select *) const {}
 	};
 
 struct select_read
 	{
+	virtual ~select_read() {}
 	virtual select_base *operator()() const { return 0; }
 	};
 

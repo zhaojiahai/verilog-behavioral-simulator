@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -59,6 +59,7 @@ operator<<(mitf_base::ostream_type &s, const mitf_base &d)
 
 struct mitf_setup
 	{
+	virtual ~mitf_setup() {}
 	virtual void operator()(initial *) const {}
 	virtual void operator()(always *) const {}
 	virtual void operator()(cont_assign *) const {}
@@ -80,6 +81,7 @@ struct mitf_setup
 
 struct mitf_write
 	{
+	virtual ~mitf_write() {}
 	virtual void operator()(const initial *) const {}
 	virtual void operator()(const always *) const {}
 	virtual void operator()(const cont_assign *) const {}

@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2000-2001 George Varughese
+// Copyright (C) 2000-2001,2011 George Varughese
 //
 // With modifications from:
 //  Jimen Ching <jimen.ching@gmail.com>
@@ -25,7 +25,7 @@ public:
 	typedef net_type::position_type position_type;
 
 	dump_ascii(dump_stream &);
-	~dump_ascii();
+	virtual ~dump_ascii();
 
 	void create_header();
 	void dump_values();

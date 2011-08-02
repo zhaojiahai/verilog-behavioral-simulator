@@ -62,16 +62,19 @@ private:
 
 struct event_expr_setup
 	{
+	virtual ~event_expr_setup() {}
 	virtual void operator()(event_expr *) const {}
 	};
 
 struct event_expr_trigger
 	{
+	virtual ~event_expr_trigger() {}
 	virtual void operator()(event_expr *) const {}
 	};
 
 struct event_expr_write
 	{
+	virtual ~event_expr_write() {}
 	virtual void operator()(const event_expr *) const {}
 	};
 

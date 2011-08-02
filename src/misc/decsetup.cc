@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -17,8 +17,6 @@
 #include "misc/delayid.h"
 #include "misc/evntexpr.h"
 #include "misc/decsetup.h"
-
-extern symbol_table symboltable;
 
 
 struct setup_event_expr : public event_expr_setup

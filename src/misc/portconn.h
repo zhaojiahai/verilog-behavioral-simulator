@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -44,11 +44,13 @@ operator<<(port_connection::ostream_type &, const port_connection &);
 
 struct port_conn_setup
 	{
+	virtual ~port_conn_setup() {}
 	virtual bool operator()(port_connection *) const { return false; }
 	};
 
 struct port_conn_write
 	{
+	virtual ~port_conn_write() {}
 	virtual void operator()(const port_connection *) const {}
 	};
 

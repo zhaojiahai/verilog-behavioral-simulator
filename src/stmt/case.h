@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -78,7 +78,7 @@ public:
 
 	case_stmt(case_type, expr_type *, citem_list *);
 	case_stmt(const case_stmt &);
-	~case_stmt();
+	virtual ~case_stmt();
 
 	case_stmt *copy_constructor() const;
 	ostream_type &display(ostream_type &) const;
@@ -95,16 +95,19 @@ private:
 
 struct case_item_setup
 	{
+	virtual ~case_item_setup() {}
 	virtual void operator()(case_item *) const {}
 	};
 
 struct case_item_trigger
 	{
+	virtual ~case_item_trigger() {}
 	virtual bool operator()(case_item *) const { return true; }
 	};
 
 struct case_item_write
 	{
+	virtual ~case_item_write() {}
 	virtual void operator()(const case_item *) const {}
 	};
 

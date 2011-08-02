@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -16,6 +16,7 @@
 struct module_item_base;
 struct module_item_read
 	{
+	virtual ~module_item_read() {}
 	virtual module_item_base *operator()() const { return 0; }
 	};
 

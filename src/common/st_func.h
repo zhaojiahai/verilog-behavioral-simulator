@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -47,7 +47,7 @@ public:
 	typedef list_type<event_ptr> monitor_list;
 
 	st_function(const str_type &, stmt_type *, decl_list * = 0);
-	~st_function();
+	virtual ~st_function();
 
 	st_function *get_function();
 

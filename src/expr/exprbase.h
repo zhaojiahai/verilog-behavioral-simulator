@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -102,6 +102,8 @@ display_binary_expr(expr_base::ostream_type &,
 
 struct expr_monitor
 	{
+	virtual ~expr_monitor()
+		{}
 	virtual bool operator()(const function_call *) const
 		{ return false; }
 	virtual bool operator()(const concatenation *) const
@@ -126,6 +128,8 @@ struct expr_evaluate
 	{
 	typedef expr_base::num_type num_type;
 
+	virtual ~expr_evaluate()
+		{}
 	virtual const num_type &operator()(const function_call *) const
 		{ static num_type dummy(DC); return dummy; }
 	virtual const num_type &operator()(const concatenation *) const
@@ -150,6 +154,7 @@ struct expr_setup
 	{
 	typedef expr_base::size_type size_type;
 
+	virtual ~expr_setup() {}
 	virtual size_type operator()(function_call *) const { return 0; }
 	virtual size_type operator()(concatenation *) const { return 0; }
 	virtual size_type operator()(number *) const { return 0; }
@@ -163,6 +168,7 @@ struct expr_setup
 
 struct expr_trigger
 	{
+	virtual ~expr_trigger() {}
 	virtual void operator()(function_call *) const {}
 	virtual void operator()(concatenation *) const {}
 	virtual void operator()(number *) const {}
@@ -176,6 +182,7 @@ struct expr_trigger
 
 struct expr_write
 	{
+	virtual ~expr_write() {}
 	virtual void operator()(const function_call *) const {}
 	virtual void operator()(const concatenation *) const {}
 	virtual void operator()(const number *) const {}
@@ -191,8 +198,8 @@ struct expr_read
 	{
 	typedef expr_base expr_type;
 
-	virtual expr_type *operator()(void) const
-		{ return 0; }
+	virtual ~expr_read() {}
+	virtual expr_type *operator()(void) const { return 0; }
 	};
 
 #endif // _EXPRBASE_H

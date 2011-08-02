@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -40,6 +40,7 @@ class loop_stmt;
 
 struct stmt_setup
 	{
+	virtual ~stmt_setup() {}
 	virtual void operator()(null_stmt *) const {}
 	virtual void operator()(seq_block_stmt *) const {}
 	virtual void operator()(systask_finish *) const {}
@@ -66,6 +67,7 @@ struct stmt_setup
 
 struct stmt_trigger
 	{
+	virtual ~stmt_trigger() {}
 	virtual bool operator()(null_stmt *) const { return true; }
 	virtual bool operator()(seq_block_stmt *) const { return true; }
 	virtual bool operator()(systask_finish *) const { return true; }
@@ -92,6 +94,7 @@ struct stmt_trigger
 
 struct stmt_write
 	{
+	virtual ~stmt_write() {}
 	virtual void operator()(const null_stmt *) const {}
 	virtual void operator()(const seq_block_stmt *) const {}
 	virtual void operator()(const task_enable_stmt *) const {}

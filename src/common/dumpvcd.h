@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2000-2001 George Varughese
+// Copyright (C) 2000-2001,2011 George Varughese
 //
 // With modifications from:
 //  Jimen Ching <jimen.ching@gmail.com>
@@ -25,7 +25,7 @@ public:
 	typedef std::map<net_type *, str_type, std::less<net_type*> > hashtable_type;
 
 	dump_vcd(dump_stream &);
-	~dump_vcd();
+	virtual ~dump_vcd();
 
 	void create_header();
 	void dump_values();

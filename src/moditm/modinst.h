@@ -66,7 +66,7 @@ public:
 	typedef list_type<mod_inst_ptr> mod_inst_list;
 
 	module_instantiation(const char *, mod_inst_list *, param_value_list * = 0);
-	~module_instantiation();
+	virtual ~module_instantiation();
 
 	ostream_type &display(ostream_type &) const;
 	const str_type &name() const;
@@ -82,11 +82,13 @@ private:
 
 struct module_instance_setup
 	{
+	virtual ~module_instance_setup() {}
 	virtual void operator()(module_instance *) const {}
 	};
 
 struct module_instance_write
 	{
+	virtual ~module_instance_write() {}
 	virtual void operator()(const module_instance *) const {}
 	};
 

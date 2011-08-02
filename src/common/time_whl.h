@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -72,6 +72,9 @@ struct time_wheel_handler
 	typedef time_wheel_node<T> node_type;
 	typedef typename node_type::time_type time_type;
 	typedef typename node_type::event_list_type event_list_type;
+
+	virtual ~time_wheel_handler()
+		{}
 
 	// User function to perform operations on our object.
 	virtual void operator()(time_type, event_list_type &) const

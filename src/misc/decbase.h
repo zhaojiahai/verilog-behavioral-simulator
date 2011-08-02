@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -58,6 +58,7 @@ operator<<(dec_base::ostream_type &s, const dec_base &d)
 
 struct dec_setup
 	{
+	virtual ~dec_setup() {}
 	virtual void operator()(delay_num *) const {}
 	virtual void operator()(delay_id *) const {}
 	virtual void operator()(ored_event_expr *) const {}
@@ -65,6 +66,7 @@ struct dec_setup
 
 struct dec_trigger
 	{
+	virtual ~dec_trigger() {}
 	virtual int operator()(delay_num *) const { return -2; }
 	virtual int operator()(delay_id *) const { return -2; }
 	virtual int operator()(ored_event_expr *) const { return -2; }
@@ -72,6 +74,7 @@ struct dec_trigger
 
 struct dec_write
 	{
+	virtual ~dec_write() {}
 	virtual void operator()(const delay_num *) const {}
 	virtual void operator()(const delay_id *) const {}
 	virtual void operator()(const ored_event_expr *) const {}

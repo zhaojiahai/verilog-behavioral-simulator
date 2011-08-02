@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -33,7 +33,7 @@ public:
 	typedef list_type<module_item_ptr> module_item_list;
 
 	st_module(const str_type &);
-	~st_module();
+	virtual ~st_module();
 
 	const bool is_top_level() const;
 	void is_top_level(bool);

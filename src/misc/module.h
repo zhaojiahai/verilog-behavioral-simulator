@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -64,16 +64,19 @@ module::ostream_type &operator<<(module::ostream_type &s, const module &);
 
 struct module_setup
 	{
+	virtual ~module_setup() {}
 	virtual void operator()(module *) const {}
 	};
 
 struct module_read
 	{
+	virtual ~module_read() {}
 	virtual module *operator()() const { return 0; }
 	};
 
 struct module_write
 	{
+	virtual ~module_write() {}
 	virtual void operator()(const module *) const {}
 	};
 
