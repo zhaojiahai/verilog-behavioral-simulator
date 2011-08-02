@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -10,6 +10,8 @@
 
 #include <string>
 #include "common/debug.h"
+
+using namespace std;
 
 class Obj
 	{

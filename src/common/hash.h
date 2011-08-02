@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -51,7 +51,7 @@ struct hash_value
 				hv._scope == _scope);
 		}
 
-	bool _test;
+	bool _test; // Make sure instantiation exists.
 	index_type _value;
 	scope_type _scope;
 	};

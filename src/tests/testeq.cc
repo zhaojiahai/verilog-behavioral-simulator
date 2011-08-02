@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -10,6 +10,8 @@
 
 #include <string>
 #include "common/event.h"
+
+using namespace std;
 
 class Obj
 	{
@@ -49,9 +51,9 @@ main()
 	Obj a("abc"), b("bcd");
 
 	event_base<Obj>::event_container *c1 = new
-		event_base<Obj>::event_container(&a);
+		event_base<Obj>::event_container(false, &a);
 	event_base<Obj>::event_container *c2 = new
-		event_base<Obj>::event_container(&b);
+		event_base<Obj>::event_container(false, &b);
 
 	Obj::expr_type::num_type num1;
 	Obj::expr_type::num_type num2;

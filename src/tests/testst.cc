@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -11,29 +11,19 @@
 #include "common/st_node.h"
 #include "common/sym_tab.h"
 
+using namespace std;
+
 symbol_table symboltable;
 
 class Obj : public st_node_base
 	{
 public:
 	Obj(const char *str, scope_type sc = -1)
-		: st_node_base("Obj", "testst"), _scope(sc), _name(str) {}
-
-	const string type_name() const
-		{ return "Obj"; }
-	const string name() const
-		{ return _name; }
-	const scope_type scope() const
-		{ return _scope; }
-	void scope(scope_type sc)
+		: st_node_base(str, "Obj")
 		{ _scope = sc; }
 
 	ostream &display(ostream &s) const
 		{ s << _name << '(' << _scope << ')'; return s; }
-
-private:
-	scope_type _scope;
-	string _name;
 	};
 
 void
@@ -52,7 +42,7 @@ void
 findSymbol(const char *name, hash_value::scope_type sc,
 		const char *_1st, const char *_2nd)
 	{
-	st_node_base::hash_type idx(hash(name, sc));
+	st_node_base::hash_type idx(hash(name, sc, false));
 	st_node_base *tmp = symboltable.get(idx);
 	if (tmp == 0)
 		cout << idx << ':' << name << " not found " << _1st << endl;
@@ -80,7 +70,7 @@ main(/*int argc, char *argv[]*/)
 	findSymbol("cde", 0, "(Not!)", "(Ok!)");
 	findSymbol("def", 0, "(Ok!)", "(Not!)");
 
-	hash_value idx(hash("abc123", 0));
+	hash_value idx(hash("abc123", 0, false));
 	cout << "idx = " << idx << endl;
 	rehash(idx, 3);
 	cout << "idx = " << idx << endl;

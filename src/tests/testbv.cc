@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -12,9 +12,7 @@
 #include <iostream>
 #include "common/bvector.h"
 
-using std::string;
-using std::cout;
-using std::endl;
+using namespace std;
 
 bit_vector Zero(LO);
 bit_vector One(HI);
@@ -75,8 +73,10 @@ test_plus(bit_vector &, bit_vector &, bit_vector &,
 	{
 	bit_vector test1(3,0), test2(4,0);
 
-	test1 = e + One;
-	test2 = e + e;
+	//test1 = e + One;
+	binary_add(test1, e, One);
+	//test2 = e + e;
+	binary_add(test2, e, e);
 	cout << "test1(e+1)=" << test1 << " (=1110)"
 		<< " test2(e+e)=" << test2 << " (=11010)"
 		<< endl;
@@ -88,8 +88,10 @@ test_minus(bit_vector &, bit_vector &, bit_vector &,
 	{
 	bit_vector test1(3,0), test2(4,0);
 
-	test1 = e - One;
-	test2 = e - e;
+	//test1 = e - One;
+	binary_sub(test1, e, One);
+	//test2 = e - e;
+	binary_sub(test2, e, e);
 	cout << "test1(e-1)=" << test1 << " (=1100)"
 		<< " test2(e-e)=" << test2 << " (=00000)"
 		<< endl;
@@ -99,17 +101,22 @@ void
 test_shift(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &e)
 	{
-	bit_vector test1(7,0), test2(3,0);
+	bit_vector test(7,0), test1(7,0), test2(3,0);
 
-	test1 = e;
-	test1 = test1 << 4UL;
-	test2 = e << 2UL;
+	test = e;
+	//test1 = test << 4UL;
+	binary_lshf(test1, test, 4UL);
+	//test2 = e << 2UL;
+	binary_lshf(test2, e, 2UL);
 	cout << "test1(=e<<4)=" << test1 << " (=11010000)"
 		<< " test2(e<<2)=" << test2 << " (=0100)"
 		<< endl;
 
-	test1 = test1 >> 4UL;
-	test2 = e >> 2UL;
+	test = test1;
+	//test1 = test >> 4UL;
+	binary_rshf(test1, test, 4UL);
+	//test2 = e >> 2UL;
+	binary_rshf(test2, e, 2UL);
 	cout << "test1(=e>>4)=" << test1 << " (=00001101)"
 		<< " test2(e>>2)=" << test2 << " (=0011)"
 		<< endl;
@@ -121,11 +128,14 @@ test_logic(bit_vector &, bit_vector &, bit_vector &,
 	{
 	bit_vector test1(3,0), test2(string("10110"));
 
-	test1 = test2 | e;
+	//test1 = test2 | e;
+	logic_or(test1, test2, e);
 	cout << "test1(test2|e)=" << test1 << " (=1111)" << endl;
-	test1 = test2 & e;
+	//test1 = test2 & e;
+	logic_and(test1, test2, e);
 	cout << "test1(test2&e)=" << test1 << " (=0100)" << endl;
-	test1 = test2 ^ e;
+	//test1 = test2 ^ e;
+	logic_xor(test1, test2, e);
 	cout << "test1(test2^e)=" << test1 << " (=1011)" << endl;
 	}
 
@@ -174,10 +184,11 @@ void
 test_div(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &)
 	{
-	bit_vector test1(1586UL), test2(25UL), test3(63UL);
-	test1 = test1 / test2;
-	cout << "test1=" << test1;
-	if (test1 == test3)
+	bit_vector test(1586UL), test1(1586UL), test2(25UL), test3(63UL);
+	//test = test1 / test2;
+	binary_div(test, test1, test2);
+	cout << "test=" << test;
+	if (test == test3)
 		cout << " Ok!" << endl;
 	else
 		cout << " Not!" << endl;
@@ -187,10 +198,11 @@ void
 test_mod(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &)
 	{
-	bit_vector test1(1586UL), test2(25UL), test3(11UL);
-	test1 = test1 % test2;
-	cout << "test1=" << test1;
-	if (test1 == test3)
+	bit_vector test(1586UL), test1(1586UL), test2(25UL), test3(11UL);
+	//test = test1 % test2;
+	binary_mod(test, test1, test2);
+	cout << "test=" << test;
+	if (test == test3)
 		cout << " Ok!" << endl;
 	else
 		cout << " Not!" << endl;
@@ -244,9 +256,11 @@ main()
 	test_div(a,b,c,d,e);
 	test_mod(a,b,c,d,e);
 
-	d = ~d;
+	//d = ~d;
+	unary_inv(d, d);
 	cout << "d inverted = " << d << " (=xx01)" << endl;
-	e = e + d;
+	//e = e + d;
+	binary_add(e, e, d);
 	cout << "e(e+d)=" << e << " (=xx10)" << endl;
 	printout(a,b,c,d,e);
 

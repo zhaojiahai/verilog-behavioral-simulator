@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -25,7 +25,7 @@ public:
 	template <typename T> struct list_type : public std::list<T> { };
 	typedef ostream ostream_type;
 
-	Obj(char *);
+	Obj(const char *);
 	ostream_type &display(ostream_type&) const;
 	bool sim_trigger(Obj *);
 
@@ -36,8 +36,8 @@ private:
 template<class T>
 class twhandler : public time_wheel_handler<T>
 	{
-	typedef time_wheel_handler<T>::time_type time_type;
-	typedef time_wheel_handler<T>::event_list_type event_list_type;
+	typedef typename time_wheel_handler<T>::time_type time_type;
+	typedef typename time_wheel_handler<T>::event_list_type event_list_type;
 	typedef typename event_list_type::iterator iterator;
 
 	void operator()(time_type t, event_list_type &lst) const
@@ -69,7 +69,7 @@ main()
 	}
 
 
-Obj::Obj(char *s)
+Obj::Obj(const char *s)
 	: str(s) {}
 
 Obj::ostream_type &
