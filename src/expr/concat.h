@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1997,2001-2002 Jimen Ching
+// Copyright (C) 1997,2001-2002,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -42,7 +42,7 @@ public:
 
 	concatenation(expr_list *, expr_type * = 0);
 	concatenation(const concatenation &);
-	~concatenation();
+	virtual ~concatenation();
 
 	concatenation *copy_constructor() const;
 	ostream_type &display(ostream_type &) const;

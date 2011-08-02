@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -95,7 +95,7 @@ public:
 
 	ored_event_expr(event_expr_list *);
 	ored_event_expr(const ored_event_expr &);
-	~ored_event_expr();
+	virtual ~ored_event_expr();
 
 	ored_event_expr *copy_constructor() const;
 	bool is_event_control(void) const

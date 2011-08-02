@@ -9,8 +9,11 @@
 /* Extra packages support. */
 #undef HAVE_ZLIB_H
 
+/* Preprocessor support (using this name). */
+#undef VERILOGVPP_PROG
+
 /* Directory to search for the preprocessor. */
-#undef VERILOGVPP_PROGRAM_DIR
+#undef VERILOGVPP_DIR
 
 /* Preprocessor execution support. */
 #undef HAVE_FORK

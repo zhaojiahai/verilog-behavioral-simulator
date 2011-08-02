@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1996,2001,2002 Jimen Ching
+// Copyright (C) 1996,2001,2002,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -51,6 +51,8 @@ struct write_stmt : public stmt_write
 
 	write_stmt(ostream_type &o)
 		: _out(o)
+		{}
+	virtual ~write_stmt()
 		{}
 
 	void operator()(const null_stmt *) const;

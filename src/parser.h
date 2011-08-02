@@ -1,6 +1,6 @@
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -19,8 +19,11 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
+#if defined(HAVE_CONFIG_H)
 #include "config.h"
+#endif
+
+#include <stdio.h>
 
 #ifndef _POSIX_SOURCE
 extern int fileno(FILE *); /* Needed by lexer. */

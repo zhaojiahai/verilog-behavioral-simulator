@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1997,2001-2003 Jimen Ching
+// Copyright (C) 1997,2001-2003,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -21,7 +21,7 @@ class param_decl : public module_item_base, public tfdecl_base
 
 public:
 	param_decl(decl_assign_list *, range_type * = 0);
-	~param_decl();
+	virtual ~param_decl();
 
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;

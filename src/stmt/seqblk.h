@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -29,7 +29,7 @@ public:
 
 	seq_block_stmt(stmt_list *);
 	seq_block_stmt(const seq_block_stmt &);
-	~seq_block_stmt();
+	virtual ~seq_block_stmt();
 
 	seq_block_stmt *get_seq_block();
 	seq_block_stmt *copy_constructor() const;

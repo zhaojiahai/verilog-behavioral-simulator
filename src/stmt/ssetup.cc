@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -61,6 +61,8 @@ struct setup_case_item : public case_item_setup
 	setup_case_item(scopelist_type &s, stmt_type *st)
 		: _scope(s)
 		{ _parent = st; }
+	virtual ~setup_case_item()
+		{}
 
 	void operator()(case_item *) const;
 

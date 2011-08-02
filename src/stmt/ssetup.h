@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -38,6 +38,8 @@ struct setup_stmt : public stmt_setup
 	setup_stmt(scopelist_type &s, stmt_type *st)
 		: _scope(s)
 		{ _parent = st; }
+	virtual ~setup_stmt()
+		{}
 
 	// Setup pass setup utilities.
 	static void second_pass();

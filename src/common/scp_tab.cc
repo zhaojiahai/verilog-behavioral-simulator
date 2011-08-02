@@ -1,8 +1,8 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2000-2001 George Varughese
+// Copyright (C) 2000-2001,2011 George Varughese, Jimen Ching
 //
 // With modifications from:
-// Jimen Ching <jching@flex.com>  
+// Jimen Ching <jimen.ching@gmail.com>
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -49,10 +49,11 @@ scope_table::is_net()
 char *
 scope_table::find(int i)
 	{
+	static char null_string[] = {0};
 	hashtable_type::iterator itp = _hashtab.find(i);
 	if (itp != _hashtab.end())
 		return vbs_strdup((*itp).second.c_str());
-	return "";
+	return null_string;
 	}
 
 int    

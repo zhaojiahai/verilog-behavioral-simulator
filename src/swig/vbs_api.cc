@@ -1,8 +1,8 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2000,2001,2002 George Varughese
+// Copyright (C) 2000,2001,2002,2011 George Varughese, Jimen Ching
 //
 // With modifications from:
-//  Jimen Ching <jching@flex.com>
+//  Jimen Ching <jimen.ching@gmail.com>
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -39,7 +39,7 @@ extern "C" void vbs_sim_setup(void);
 extern "C" long int vbs_sim_run(int);
 extern "C" bool vbs_sim_step();
 extern "C" int read_verilog_file(char *);
-extern "C" void vbs_sim_init(char *);
+extern "C" void vbs_sim_init(const char *);
 extern "C" char *vbs_strdup(const char *);
 static int current_scope = 1;
 static int last_scope = 1;

@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -35,7 +35,7 @@ public:
 
 	range_id(const char *, select_type *r = 0);
 	range_id(const range_id &);
-	~range_id();
+	virtual ~range_id();
 
 	const str_type &name() const
 		{ return _name; }

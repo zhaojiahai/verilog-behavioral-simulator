@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -8,7 +8,6 @@
 //
 // sim.cc
 
-#include <unistd.h>
 #include <cstdio>
 #include <ctime>
 #include <cstdlib> // getenv
@@ -81,9 +80,9 @@
 #define VERILOGOBJ_EXT "vo"		// Module object extension.
 #endif // VERILOGOBJ_EXT
 
-#ifndef VERILOGVPP_PROG
-#define VERILOGVPP_PROG "vpp"	// Preprocessor program name.
-#endif // VERILOGVPP_PROG
+#ifndef VERILOGTMP_EXT
+#define VERILOGTMP_EXT "vt"		// Temporary file extension.
+#endif // VERILOGTMP_EXT
 
 using std::string;
 using std::list;
@@ -126,7 +125,7 @@ void trigger_postproc(stmt_base *st)
 		if (sqblk != 0 && sqblk->_stk.size() > 0)
 			{
 			// End of a nesting block, re-execute statement.  Must advance
-			// current staement pointer so we move forward.
+			// current statement pointer so we move forward.
 			sqblk = sqblk->_stk.top();
 			loop_stmt *lp = sqblk->_curstmt->get()->get_loop();
 			task_enable_stmt *tsk = sqblk->_curstmt->get()->get_task_enable();
@@ -265,17 +264,13 @@ find_top_level(void)
 void
 tmpfile_get(const string &bn, string &new_file)
 	{
-	char ext[16];
-	sprintf(ext, ".%d", getpid());
-	new_file = VERILOGTMP_DIR + bn + ext;
+	new_file = VERILOGTMP_DIR + bn + "." + VERILOGTMP_EXT;
 	}
 
 void
 tmpfile_remove(const string &bn)
 	{
-	char ext[16];
-	sprintf(ext, ".%d", getpid());
-	string tmp_file = VERILOGTMP_DIR + bn + ext;
+	string tmp_file = VERILOGTMP_DIR + bn + "." + VERILOGTMP_EXT;
 	if (remove(tmp_file.c_str()) != 0)
 		{
 		vbs_err.set_data(vbs_error::SE_FILEDELETE, -1);
@@ -284,11 +279,9 @@ tmpfile_remove(const string &bn)
 	}
 
 void
-tmpfile_save(const string &bn, char *new_ext)
+tmpfile_save(const string &bn, const char *new_ext)
 	{
-	char ext[16];
-	sprintf(ext, ".%d", getpid());
-	string orig_file = VERILOGTMP_DIR + bn + ext;
+	string orig_file = VERILOGTMP_DIR + bn + "." + VERILOGTMP_EXT;
 	string new_file = VERILOGLCL_DIR + bn + "." + new_ext;
 	if (rename(orig_file.c_str(), new_file.c_str()) != 0)
 		{
@@ -335,7 +328,7 @@ write_module_to_file(p_module m)
 	// For debugging purposes, use non-binary mode.
 	ofstream out(fn.c_str()/*, ios::bin*/);
 	mod->write(write_module(out)); // Start writing data.
-	delete mod; // Free module before quiting.
+	delete mod; // Free module before quitting.
 	}
 
 void
@@ -371,6 +364,8 @@ store_module_to_symbol_table(p_module m)
 	delete mod;
 	}
 
+#if defined(VERILOGVPP_PROG)
+
 bool
 preprocessor_find(string &pn)
 	{
@@ -383,7 +378,7 @@ preprocessor_find(string &pn)
 		string("./")
 		};
 
-	// First look in the directory where vbs was stored.
+	// First look in the directory where this binary was stored.
 	pn = vbs_err.get_program_name();
 	string::size_type sep = pn.find_last_of(SEPARATOR_CHAR);
 	if (sep != (string::size_type) -1 && sep > 0)
@@ -421,6 +416,8 @@ preprocessor_external(FILE *out, char *vf, const string &pn)
 	return sim_program_exec(pn.c_str(), vf, out);
 	}
 
+#endif // VERILOGVPP_PROG
+
 bool
 preprocessor_simple(FILE *out, char *vf)
 	{
@@ -452,15 +449,17 @@ sim_preprocess(char *vf, const string &bn)
 	if (tmp_fp == 0)
 		return 0;
 
+#if defined(VERILOGVPP_PROG)
 	if (preprocessor_find(pn))
 		status = preprocessor_external(tmp_fp, vf, pn);
 	else
+#endif // VERILOGVPP_PROG
 		status = preprocessor_simple(tmp_fp, vf);
 
 	fclose(tmp_fp);
 	if (status == false)
 		{
-		tmpfile_remove(bn); // Remove tmp file before quiting.
+		tmpfile_remove(bn); // Remove tmp file before quitting.
 		return 0;
 		}
 	return fopen(tmp_fn.c_str(), "r"); // Reopen file for reading.
@@ -527,7 +526,7 @@ read_verilog_file(char *vf)
 		}
 	else
 		{
-		// Preprocess the file.  It might not need any preprocessing
+		// Pre-process the file.  It might not need any pre-processing
 		// at all, but we do it anyway.  The returned file pointer is
 		// the temporary file.  sim_preprocess should handle the fp's
 		// correctly, i.e. close one before returning the other.
@@ -544,7 +543,7 @@ read_verilog_file(char *vf)
 		// What to do next?
 		if (vbs_err.test_state(vbs_error::SS_PREPROCESS_ONLY))
 			{
-			// Preprocess only.  Save file and goto next file.
+			// Pre-process only.  Save file and goto next file.
 			fclose(fp);
 			tmpfile_save(basename, VERILOGPPF_EXT);
 			return 0;
@@ -565,7 +564,7 @@ read_verilog_file(char *vf)
 	}
 
 void
-vbs_sim_init(char *pn)
+vbs_sim_init(const char *pn)
 	{
 	// Setup variables for error reporting.
 	vbs_err.set_program_name(pn);
@@ -723,7 +722,7 @@ vbs_sim_start(int amt, char **lst)
 
 	// Our own exception handler...
 	if (setjmp(vbs_sim_finish) != 0)
-		return; // $finish enabled or an error occured.
+		return; // $finish enabled or an error occurred.
 
 	// Setup for simulation.
 	vbs_err.clear_state(vbs_error::SS_STATE_MASK);

@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -28,7 +28,7 @@ public:
 	typedef list_type<decl_ptr> decl_list;
 
 	task(const char *, stmt_type *, decl_list *);
-	~task();
+	virtual ~task();
 
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;

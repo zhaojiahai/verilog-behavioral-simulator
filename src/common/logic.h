@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1996-1997,2001,2002 Jimen Ching
+// Copyright (C) 1996-1997,2001,2002,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -43,6 +43,8 @@ public:
 	operator bool() const
 		{ return (_state == HI) ? true : false; }
 	operator int() const
+		{ return _state; }
+	operator long int() const
 		{ return _state; }
 	operator char() const
 		{
@@ -358,15 +360,15 @@ operator>=(const logic l, const logic r)
 
 inline logic
 operator!(const logic l)
-	{ return logic_INV[int (l)]; }
+	{ return logic_INV[l]; }
 
 inline logic
 operator~(const logic l)
-	{ return logic_INV[int (l)]; }
+	{ return logic_INV[l]; }
 
 inline logic::edge_type
 edge_detect(const logic f, const logic t)
-	{ return logic_DETECT[int (f)][int (t)]; }
+	{ return logic_DETECT[f][t]; }
 
 inline logic
 reduce_and(const logic c, const logic n)

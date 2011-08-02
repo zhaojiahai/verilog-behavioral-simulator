@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -91,7 +91,11 @@ p_create_qouted_string(char *str)
 			{
 			if (str[i+1] >= '0' && str[i+1] <= '9')
 				{
-				yyerror(" octal string constant ");
+				static char cs[] = {' ','o','c','t','a','l',
+									' ','s','t','r','i','n','g',
+									' ','c','o','n','s','t','a','n','t',
+									' '};
+				yyerror(cs);
 				break;
 				}
 			}

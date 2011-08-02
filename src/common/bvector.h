@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -27,6 +27,7 @@
 #ifndef _BVECTOR_H
 #define _BVECTOR_H
 
+#include <cstring>
 #include <string>
 #include <utility>
 #include <iostream>
@@ -548,7 +549,9 @@ bit_vector::operator=(const bit_vector &bv)
 	// with zeros.  In the special case that we are invalid, then copy
 	// everything.
 	if (bv._size == 0)
-		; // Has no effect.
+		{
+		// Has no effect.
+		}
 	else if (_size == 0)
 		{
 		// If we were nothing before, copy everything over now.
@@ -586,7 +589,9 @@ bit_vector::operator=(const sub_bit_vector &sbv)
 	{
 	// Same as above.
 	if (sbv._size == 0)
-		; // Has no effect.
+		{
+		// Has no effect.
+		}
 	else if (_size == 0)
 		{
 		_msb_lower = sbv._BV._msb_lower;
@@ -628,7 +633,9 @@ bit_vector::operator=(const const_sub_bit_vector &sbv)
 	{
 	// Same as above.
 	if (sbv._size == 0)
-		; // Has no effect.
+		{
+		// Has no effect.
+		}
 	else if (_size == 0)
 		{
 		_msb_lower = sbv._BV._msb_lower;

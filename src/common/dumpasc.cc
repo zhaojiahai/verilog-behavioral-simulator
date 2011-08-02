@@ -1,8 +1,8 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2000-2001 George Varughese
+// Copyright (C) 2000-2001,2011 George Varughese
 //
 // With modifications from:
-// Jimen Ching <jching@flex.com>
+// Jimen Ching <jimen.ching@gmail.com>
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -23,10 +23,9 @@
 #include "expr/eeval.h"
 
 //
-// FIXME:  needs complate rewrite for $dump setup...
+// FIXME:  needs complete rewrite for $dump setup...
 //
 
-extern dump_info dumpinfo;
 extern scope_table scopetable;
 
 dump_ascii::dump_ascii(dump_stream &d)

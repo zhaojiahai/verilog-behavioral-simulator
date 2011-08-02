@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -26,7 +26,7 @@ public:
 
 	part_select(expr_type *, expr_type *);
 	part_select(const part_select &);
-	~part_select();
+	virtual ~part_select();
 
 	select_size_type get_data(position_type &, position_type &) const;
 	part_select *copy_constructor() const;

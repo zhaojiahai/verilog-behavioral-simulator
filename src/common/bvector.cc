@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -566,12 +566,16 @@ bit_vector::get_bits_as_int(position_type &idx, amount_type numbits) const
 		{
 		case 4:
 			ret += BITS2INT[3][_bits[idx+3]];
+			// no break
 		case 3:
 			ret += BITS2INT[2][_bits[idx+2]];
+			// no break
 		case 2:
 			ret += BITS2INT[1][_bits[idx+1]];
+			// no break
 		case 1:
 			ret += BITS2INT[0][_bits[idx+0]];
+			// no break
 		}
 	idx += remaining;
 	return ret;
@@ -597,11 +601,20 @@ bit_vector::assign_bits(position_type &idx,
 
 	switch (remaining)
 		{
-		case 4: _bits[idx+3] = D;
-		case 3: _bits[idx+2] = C;
-		case 2: _bits[idx+1] = B;
-		case 1: _bits[idx+0] = A; break;
-		default: return false;
+		case 4:
+			_bits[idx+3] = D;
+			// no break
+		case 3:
+			_bits[idx+2] = C;
+			// no break
+		case 2:
+			_bits[idx+1] = B;
+			// no break
+		case 1:
+			_bits[idx+0] = A;
+			break;
+		default:
+			return false;
 		}
 	idx += remaining;
 	return true;

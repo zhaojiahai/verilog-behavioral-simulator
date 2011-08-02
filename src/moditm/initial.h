@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -23,7 +23,7 @@ public:
 	typedef stmt_base stmt_type;
 
 	initial(stmt_type *);
-	~initial();
+	virtual ~initial();
 
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;

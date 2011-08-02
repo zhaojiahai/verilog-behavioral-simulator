@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -147,7 +147,7 @@ check_format(const vbs_error::str_type &fmt)
 	}
 
 void
-entry_iovars(st_net::io_list &localvars, st_net::arg_list &arg)
+entry_iovars(std::list<hash_value> &localvars, std::list< basic_ptr<expr_base> > &arg)
 	{
 	// Go through the list and initialize all input variables.
 	st_net::io_list::iterator idx(localvars.begin());
@@ -167,7 +167,7 @@ entry_iovars(st_net::io_list &localvars, st_net::arg_list &arg)
 	}
 
 void
-exit_iovars(st_net::io_list &localvars, st_net::arg_list &arg)
+exit_iovars(std::list<hash_value> &localvars, std::list< basic_ptr<expr_base> > &arg)
 	{
 	// Go through the list and set all output variables.
 	st_net::io_list::iterator idx(localvars.begin());

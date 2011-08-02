@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -33,7 +33,7 @@ public:
 
 	assignment_stmt(lvalue_type *, expr_type *, bool nb, dec_type * = 0);
 	assignment_stmt(const assignment_stmt &);
-	~assignment_stmt();
+	virtual ~assignment_stmt();
 
 	assignment_stmt *copy_constructor() const;
 	ostream_type &display(ostream_type &) const;

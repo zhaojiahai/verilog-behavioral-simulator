@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -246,7 +246,13 @@ p_create_include_delay_or_event_control
 		}
 
 	if (err != false)
-		yyerror("delay or event control");
+		{
+		static char cs[] = {'d','e','l','a','y',' ',
+							'o','r',' ',
+							'e','v','e','n','t',' ',
+							'c','o','n','t','r','o','l'};
+		yyerror(cs);
+		}
 
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  added delay or event control to statement.\n");

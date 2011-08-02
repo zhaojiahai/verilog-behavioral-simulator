@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1996-1997,2001,2002 Jimen Ching
+// Copyright (C) 1996-1997,2001,2002,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -37,7 +37,7 @@ binary_op_expr::copy_constructor() const
 binary_op_expr::ostream_type &
 binary_op_expr::display(ostream_type &s) const
 	{
-	char *op = ".";
+	const char *op = ".";
 	switch (_operator)
 		{
 		case ADD: op = "+"; break;

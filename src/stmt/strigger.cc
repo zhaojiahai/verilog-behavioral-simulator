@@ -1,8 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
-//
-// With modifications from:
-//  Jimen Ching <jching@flex.com> 
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -112,6 +109,9 @@ trigger_stmt::operator()(systask_finish *) const
 
 	extern jmp_buf vbs_sim_finish;
 	longjmp(vbs_sim_finish, 1);
+
+	// Unreachable code...
+	return false;
 	}
 
 void
@@ -466,7 +466,7 @@ trigger_stmt::operator()(seq_block_stmt *p) const
 		DEBUG_OUTPUT("DEBUG_USERX:  Adding list...\n");
 		DEBUG_FOUTPUT(ptrprintlist<seq_block_stmt::stmt_list>(p->_stmt));
 		DEBUG_OUTPUT("\n");
-		// Set currrent statement to be used later.  This works
+		// Set current statement to be used later.  This works
 		// because <_parent> is guaranteed to be a <seqblk>.
 		p->_curstmt = p->_stmt->begin();
 		sqblk->_stk.push(p);
@@ -526,6 +526,9 @@ trigger_stmt::operator()(seq_block_stmt *p) const
 			}
 		++(nesting->_curstmt); // Setup for next round.
 		}
+
+	// Unreachable code...
+	return false;
 	}
 
 bool

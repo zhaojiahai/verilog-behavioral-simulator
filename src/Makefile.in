@@ -1,5 +1,5 @@
 # Verilog Behavioral Simulator
-# Copyright (C) 1996-2001 Jimen Ching
+# Copyright (C) 1996-2001,2011 Jimen Ching
 #
 # This file is part of the Verilog Behavioral Simulator package.
 # See the file COPYRIGHT for copyright and disclaimer information.
@@ -14,6 +14,9 @@
 SHELL = /bin/sh
 
 srcdir = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
 
 # Select your compiler.
 CC = @CC@
@@ -36,10 +39,10 @@ PERLLIBS = @PERLLIBS@
 INSTALL = @INSTALL@
 COMPRESS = @COMPRESS@
 
-# Version numbering.
-MAJOR = @MAJOR@
-MINOR = @MINOR@
-PATCHLEVEL = @PATCHLEVEL@
+# Extra packages.
+SWIG = @SWIG@
+SRCS_TCL = @SRCS_TCL@
+SRCS_PERL = @SRCS_PERL@
 
 #
 # NO NEED TO MODIFY BELOW THIS LINE!!!
@@ -53,17 +56,8 @@ LFLAGS :=
 YFLAGS := -d
 LIBS := $(LIBS)
 
-# Extra packages.
-SWIG = @SWIG@
-SRCS_TCL = @SRCS_TCL@
-SRCS_PERL = @SRCS_PERL@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-bindir = @bindir@
-
 # Generated files
-SRCSP = vbs_yacc.c vbs_lex.c
+SRCSP = vbs_lex.c vbs_yacc.c
 
 # C files
 SRCSC = parser.c vpi_user.c
@@ -243,6 +237,7 @@ endif
 ifneq ($(SRCS_TCL),)
 	@echo "     libvbs.so ....... compile library for TCL scripting"
 endif
+	@echo "     libvbs.a ........ compile VBS static library only"
 	@echo "     test-bv ......... test bit_vector class"
 	@echo "     test-db ......... test debug class"
 	@echo "     test-ptr ........ test pointer type class"
@@ -274,20 +269,17 @@ vbs-guile:
 	@echo "Guile scripting support is not available."
 endif
 
-vbs.so: version.h $(OBJS_PERL) $(OBJS)
+vbs.so: $(OBJS_PERL) $(OBJS)
 	$(CXX) -shared $(LDFLAGS) -o $@ $(OBJS_PERL) $(OBJS) $(LIBS) $(PERLLIBS)
 
-libvbs.so: version.h $(OBJS_TCL) $(OBJS)
+libvbs.so: $(OBJS_TCL) $(OBJS)
 	$(CXX) -shared $(LDFLAGS) -o $@ $(OBJS_TCL) $(OBJS) $(LIBS)
 
-libvbs.a: version.h $(OBJS)
+libvbs.a: $(OBJS)
 	ar rc $@ $(OBJS)
 
 Makefile: $(srcdir)/Makefile.in
 	./config.status
-
-version.h:
-	echo "#define VERSION" \"$(MAJOR).$(MINOR).$(PATCHLEVEL)\" > version.h
 
 vbs_lex.c: $(srcdir)/vbs.l
 	$(LEX) $(LFLAGS) -o$@ $<
@@ -297,9 +289,10 @@ vbs_yacc.c: $(srcdir)/vbs.y
 	$(YACC) $(YFLAGS) -o $@ $<
 
 maintainer-clean: distclean
+	rm -rf *.cache
 	rm -f *.i
-	rm -f config.cache config.log config.status
-	rm -f config.h Makefile sstream
+	rm -f config.h config.log config.status
+	rm -f Makefile sstream
 
 distclean: clean clean-repo
 	rm -f *.d
@@ -307,7 +300,6 @@ distclean: clean clean-repo
 	rm -f vbs.pm
 	rm -f vbs_yacc.c vbs_yacc.h
 	rm -f vbs_lex.c
-	rm -f version.h
 
 clean:
 	rm -f *.o
@@ -490,12 +482,12 @@ vbs_perl.o: vbs_perl.cc
 	$(CXX) $(PERLDEFS) -c $<
 
 # Grab generated dependencies.
--include $(SRCSP:.c=.d)
--include $(SRCSC:.c=.d)
--include $(SRCS1:.cc=.d)
--include $(SRCS2:.cc=.d)
--include $(SRCS3:.cc=.d)
--include $(SRCS4:.cc=.d)
--include $(SRCS5:.cc=.d)
 -include $(SRCS6:.cc=.d)
+-include $(SRCS5:.cc=.d)
+-include $(SRCS4:.cc=.d)
+-include $(SRCS3:.cc=.d)
+-include $(SRCS2:.cc=.d)
+-include $(SRCS1:.cc=.d)
+-include $(SRCSC:.c=.d)
+-include $(SRCSP:.c=.d)
 -include $(SWIG_SRCS:.cc=.d)

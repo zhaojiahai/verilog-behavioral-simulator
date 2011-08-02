@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -48,14 +48,14 @@ public:
 	typedef stmt_base::expr_type expr_type;
 	typedef basic_ptr<expr_type> arg_type;
 	typedef list_type<arg_type> arg_list;
-	friend void entry_iovars(io_list &, arg_list &);
-	friend void exit_iovars(io_list &, arg_list &);
+	friend void entry_iovars(std::list<hash_value> &, std::list< basic_ptr<expr_base> > &);
+	friend void exit_iovars(std::list<hash_value> &, std::list< basic_ptr<expr_base> > &);
 
 	enum net_type { PORT, WIRE, REGISTER, INTEGER, MEMORY, PARAMETER };
 	enum iodirection_type { UNDEF, IN, OUT, INOUT };
 
 	st_net(const str_type &, net_type = PORT, iodirection_type = UNDEF);
-	~st_net();
+	virtual ~st_net();
 
 	st_net *get_net();
 

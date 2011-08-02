@@ -14,14 +14,6 @@ AC_CONFIG_HEADER(config.h)
 #
 #############################################################################
 
-MAJOR=1
-MINOR=4
-PATCHLEVEL=0
-
-AC_SUBST(MAJOR)
-AC_SUBST(MINOR)
-AC_SUBST(PATCHLEVEL)
-
 dnl **** Command-line arguments ****
 
 AC_ARG_ENABLE(debug,
@@ -32,13 +24,32 @@ AC_ARG_WITH(template_depth,
 	[  --with-template_depth   Template depth (--with-template_depth=n)],
 	[template_depth="$withval"])
 
+AC_ARG_WITH(vppprog,
+	[  --with-vppprog          Compile without preprocessor support (default is "vpp")],
+	[vppprog="$withval"],[vppprog="vpp"])
+
 AC_ARG_WITH(vppdir,
 	[  --with-vppdir           Preproccesor directory (--with-vppdir=dir)],
 	[vppdir="$withval"])
 
+if test "$vppprog" = no
+then
+	vppprog=
+else
+	if test "$vppprog" = yes
+	then
+		vppprog="vpp"
+	fi
+fi
+
+if test -n "$vppprog"
+then
+	AC_DEFINE_UNQUOTED(VERILOGVPP_PROG, "$vppprog")
+fi
+
 if test -n "$vppdir"
 then
-	AC_DEFINE_UNQUOTED(VERILOGVPP_PROGRAM_DIR, "$vppdir")
+	AC_DEFINE_UNQUOTED(VERILOGVPP_DIR, "$vppdir")
 fi
 
 dnl **** System verification ****
@@ -339,6 +350,7 @@ if test -n "$SRCS_TCL"
 then
 	echo "    'make libvbs.so' ... Library for TCL scripting"
 fi
+	echo "    'make libvbs.a' .... Compile VBS static library only"
 echo
 
 

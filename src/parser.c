@@ -1,6 +1,6 @@
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2000-2002 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2000-2002,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -36,6 +36,8 @@ vbs_strdup(const char *str)
 	strcpy(p, str);
 	return p;
 	}
+
+#if defined(VERILOGVPP_PROG)
 
 /*
  * Functions that need the POSIX interface.  Placed in this file because
@@ -102,3 +104,5 @@ sim_program_exec(const char *pn, char *vf, FILE *out)
 		return 0;
 	return 1;
 	}
+
+#endif // VERILOGVPP_PROG

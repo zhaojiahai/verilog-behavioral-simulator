@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 2001 George Varughese
+// Copyright (C) 2001,2011 George Varughese
 //
 // With modifications from:
 // Jimen Ching <jching@flex.com>
@@ -14,7 +14,9 @@
 #ifndef __DUMP_STREAM_H
 #define __DUMP_STREAM_H
 
+#if defined(HAVE_CONFIG_H)
 #include "config.h"
+#endif
 
 #if defined (HAVE_ZLIB_H)
 #include <zlib.h>

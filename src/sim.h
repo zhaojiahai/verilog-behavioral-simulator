@@ -1,6 +1,6 @@
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -25,7 +25,7 @@ extern "C" {
 
 #include "p_types.h"
 
-extern void vbs_sim_init(char *);
+extern void vbs_sim_init(const char *);
 extern void vbs_sim_start(int, char **);
 extern long int vbs_sim_run(int);
 
