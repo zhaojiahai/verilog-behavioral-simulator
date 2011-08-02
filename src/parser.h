@@ -25,10 +25,6 @@ extern "C" {
 
 #include <stdio.h>
 
-#ifndef _POSIX_SOURCE
-extern int fileno(FILE *); /* Needed by lexer. */
-#endif /* _POSIX_SOURCE */
-
 /*
  * Global data variables.
  */

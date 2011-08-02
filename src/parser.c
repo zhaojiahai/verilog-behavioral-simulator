@@ -50,6 +50,10 @@ vbs_strdup(const char *str)
 #include <unistd.h>
 #include <fcntl.h>
 
+#ifndef _POSIX_SOURCE
+extern int fileno(FILE *); /* Needed by lexer. */
+#endif /* _POSIX_SOURCE */
+
 int parms_cnt = 1;
 char *parms[128];
 
