@@ -4,7 +4,7 @@ dnl configure.in
 dnl
 
 AC_REVISION($Revision: 1.20 $)
-AC_INIT(vbs.cc)		
+AC_INIT(vbs.h)		
 AC_CONFIG_HEADER(config.h)
 
 #############################################################################

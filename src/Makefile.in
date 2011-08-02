@@ -255,11 +255,11 @@ endif
 # Public targets
 #
 
-vbs: libvbs.a vbs.o
-	$(CXX) $(LDFLAGS) -o $@ vbs.o libvbs.a $(LIBS)
+vbs: libvbs.a main.o
+	$(CXX) $(LDFLAGS) -o $@ main.o libvbs.a $(LIBS)
 
-vbs-static: libvbs.a vbs.o
-	$(CXX) -static $(LDFLAGS) -o $@ vbs.o libvbs.a $(LIBS)
+vbs-static: libvbs.a main.o
+	$(CXX) -static $(LDFLAGS) -o $@ main.o libvbs.a $(LIBS)
 
 ifneq ($(GUILE_LD),)
 vbs-guile: libvbs.a vbs_guile.o
