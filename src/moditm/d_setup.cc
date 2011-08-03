@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -27,9 +27,8 @@
 #include "moditm/d_int.h"
 #include "moditm/d_param.h"
 #include "moditm/d_setup.h"
+#include "vbs.h"
 
-extern symbol_table symboltable;
-extern event_queue<stmt_base> eventqueue;
 
 inline void
 decl_setup::io_setup(ident_list *il, range_type *r,
@@ -40,6 +39,7 @@ decl_setup::io_setup(ident_list *il, range_type *r,
 	localscope.push(_scope.top());
 
 	// Now go through the list of ids to be declared.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	ident_list::iterator itp(il->begin());
 	ident_list::iterator stop(il->end());
 	for (; itp != stop; ++itp)
@@ -134,6 +134,7 @@ inline void
 decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 	{
 	// Find the symbol table node, if it exists.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	scopelist_type localscope;
 	localscope.push(_scope.top());
 	hash_type hv(st_node_find(id->name().c_str(), localscope));
@@ -319,6 +320,8 @@ decl_setup::operator()(net_decl *p) const
 		}
 
 	// Go through each variable, and set it up.
+	symbol_table &symboltable = vbs_engine::symboltable();
+	event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 	net_decl::decl_assign_list::const_iterator itp(p->_id_list->begin());
 	net_decl::decl_assign_list::const_iterator stop(p->_id_list->end());
 	event_cache_type *cache = 0;
@@ -367,6 +370,7 @@ void
 decl_setup::operator()(reg_decl *p) const
 	{
 	// Go through each variable, and set it up.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	reg_decl::decl_assign_list::iterator itp(p->_id_list->begin());
 	reg_decl::decl_assign_list::iterator stop(p->_id_list->end());
 	for (; itp != stop; ++itp)
@@ -394,6 +398,7 @@ void
 decl_setup::operator()(int_decl *p) const
 	{
 	// Go through each variable, and set it up.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	int_decl::decl_assign_list::iterator itp(p->_id_list->begin());
 	int_decl::decl_assign_list::iterator stop(p->_id_list->end());
 	for (; itp != stop; ++itp)
@@ -421,6 +426,7 @@ void
 decl_setup::operator()(param_decl *p) const
 	{
 	// Go through each variable, and set it up.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	param_decl::decl_assign_list::const_iterator itp(p->_id_list->begin());
 	param_decl::decl_assign_list::const_iterator stop(p->_id_list->end());
 	for (; itp != stop; ++itp)

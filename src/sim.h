@@ -34,6 +34,7 @@ extern void sim_perror(char *, char *, char *, int);
 extern void sim_set_state(int);
 extern void sim_set_dump(int);
 extern void sim_run_status(int, const char *);
+extern unsigned long sim_current_time();
 extern void sim_cpu_time(int);
 extern void (*sim_parsed_module)(p_module m);
 

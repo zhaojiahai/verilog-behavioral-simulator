@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -13,14 +13,14 @@
 #include "common/st_net.h"
 #include "misc/lvalue.h"
 #include "misc/mtrigger.h"
-
-extern symbol_table symboltable;
+#include "vbs.h"
 
 // Lvalue for assignment statement.
 
 void
 trigger_lvalue::operator()(lvalue *l) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	lvalue::expr_list::iterator itp(l->_exp_list->begin());
 	lvalue::expr_list::iterator stop(l->_exp_list->end());
 	lvalue::element_list::iterator eitp(l->_elmt_list.begin());

@@ -20,9 +20,7 @@
 #include "common/dumpasc.h"
 #include "common/dumpstrm.h"
 #include "stmt/stmtbase.h"
-#include "sim.h" // sim_run_status()
-
-extern time_wheel<stmt_base> timewheel;
+#include "sim.h" // sim_run_status(), sim_current_time()
 
 
 dump_info::dump_info()
@@ -159,7 +157,7 @@ void
 dump_info::dump_on(bool b)
 	{ 
 	_dump_on = b;
-	if (timewheel.current_time() != 0)
+	if (sim_current_time() != 0)
 		{
 		if (_dump_base != 0)
 			{

@@ -18,10 +18,7 @@
 #include "common/sym_tab.h"
 #include "expr/rangeid.h"
 #include "expr/eeval.h"
-
-struct stmt_base;
-extern symbol_table symboltable;
-extern event_queue<stmt_base> eventqueue;
+#include "vbs.h"
 
 // Utility functions for st_task/st_function's evaluate and setup
 // and trigger functions.
@@ -150,6 +147,7 @@ void
 entry_iovars(std::list<hash_value> &localvars, std::list< basic_ptr<expr_base> > &arg)
 	{
 	// Go through the list and initialize all input variables.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_net::io_list::iterator idx(localvars.begin());
 	st_net::io_list::iterator last(localvars.end());
 	st_net::arg_list::iterator exp(arg.begin());
@@ -170,6 +168,7 @@ void
 exit_iovars(std::list<hash_value> &localvars, std::list< basic_ptr<expr_base> > &arg)
 	{
 	// Go through the list and set all output variables.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_net::io_list::iterator idx(localvars.begin());
 	st_net::io_list::iterator last(localvars.end());
 	st_net::arg_list::iterator exp(arg.begin());
@@ -200,6 +199,7 @@ void
 check_monitor(st_net::monitor_list &el,
 		st_net::num_type &before, st_net::num_type &after)
 	{
+	event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 	event_base<stmt_base> *ev = 0;
 	st_net::monitor_list::iterator itp(el.begin());
 	st_net::monitor_list::iterator stop(el.end());
@@ -488,6 +488,7 @@ st_net_assign::operator()(const num_type &num, position_type ms, position_type l
 	if (_net._port_index != 0 && (_net._iodirection == st_net::OUT ||
 			_net._iodirection == st_net::INOUT))
 		{
+		symbol_table &symboltable = vbs_engine::symboltable();
 		// We only want to update the port if it's output or
 		// inout direction.  We never update the port if it's
 		// input or undefined.
@@ -513,6 +514,7 @@ st_net_evaluate::operator()(position_type p_m, position_type p_l,
 	if ((_net._iodirection == st_net::IN || _net._iodirection == st_net::INOUT)
 	 && _net._port_index != 0)
 		{
+		symbol_table &symboltable = vbs_engine::symboltable();
 		net_type *net = symboltable.get(*_net._port_index)->get_net();
 		st_net_evaluate eval(*net);
 		*_net._result = eval(p_m, p_l, m, l, true);
@@ -556,6 +558,7 @@ st_node_find(const char *name, Stack<int> &sc, int *s)
 	typedef hash_value hash_type;
 	typedef Stack<int> scopelist_type;
 	typedef st_instantiation instantiation_type;
+	symbol_table &symboltable = vbs_engine::symboltable();
 
 	// There is a hierarchy, need to step through the list.
 	hash_type hv;

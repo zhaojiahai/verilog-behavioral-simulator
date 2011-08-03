@@ -16,9 +16,7 @@
 #include "misc/delayid.h"
 #include "misc/evntexpr.h"
 #include "misc/dectrig.h"
-
-extern time_wheel<stmt_base> timewheel;
-extern event_queue<stmt_base> eventqueue;
+#include "vbs.h"
 
 
 // Event expression trigger object.
@@ -47,7 +45,10 @@ trigger_dec::operator()(delay_num *p) const
 		// Delay is zero, append to eventqueue to be executed
 		// as a non-blocking event.
 		if (!p->_event->is_queued())
+			{
+			event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 			eventqueue.add_event(p->_event);
+			}
 		retval = 0;
 		}
 	else
@@ -56,6 +57,7 @@ trigger_dec::operator()(delay_num *p) const
 			next_time = 0;
 
 		// Find the time unit to append to and do it.
+		time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 		time_wheel<stmt_base>::time_type t = timewheel.current_time();
 		t += next_time;
 		timewheel.add_event(t, _stmt);
@@ -77,7 +79,10 @@ trigger_dec::operator()(delay_id *p) const
 		// Delay is zero, append to eventqueue to be executed
 		// as a non-blocking event.
 		if (!p->_event->is_queued())
+			{
+			event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 			eventqueue.add_event(p->_event);
+			}
 		retval = 0;
 		}
 	else
@@ -86,6 +91,7 @@ trigger_dec::operator()(delay_id *p) const
 			next_time = 0;
 
 		// Find the time unit to append to and do it.
+		time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 		time_wheel<stmt_base>::time_type t = timewheel.current_time();
 		t += next_time;
 		timewheel.add_event(t, _stmt);

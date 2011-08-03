@@ -22,12 +22,13 @@
 #include "expr/binary_op.h"
 #include "expr/ternary_op.h"
 #include "expr/mintypmax.h"
+#include "vbs.h"
 
-extern symbol_table symboltable;
 
 const evaluate_expr::num_type &
 evaluate_expr::operator()(const function_call *p) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_function *func = symboltable.get(p->_index)->get_function();
 	*p->_result = func->evaluate(evaluate_st_node(p));
 	return *p->_result;
@@ -82,6 +83,7 @@ evaluate_expr::operator()(const qouted_str *p) const
 const evaluate_expr::num_type &
 evaluate_expr::operator()(const range_id *p) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_node_base *node = symboltable.get(p->_index);
 	st_net *net = node->get_net();
 	if (net == 0)

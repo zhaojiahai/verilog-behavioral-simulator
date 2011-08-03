@@ -179,7 +179,8 @@ SRCS6 =	\
 		p_moditm.cc \
 		p_stmt.cc \
 		p_expr.cc \
-		sim.cc
+		sim.cc \
+		vbs.cc
 
 OBJS_PERL = $(subst .cc,.o,$(SRCS_PERL))
 OBJS_TCL = $(subst .cc,.o,$(SRCS_TCL))

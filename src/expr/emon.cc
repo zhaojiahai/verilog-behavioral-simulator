@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1996-1997,2001,2002 Jimen Ching
+// Copyright (C) 1996-1997,2001,2002,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -24,14 +24,14 @@
 #include "expr/eeval.h"
 #include "expr/emon.h"
 #include "misc/mmon.h"
+#include "vbs.h"
 
-extern symbol_table symboltable;
-extern event_queue<stmt_base> eventqueue;
 
 bool
 monitor_expr::operator()(const function_call *p) const
 	{
 	bool success = true;
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_function *func = symboltable.get(p->_index)->get_function();
 	if (func != 0)
 		{
@@ -82,6 +82,7 @@ monitor_expr::operator()(const number *) const
 			{
 			// Something is monitoring a constant, so put an event on the
 			// event queue and trigger it at the end of time unit 0.
+			event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 			ev_list.push_back(*_event);
 			eventqueue.add_event(_event->get());
 			}
@@ -104,6 +105,7 @@ monitor_expr::operator()(const qouted_str *) const
 			{
 			// Something is monitoring a constant, so put an event on the
 			// event queue and trigger it at the end of time unit 0.
+			event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 			ev_list.push_back(*_event);
 			eventqueue.add_event(_event->get());
 			}
@@ -115,6 +117,7 @@ bool
 monitor_expr::operator()(const range_id *p) const
 	{
 	bool success;
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_net *node = symboltable.get(p->_index)->get_net();
 	if (node != 0)
 		{

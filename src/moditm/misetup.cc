@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -31,11 +31,8 @@
 #include "moditm/task.h"
 #include "moditm/modinst.h"
 #include "moditm/misetup.h"
+#include "vbs.h"
 
-extern time_wheel<stmt_base> timewheel;
-extern symbol_table symboltable;
-extern event_queue<stmt_base> eventqueue;
-extern scope_table scopetable;
 
 struct setup_module_instance : public module_instance_setup
 	{
@@ -68,6 +65,7 @@ void
 setup_module_instance::operator()(module_instance *p) const
 	{
 	// Create a module instance symbol table object.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	instantiation_type *inst = 0;
 	hash_type hv(symboltable.find(p->_name, _scope, true));
 	if (hv._scope < 0)
@@ -109,6 +107,7 @@ setup_module_instance::operator()(module_instance *p) const
 		}
 
 	// Setup the module definition being used.
+	scope_table &scopetable = vbs_engine::scopetable();
 	scopetable.push_scope(inst->name());
 	scopetable.push_level();
 	// Moved here (from st_setup.cc) because inst->instance_scope must
@@ -152,6 +151,7 @@ setup_module_item::operator()(initial *p) const
 		st = new seq_block_stmt(lst);
 		}
 	st->setup(setup_stmt(_scope, st));
+	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 	timewheel.add_event(0, st);
 	}
 
@@ -176,7 +176,10 @@ setup_module_item::operator()(always *p) const
 
 	// If no event control, must schedule for execution.
 	if (st->_ec == 0)
+		{
+		time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 		timewheel.add_event(0, st);
+		}
 	}
 
 void
@@ -187,6 +190,7 @@ setup_module_item::operator()(cont_assign *p) const
 	// block.  Since a change in any one of the variables in the
 	// right-hand-side of the assignment will cause an event to occur.
 	// So we must set it up correctly.
+	event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 	cont_assign::assign_stmt_list::iterator itp(p->_assign->begin());
 	cont_assign::assign_stmt_list::iterator stop(p->_assign->end());
 	event_cache_type *cache = 0;
@@ -227,6 +231,7 @@ void
 setup_module_item::operator()(function *p) const
 	{
 	// Setup function definitions mean saving it in the symbol table.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	hash_type hv(st_node_find(p->_name.c_str(), _scope));
 	func_type *func;
 	if (hv._scope < 0)
@@ -265,6 +270,7 @@ void
 setup_module_item::operator()(task *p) const
 	{
 	// Setup task definitions mean saving it in the symbol table.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	hash_type hv(st_node_find(p->_name.c_str(), _scope));
 	task_type *t;
 	if (hv._scope < 0)
@@ -296,6 +302,7 @@ void
 setup_module_item::operator()(module_instantiation *p) const
 	{
 	static Stack<hash_type> recurse;
+	symbol_table &symboltable = vbs_engine::symboltable();
 
 	// Find the module definition for setting up the instances.
 	hash_type hv(st_node_find(p->_name.c_str(), _scope));

@@ -42,10 +42,7 @@
 #include "stmt/case.h"
 #include "stmt/loopstmt.h"
 #include "stmt/ssetup.h"
-
-extern symbol_table symboltable;
-extern scope_table scopetable;
-extern dump_info dumpinfo;
+#include "vbs.h"
 
 typedef stmt_base::list_type<stmt_base*> stmt_list;
 stmt_list postponed_setup;
@@ -92,6 +89,7 @@ setup_stmt::operator()(systask_finish *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -109,6 +107,7 @@ setup_stmt::operator()(systask_display *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -126,6 +125,7 @@ setup_stmt::operator()(systask_write *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -143,6 +143,7 @@ setup_stmt::operator()(systask_monitor *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -160,6 +161,7 @@ setup_stmt::operator()(systask_readmemb *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -177,6 +179,7 @@ setup_stmt::operator()(systask_readmemh *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -194,6 +197,7 @@ setup_stmt::operator()(systask_strobe *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -211,6 +215,7 @@ setup_stmt::operator()(systask_dumpon *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -228,6 +233,7 @@ setup_stmt::operator()(systask_dumpoff *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -245,6 +251,7 @@ setup_stmt::operator()(systask_dumpall *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -262,6 +269,7 @@ setup_stmt::operator()(systask_dumpvars *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -270,6 +278,7 @@ setup_stmt::operator()(systask_dumpvars *p) const
 		vbs_err.out(p->_name);
 		}
 	// System tasks do not need to be setup.
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	dumpinfo.dump_on(true);
 	t->_done_setup = true;
 	}
@@ -280,6 +289,7 @@ setup_stmt::operator()(systask_dumpfile *p) const
 	task_type *t = new task_type(p->_name, p);
 	// System tasks always have global scope.
 	t->scope(0);
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type::hash_type hv(symboltable.add(t));
 	if (hv._scope < 0)
 		{
@@ -300,6 +310,7 @@ setup_stmt::operator()(sysfunc_time *p) const
 	f->_storage = func_type::num_type(63, 0);
 	// Need to save index to get the symbol table node, to store
 	// the return value (time).  This is a function call.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	p->_index = symboltable.add(f);
 	if (p->_index._scope < 0)
 		{
@@ -320,6 +331,7 @@ setup_stmt::operator()(sysfunc_stime *p) const
 	f->_storage = func_type::num_type(31, 0);
 	// Need to save index to get the symbol table node, to store
 	// the return value (time).  This is a function call.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	p->_index = symboltable.add(f);
 	if (p->_index._scope < 0)
 		{
@@ -340,6 +352,7 @@ setup_stmt::operator()(sysfunc_random *p) const
 	f->_storage = func_type::num_type(32, 0);
 	// Need to save index to get the symbol table node, to store
 	// the return value (random).  This is a function call.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	p->_index = symboltable.add(f);
 	if (p->_index._scope < 0)
 		{
@@ -388,6 +401,8 @@ setup_stmt::operator()(seq_block_stmt *p) const
 void
 setup_stmt::second_pass()
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
+	scope_table &scopetable = vbs_engine::scopetable();
 	task_enable_type::arg_list::iterator itp;
 	task_enable_type::arg_list::iterator stop;
 	stmt_list::iterator dtp = postponed_setup.begin();
@@ -470,6 +485,7 @@ setup_stmt::operator()(task_enable_stmt *p) const
 		}
 
 	// Make sure it's a task.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type *node = symboltable.get(p->_index)->get_task();
 	if (node == 0)
 		{
@@ -486,6 +502,7 @@ setup_stmt::operator()(task_enable_stmt *p) const
 		*modscp = save; // Restore original scope.
 
 	// Now check argument list.
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	bool display_test = (p->_name == "$display");
 	bool write_test = (p->_name == "$write");
 	bool monitor_test = (p->_name == "$monitor");

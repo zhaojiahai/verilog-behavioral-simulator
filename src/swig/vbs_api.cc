@@ -26,6 +26,8 @@
 #include "common/st_inst.h"
 #include "common/dumpinfo.h"
 #include "common/scp_tab.h"
+#include "vbs.h"
+#include "sim.h"
 
 using std::endl;
 using std::list;
@@ -36,8 +38,6 @@ typedef symbol_table::size_type size_type;
 typedef symbol_table::bucket_type bucket_type;
 
 extern list<hash_value> module_list;
-extern symbol_table symboltable;
-extern time_wheel<stmt_base> timewheel;
 extern "C" void vbs_sim_setup(void);
 extern "C" long int vbs_sim_run(int);
 extern "C" bool vbs_sim_step();
@@ -47,8 +47,6 @@ extern "C" char *vbs_strdup(const char *);
 static int current_scope = 1;
 static int last_scope = 1;
 static bool sim_init = false;
-extern scope_table scopetable;
-extern dump_info dumpinfo;
 string errorString;
 
 
@@ -56,6 +54,7 @@ string errorString;
 static st_net *
 get_net(char *net_name)
 	{
+	scope_table &scopetable = vbs_engine::scopetable();
 	return scopetable.get_net(net_name);
 	}
 
@@ -77,6 +76,7 @@ vbs_display_net(char *net_name)
 int
 vbs_get_scope(char * net_name)
 	{	
+	scope_table &scopetable = vbs_engine::scopetable();
 	string scp = net_name;
 	string top = scopetable.top_level();
 #if __GNUC__ == 2 && __GNUC_MINOR__ >= 95
@@ -107,6 +107,7 @@ vbs_set_net(char *net_name, char *val)
 char *
 vbs_list_instances(char *scope)
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	string instances;
 	size_type max = symboltable.size();
 	int scp = vbs_get_scope(scope);
@@ -143,6 +144,7 @@ vbs_set_scope(char *inst)
 char *
 vbs_list_nets(void)
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	string nets;
 	size_type max = symboltable.size();
 	for (size_type i = 0 ; i < max ; i ++ )
@@ -165,12 +167,14 @@ vbs_list_nets(void)
 void
 vbs_display_symboltable(void)
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	symboltable.display(cout);
 	}
 
 char *
 vbs_list_modules()
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	string mod_list;
 	list<hash_value>::iterator idx(module_list.begin());
 	list<hash_value>::iterator stop(module_list.end());
@@ -179,33 +183,32 @@ vbs_list_modules()
 	return vbs_strdup(mod_list.c_str());
 	}
 
-
-long int
-vbs_current_time()
-	{
-	return timewheel.current_time();
-	}
-
 void
 vbs_dumpon()
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	dumpinfo.dump_on(true);
 	}
 
 void
 vbs_dumpoff()
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	dumpinfo.dump_on(false);
 	}
+
 void
 vbs_dumpfile(char *f)
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	string fn = f;
 	dumpinfo.dump_file(fn);
 	}
+
 void
 vbs_dumpvars(int l,char *f)
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	string fn = f;
 	dumpinfo.levels(l);
 	dumpinfo.dump_vars(f);
@@ -233,14 +236,14 @@ vbs_sim_continue()
 	{
 	bool was_ok = true ;
 	while (was_ok) was_ok = vbs_sim_step();
-	return timewheel.current_time();
+	return sim_current_time();
 	}
 
 long int
 vbs_sim_fast()
 	{
 	vbs_sim_run(-1);
-	return timewheel.current_time();
+	return sim_current_time();
 	}
 
 void
@@ -252,19 +255,21 @@ vbs_sim_till(long int tm)
 void
 vbs_sim_for(long int tm)
 	{
-	long int now = timewheel.current_time();
+	long int now = sim_current_time();
 	vbs_sim_run(now + tm);
 	}
 
 char *
 vbs_current_scope()
 	{
+	scope_table &scopetable = vbs_engine::scopetable();
 	return scopetable.find(current_scope);
 	}
 
 char *
 vbs_push_scope(char * scope)
 	{
+	scope_table &scopetable = vbs_engine::scopetable();
 	int scp = vbs_get_scope(scope);
 	last_scope = current_scope;
 	current_scope = scp;
@@ -274,6 +279,7 @@ vbs_push_scope(char * scope)
 char *
 vbs_pop_scope()
 	{
+	scope_table &scopetable = vbs_engine::scopetable();
 	current_scope = last_scope;
 	return scopetable.find(current_scope);
 	}

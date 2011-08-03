@@ -23,9 +23,9 @@
 #include "common/dumpvcd.h"
 #include "expr/rangeid.h"
 #include "expr/eeval.h"
+#include "vbs.h"
 
-extern scope_table scopetable;
-extern time_wheel<stmt_base> timewheel;
+extern "C" unsigned long sim_current_time();
 
 
 dump_vcd::dump_vcd(dump_stream &d)
@@ -44,7 +44,7 @@ dump_vcd::~dump_vcd()
 	{
 	// this keeps dinotrace happy to display last segment
 	strstream_type str_out;
-	str_out << "#" << timewheel.current_time() + 1 << endl;
+	str_out << "#" << sim_current_time() + 1 << endl;
 	_dump_out << str_out;
 	}
 
@@ -65,6 +65,7 @@ dump_vcd::get_next_name()
 void
 dump_vcd::pre_second_pass()
 	{ 
+	scope_table &scopetable = vbs_engine::scopetable();
 	strstream_type str_out;
 	str_out << "$scope module "
 			<< scopetable.top_level()
@@ -76,6 +77,7 @@ dump_vcd::pre_second_pass()
 void
 dump_vcd::second_pass(ident_type *rid, int lvls, net_list *n)
 	{
+	scope_table &scopetable = vbs_engine::scopetable();
 	strstream_type str_out;
 
 	// Ignore if nothing to output.
@@ -194,7 +196,7 @@ dump_vcd::dump_values()
 	strstream_type str_out;
 	net_list::iterator nstart(n_lst.begin());
 	net_list::iterator nstop(n_lst.end());
-	str_out << "#" << timewheel.current_time() << endl;
+	str_out << "#" << sim_current_time() << endl;
 	for (; nstart != nstop; ++nstart)
 		{
 		if ((*nstart)->changed())
@@ -220,7 +222,7 @@ dump_vcd::dump_all()
 	strstream_type str_out;
 	net_list::iterator nstart(n_lst.begin());
 	net_list::iterator nstop(n_lst.end());
-	str_out << "#" << timewheel.current_time() << endl;
+	str_out << "#" << sim_current_time() << endl;
 	str_out << "$dumpall" << endl;
 	for (; nstart != nstop; ++nstart)
 		{
@@ -239,7 +241,7 @@ void
 dump_vcd::dump_on()
 	{
 	strstream_type str_out;
-	str_out << "#" << timewheel.current_time() << endl;
+	str_out << "#" << sim_current_time() << endl;
 	str_out << "$dumpon" << endl;
 	net_list::iterator nstart = n_lst.begin();
 	net_list::iterator nstop  = n_lst.end();
@@ -261,7 +263,7 @@ void
 dump_vcd::dump_off()
 	{
 	strstream_type str_out;
-	str_out << "#" << timewheel.current_time() << endl;
+	str_out << "#" << sim_current_time() << endl;
 	str_out << "$dumpoff" << endl;
 	net_list::iterator nstart(n_lst.begin());
 	net_list::iterator nstop(n_lst.end());

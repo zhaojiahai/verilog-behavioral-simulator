@@ -21,12 +21,11 @@
 #include "common/dumpasc.h"
 #include "expr/rangeid.h"
 #include "expr/eeval.h"
+#include "vbs.h"
 
 //
 // FIXME:  needs complete rewrite for $dump setup...
 //
-
-extern scope_table scopetable;
 
 dump_ascii::dump_ascii(dump_stream &d)
 	: dump_base(d)
@@ -51,6 +50,7 @@ dump_ascii::pre_second_pass()
 void
 dump_ascii::post_second_pass()
 	{
+	scope_table &scopetable = vbs_engine::scopetable();
 	Stack<int> sc;
 	int name_length = 0, tmp_length = 0;
 	strstream_type str_out;

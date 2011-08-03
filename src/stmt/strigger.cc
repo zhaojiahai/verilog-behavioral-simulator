@@ -44,12 +44,8 @@
 
 #include "common/debug.h"
 #include "common/tmpl_utl.h"
+#include "vbs.h"
 #include "sim.h"
-
-extern symbol_table symboltable;
-extern time_wheel<stmt_base> timewheel;
-extern dump_info dumpinfo;
-extern scope_table scopetable;
 
 
 // Case item for case statement.
@@ -118,6 +114,7 @@ void
 trigger_stmt::sys_task_output(task_caller_type *caller) const
 	{
 	// Now, grab the format string and find out what to do.
+	scope_table &scopetable = vbs_engine::scopetable();
 	task_caller_type::arg_list::iterator itp(caller->_argument->begin());
 	task_caller_type::arg_list::iterator stop(caller->_argument->end());
 	// Should not be null.  Setup should have checked.
@@ -235,6 +232,7 @@ trigger_stmt::sys_task_readmem(task_caller_type *caller, int base) const
 		}
 
 	// Read file into memory.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	net_type *net = symboltable.get(rid->index())->get_net();
 	net->assignment(fn.c_str(), base, start, finish);
 	}
@@ -279,6 +277,7 @@ bool
 trigger_stmt::operator()(systask_dumpon *) const
 	{
 	// Turn on dumping.
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	dumpinfo.dump_on(true);
 	return true;
 	}
@@ -287,6 +286,7 @@ bool
 trigger_stmt::operator()(systask_dumpoff *) const
 	{
 	// Turn off dumping.
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	dumpinfo.dump_on(false);
 	return true;
 	}
@@ -295,6 +295,7 @@ bool
 trigger_stmt::operator()(systask_dumpall *) const
 	{
 	// Turn on dump of all variables.
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	dumpinfo.dump_all();
 	return true;
 	}
@@ -302,6 +303,7 @@ trigger_stmt::operator()(systask_dumpall *) const
 bool
 trigger_stmt::operator()(systask_dumpvars *) const
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	task_caller_type *caller = _parent->get_task_enable();
 	// The $dumpvars 
 	// No arguments means dump all signals
@@ -361,8 +363,9 @@ bool
 trigger_stmt::operator()(sysfunc_time *p) const
 	{
 	// All we need to do is store the current time.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	func_type *func = symboltable.get(p->_index)->get_function();
-	func->_storage = timewheel.current_time();
+	func->_storage = sim_current_time();
 	return true;
 	}
 
@@ -370,8 +373,9 @@ bool
 trigger_stmt::operator()(sysfunc_stime *p) const
 	{
 	// All we need to do is store the current time.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	func_type *func = symboltable.get(p->_index)->get_function();
-	func->_storage = timewheel.current_time();
+	func->_storage = sim_current_time();
 	return true;
 	}
 
@@ -380,6 +384,7 @@ trigger_stmt::operator()(sysfunc_random *p) const
 	{
 	// All we need to do is store a random number.
         // At least for 32 bits.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	func_type *func = symboltable.get(p->_index)->get_function();
 	func->_storage = rand();
 	return true;
@@ -555,6 +560,7 @@ trigger_stmt::operator()(task_enable_stmt *p) const
 		}
 
 	// Due to nesting levels, we need to return status.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	task_type *t = symboltable.get(p->_index)->get_task();
 	if (t->trigger(trigger_st_node(p, _parent)) == false)
 		{

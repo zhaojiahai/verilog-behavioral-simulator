@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -23,8 +23,8 @@
 #include "expr/binary_op.h"
 #include "expr/ternary_op.h"
 #include "expr/mintypmax.h"
+#include "vbs.h"
 
-extern symbol_table symboltable;
 
 void
 get_base_size(const trigger_expr::str_type &fmt,
@@ -71,6 +71,7 @@ void
 trigger_expr::operator()(function_call *p) const
 	{
 	// <node> can not be NULL.  Setup should have checked.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_function *node = symboltable.get(p->_index)->get_function();
 	*p->_result = node->evaluate(evaluate_st_node(p));
 	display_output(_format, *p->_result);
@@ -103,6 +104,7 @@ void
 trigger_expr::operator()(range_id *p) const
 	{
 	// Grab the data from the symbol table.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	st_net *node = symboltable.get(p->_index)->get_net();
 	// Print out the content.  Setup should have checked the range.
 	range_id::position_type ms, ls;

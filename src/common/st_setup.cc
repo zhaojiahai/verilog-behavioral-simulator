@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -19,8 +19,7 @@
 #include "misc/msetup.h"
 #include "moditm/tfsetup.h"
 #include "moditm/misetup.h"
-
-extern symbol_table symboltable;
+#include "vbs.h"
 
 // sim_start
 
@@ -48,6 +47,8 @@ setup_st_node::setup_st_node(scopelist_type &s, port_conn_list *p,
 void
 setup_st_node::operator()(st_module *p) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
+
 	// Setup local scope.  Each new module has its own scope.
 	int thisscope = p->instance_scope();
 	scopelist_type localscope;
@@ -134,6 +135,8 @@ setup_st_node::operator()(st_net *p) const
 void
 setup_st_node::operator()(st_function *p) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
+
 	// We do not need to setup the declaration and statement more than once.
 	if (p->_done_setup != false)
 		return;
@@ -179,6 +182,8 @@ setup_st_node::operator()(st_function *p) const
 void
 setup_st_node::operator()(st_task *p) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
+
 	// We do not need to setup the declaration and statement more than once.
 	if (p->_done_setup != false)
 		return;

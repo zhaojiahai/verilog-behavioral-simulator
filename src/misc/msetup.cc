@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -28,7 +28,7 @@
 #include "stmt/stmtbase.h"
 #include "stmt/assign.h"
 
-extern symbol_table symboltable;
+#include "vbs.h"
 
 // sim_parsed_module
 
@@ -51,6 +51,7 @@ void
 setup_port::operator()(port *p) const
 	{
 	// If port has a port connection, setup the connection...
+	symbol_table &symboltable = vbs_engine::symboltable();
 	if (_port_conn->_expr != 0)
 		{
 		ident_type *id;
@@ -136,6 +137,7 @@ setup_select::operator()(part_select *p) const
 setup_lvalue::size_type
 setup_lvalue::operator()(lvalue *l) const
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	lvalue::expr_list::reverse_iterator itp(l->_exp_list->rbegin());
 	lvalue::expr_list::reverse_iterator stop(l->_exp_list->rend());
 	size_type node_size = 0, size = 0, prev_size = 0;

@@ -53,6 +53,7 @@
 #include "stmt/strigger.h"
 #include "p_misc.h"
 #include "parser.h"
+#include "vbs.h"
 #include "sim.h"
 
 #include "common/debug.h"
@@ -93,11 +94,6 @@ using std::ifstream;
 using std::setfill;
 using std::setw;
 
-dump_info dumpinfo;
-symbol_table symboltable;
-scope_table scopetable;
-time_wheel<stmt_base> timewheel;
-event_queue<stmt_base> eventqueue;
 list<hash_value> module_list;
 vbs_error::value_type parse_error_code;
 
@@ -112,6 +108,7 @@ void setup_toplevel(st_module *, Stack<int> &);
 
 void trigger_postproc(stmt_base *st)
 	{
+	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 	if (st->_always == true)
 		{
 		if (st->_ec == 0)
@@ -163,6 +160,8 @@ struct twhandler : public time_wheel_handler<T>
 
 	void operator()(time_type t, list_type &tlst) const
 		{
+		event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
+		dump_info &dumpinfo = vbs_engine::dumpinfo();
 		DEBUG_STATE(DEBUG_TIME_WHEEL);
 		DEBUG_OUTPUT("DEBUG_TIME_WHELL:  Starting event time ");
 		DEBUG_OUTPUT(t);
@@ -210,6 +209,7 @@ find_top_level(void)
 	{
 	// Go through each module in the list and mark all modules which are
 	// instantiated as non-top level.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	Stack<int> scope;
 	scope.push(0);
 	list<hash_value>::iterator idx(module_list.begin());
@@ -356,6 +356,7 @@ store_module_to_symbol_table(p_module m)
 	mod->setup(setup_module(stmod));
 
 	// Enter node into symbol table.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	hash_value hv(symboltable.add(stmod));
 	if (hv._scope < 0)
 		{
@@ -572,6 +573,7 @@ vbs_sim_init(const char *pn)
 	vbs_err.set_program_name(pn);
 
 	// Symbol table for simulation
+	symbol_table &symboltable = vbs_engine::symboltable();
 	symboltable.initialize(HASHSIZE);
 
 	// Our global system tasks and functions.
@@ -613,6 +615,10 @@ vbs_sim_init(const char *pn)
 void
 vbs_sim_setup(void)
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
+	scope_table &scopetable = vbs_engine::scopetable();
+	symbol_table &symboltable = vbs_engine::symboltable();
+
 	// Start with global scope for setup.
 	Stack<int> scope;
 	scope.push(0);
@@ -645,27 +651,19 @@ vbs_sim_setup(void)
 	scopetable.top_level(toplevel->name());
 	dumpinfo.top_level(toplevel->name());
 	setup_stmt::second_pass();
-
-	// Do not remove modules.  Maybe add a parameter to enable this?
-#if 0
-	// Remove the modules from the symbol table.  We no longer need them.
-	toplevel = 0;
-	list<hash_value>::iterator idx(module_list.begin());
-	list<hash_value>::iterator stop(module_list.end());
-	for (; idx != stop; ++idx)
-		symboltable.remove(*idx);
-#endif
 	}
 
 bool
 vbs_sim_step()
 	{
+	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 	return timewheel.trigger_once(twhandler<stmt_base>());
 	}
 
 long int
 vbs_sim_run(int end_time)
 	{
+	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 	bool step = true;
 	switch (end_time)
 		{
@@ -735,6 +733,7 @@ vbs_sim_start(int amt, char **lst)
 	vbs_sim_setup();
 	vbs_err.pop_filename();
 
+	symbol_table &symboltable = vbs_engine::symboltable();
 	DEBUG_STATE(DEBUG_SYMBOL_TABLE);
 	DEBUG_OUTPUT("DEBUG_SYMBOL_TABLE:  Symbol table after setup:\n");
 	DEBUG_OUTPUT(symboltable);
@@ -822,8 +821,10 @@ sim_set_state(int flag)
 void
 sim_set_dump(int flag)
 	{
+	dump_info &dumpinfo = vbs_engine::dumpinfo();
+
 	// This is a hack to set the dump config from the main driver so we
-	// don't have to include dumpinfo.h in vbs.cc.
+	// don't have to include dumpinfo.h in main.cc.
 	switch (flag)
 		{
 		case -1:
@@ -866,6 +867,7 @@ sim_run_status(int reason, const char *message)
 		default:
 			if (!quiet)
 				{
+				time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 				cout << endl
 					 << "Simulation stopped at time unit "
 					 << timewheel.current_time()
@@ -875,6 +877,13 @@ sim_run_status(int reason, const char *message)
 				}
 			break;
 		}
+	}
+
+unsigned long
+sim_current_time()
+	{
+	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
+	return timewheel.current_time();
 	}
 
 void
@@ -898,6 +907,7 @@ sim_cpu_time(int reason)
 		case 0:
 			if (output_clock)
 				{
+				event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 				// Convert to milliseconds.
 				time_t sim_time_ms = (sim_clock * 1000) / CLOCKS_PER_SEC;
 				// Calculate seconds.

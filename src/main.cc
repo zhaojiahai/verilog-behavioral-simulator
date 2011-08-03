@@ -33,6 +33,7 @@ extern "C" int getopt(int argc, char * const argv[], const char *optstr);
 #include <sstream>
 #include <iostream>
 #include "expr/mintypmax.h"
+#include "vbs.h"
 #include "sim.h" // Starting point...
 #include "version.h"
 
@@ -334,6 +335,7 @@ main(int argc, char *argv[])
 		return retval;
 
 	// Initialize system variables (globals).
+	vbs_engine::initialize(); // Create our engine singleton.
 	vbs_sim_init(argv[0]);
 
 	// Here we go!
@@ -342,6 +344,9 @@ main(int argc, char *argv[])
 		vbs_sim_start(infiles, &argv[optind]);
 	else
 		cout << "No input file(s)..." << endl;
+
+	// Cleanup engine.
+	vbs_engine::reset();
 
 	return 0;
 	}

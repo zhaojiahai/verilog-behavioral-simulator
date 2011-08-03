@@ -45,8 +45,8 @@ public:
 
 	char *find(int i); // return string corresponding to scope
 	int find(const str_type &); // return the scope of the string
-	net_list get_nets(int); // reutrn the no. of nets at the level
-	net_list get_nets(int, int); // reutrn the no. of nets at the level
+	net_list get_nets(int); // return the no. of nets at the level
+	net_list get_nets(int, int); // return the no. of nets at the level
 	net_list get_nets(const char *sc); // all signals below level sc
 	net_list get_nets(const char *sc, int); // all_signals to l levels below
 	net_list get_nets(instantiation_list &, int = 0); // all_signals to l levels below

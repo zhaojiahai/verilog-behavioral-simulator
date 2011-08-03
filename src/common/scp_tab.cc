@@ -16,9 +16,9 @@
 #include "st_inst.h"
 #include "st_net.h"
 #include "scp_tab.h"
+#include "vbs.h"
 
 extern "C" char *vbs_strdup(const char *);
-extern symbol_table symboltable;
 
 scope_table::scope_table()
 	{
@@ -74,6 +74,7 @@ scope_table::net_list
 scope_table::get_nets(int sc) 
 	{
 	// Returns nets at scope sc
+	symbol_table &symboltable = vbs_engine::symboltable();
 	net_list n_list;
 	size_type max = symboltable.size();
 	for (size_type i = 0; i < max; ++i)
@@ -96,6 +97,7 @@ scope_table::get_nets(int sc)
 st_net *
 scope_table::get_net(const char *st)
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	int sc;
 	char *scp = get_scope(st);
 	str_type net_name(st);
@@ -285,6 +287,7 @@ scope_table::get_nets(instantiation_list & inst_list, int lvls)
 st_instantiation *
 scope_table::get_instance(str_type &nam)
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
 	int sc = find(nam);
 	size_type max = symboltable.size();
 	for (size_type i = 0; i < max; ++i)
@@ -308,6 +311,7 @@ scope_table::instantiation_list
 scope_table::get_instances(int sc) 
 	{
 	// Returns instances at scope sc.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	instantiation_list inst_lst;
 	size_type max = symboltable.size();
 	for (size_type i = 0; i < max ; ++i)

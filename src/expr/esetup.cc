@@ -27,8 +27,8 @@
 #include "expr/ternary_op.h"
 #include "expr/mintypmax.h"
 #include "misc/msetup.h"
+#include "vbs.h"
 
-extern symbol_table symboltable;
 
 setup_expr::size_type
 setup_expr::operator()(function_call *p) const
@@ -53,6 +53,7 @@ setup_expr::operator()(function_call *p) const
 		}
 
 	// Make sure it's a function.
+	symbol_table &symboltable = vbs_engine::symboltable();
 	func_type *node = symboltable.get(p->_index)->get_function();
 	if (node == 0)
 		{
@@ -148,7 +149,7 @@ setup_expr::size_type
 setup_expr::operator()(range_id *p) const
 	{
 	p->_index = st_node_find(p->_name.c_str(), _scope);
-// Must be some kind of extension used by a contributor (delete later).
+// FIXME: must be some kind of extension used by a contributor (delete later).
 #if 0
 	{
 #include "moditm/d_int.h"
@@ -172,6 +173,7 @@ setup_expr::operator()(range_id *p) const
 		vbs_err.out(p->_name);
 		}
 
+	symbol_table &symboltable = vbs_engine::symboltable();
 	net_type *net = symboltable.get(p->_index)->get_net();
 	// In the case of an lvalue in an assignment, a function name could
 	// also be an lvalue.
