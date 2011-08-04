@@ -42,6 +42,7 @@ struct setup_stmt : public stmt_setup
 		{}
 
 	// Setup pass setup utilities.
+	static void reset();
 	static void second_pass();
 
 	void handle_dec(stmt_type *) const;
@@ -70,6 +71,11 @@ struct setup_stmt : public stmt_setup
 
 	scopelist_type &_scope;
 	stmt_type *_parent;
+
+	// VCD setup must be done after other setup.  Keep a list
+	// of $dumpvars tasks to process later.
+	typedef stmt_base::list_type<stmt_type *> stmt_list;
+	static stmt_list *_postponedsetup;
 	};
 
 #endif // _SSETUP_H

@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -31,6 +31,7 @@ public:
 
 	delay_id(expr_type *);
 	delay_id(const delay_id &);
+	virtual ~delay_id();
 
 	delay_id *copy_constructor() const;
 	ostream_type &display(ostream_type &) const;

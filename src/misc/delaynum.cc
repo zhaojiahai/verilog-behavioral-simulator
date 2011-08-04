@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -21,6 +21,11 @@ delay_num::delay_num(const delay_num &p)
 	// We should not be making copies of delay_num after setup.
 	// Thus _event should be NULL in p anyway.
 	_event = 0;
+	}
+
+delay_num::~delay_num()
+	{
+	delete _event;
 	}
 
 delay_num *

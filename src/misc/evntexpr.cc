@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -26,7 +26,10 @@ event_expr::event_expr(const event_expr &p)
 	}
 
 event_expr::~event_expr()
-	{ delete _expr; }
+	{
+	delete _expr;
+	delete _event;
+	}
 
 event_expr::ostream_type &
 event_expr::display(ostream_type &s) const

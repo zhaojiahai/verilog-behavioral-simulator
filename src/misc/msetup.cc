@@ -91,6 +91,7 @@ setup_port::operator()(port *p) const
 			lval->setup(setup_lvalue(_scope));
 			expr_base *exp = _port_conn->_expr->copy_constructor();
 			stmt_base *st = new assignment_stmt(lval, exp, false);
+			_stmtlist->push_back(basic_ptr<stmt_base>(st));
 
 			// Create event for monitoring expressions.
 			event_base<stmt_base>::event_container *cache =
@@ -102,6 +103,15 @@ setup_port::operator()(port *p) const
 			}
 		}
 	}
+
+void
+setup_port::reset()
+	{
+	delete _stmtlist;
+	_stmtlist = new std::list<basic_ptr<stmt_base> >;
+	}
+
+std::list<basic_ptr<stmt_base> > *setup_port::_stmtlist;
 
 
 bool

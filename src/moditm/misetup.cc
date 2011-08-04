@@ -151,6 +151,10 @@ setup_module_item::operator()(initial *p) const
 		st = new seq_block_stmt(lst);
 		}
 	st->setup(setup_stmt(_scope, st));
+
+	// Avoid memory leak by keeping track of allocated statement.
+	_stmtlist->push_back(basic_ptr<stmt_base>(st));
+
 	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 	timewheel.add_event(0, st);
 	}
@@ -164,7 +168,7 @@ setup_module_item::operator()(always *p) const
 		st = cpy;
 	else
 		{
-		// Force an initial statement to be a sequential block.
+		// Force an always statement to be a sequential block.
 		seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
 		lst->push_back(cpy);
 		st = new seq_block_stmt(lst);
@@ -174,6 +178,9 @@ setup_module_item::operator()(always *p) const
 	st->_always = true;
 	st->setup(setup_stmt(_scope, st));
 
+	// Avoid memory leak by keeping track of allocated statement.
+	_stmtlist->push_back(basic_ptr<stmt_base>(st));
+
 	// If no event control, must schedule for execution.
 	if (st->_ec == 0)
 		{
@@ -181,6 +188,16 @@ setup_module_item::operator()(always *p) const
 		timewheel.add_event(0, st);
 		}
 	}
+
+void
+setup_module_item::reset()
+	{
+	delete _stmtlist;
+	_stmtlist = new stmt_list;
+	}
+
+setup_module_item::stmt_list *setup_module_item::_stmtlist;
+
 
 void
 setup_module_item::operator()(cont_assign *p) const
@@ -216,6 +233,9 @@ setup_module_item::operator()(cont_assign *p) const
 			st->_dec = p->_dec->copy_constructor();
 			}
 		st->setup(setup_stmt(_scope, st));
+
+		// Avoid memory leak by keeping track of allocated statement.
+		_stmtlist->push_back(basic_ptr<stmt_base>(st));
 
 		cache = new event_cache_type(true, st);
 		ev = new change_event<stmt_type>(cache, DC);

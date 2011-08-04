@@ -72,10 +72,7 @@ monitor_expr::operator()(const number *) const
 	{
 	// Create static list of event pointers because the _event passed in
 	// is from the stack.  We need a valid pointer until the event is
-	// executed.  This is kind of a waste of memory, but what can we do?
-	// FIXME!
-	static event_ptr_list ev_list;
-
+	// executed.
 	if (!_via_select)
 		{
 		if (_event != 0 && !_event->get()->is_queued())
@@ -83,7 +80,7 @@ monitor_expr::operator()(const number *) const
 			// Something is monitoring a constant, so put an event on the
 			// event queue and trigger it at the end of time unit 0.
 			event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
-			ev_list.push_back(*_event);
+			_eventlist->push_back(*_event);
 			eventqueue.add_event(_event->get());
 			}
 		}
@@ -95,10 +92,7 @@ monitor_expr::operator()(const qouted_str *) const
 	{
 	// Create static list of event pointers because the _event passed in
 	// is from the stack.  We need a valid pointer until the event is
-	// executed.  This is kind of a waste of memory, but what can we do?
-	// FIXME!
-	static event_ptr_list ev_list;
-
+	// executed.
 	if (!_via_select)
 		{
 		if (_event != 0 && !_event->get()->is_queued())
@@ -106,12 +100,21 @@ monitor_expr::operator()(const qouted_str *) const
 			// Something is monitoring a constant, so put an event on the
 			// event queue and trigger it at the end of time unit 0.
 			event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
-			ev_list.push_back(*_event);
+			_eventlist->push_back(*_event);
 			eventqueue.add_event(_event->get());
 			}
 		}
 	return true;
 	}
+
+void
+monitor_expr::reset()
+	{
+	delete _eventlist;
+	_eventlist = new event_ptr_list;
+	}
+
+monitor_expr::event_ptr_list *monitor_expr::_eventlist;
 
 bool
 monitor_expr::operator()(const range_id *p) const

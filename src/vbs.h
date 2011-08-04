@@ -15,6 +15,7 @@
 #ifndef _VBS_H
 #define _VBS_H
 
+struct hash_value;
 class stmt_base;
 
 class dump_info;
@@ -23,7 +24,7 @@ class symbol_table;
 template<class T> class event_queue;
 template<class T> class time_wheel;
 
-class vbs_engine
+struct vbs_engine
 	{
 public:
 	static dump_info &dumpinfo()
@@ -36,6 +37,8 @@ public:
 		{ return *_instance->_eventqueue; }
 	static time_wheel<stmt_base> &timewheel()
 		{ return *_instance->_timewheel; }
+	static std::list<hash_value> &modulelist()
+		{ return *_instance->_modulelist; }
 
 	static void initialize();
 	static void reset();
@@ -61,6 +64,10 @@ private:
 
 	// Object to handle simulation time advancement.
 	time_wheel<stmt_base> *_timewheel;
+
+	// List of modules to search for the top-level module.  Once used,
+	// we keep it around for applications that want to display this list.
+	std::list<hash_value> *_modulelist;
 
 	static vbs_engine *_instance;
 	};

@@ -44,10 +44,6 @@
 #include "stmt/ssetup.h"
 #include "vbs.h"
 
-typedef stmt_base::list_type<stmt_base*> stmt_list;
-stmt_list postponed_setup;
-
-
 // Case item for case statement.
 
 struct setup_case_item : public case_item_setup
@@ -399,14 +395,21 @@ setup_stmt::operator()(seq_block_stmt *p) const
 	}
 
 void
+setup_stmt::reset()
+	{
+	delete _postponedsetup;
+	_postponedsetup = new stmt_list;
+	}
+
+void
 setup_stmt::second_pass()
 	{
 	dump_info &dumpinfo = vbs_engine::dumpinfo();
 	scope_table &scopetable = vbs_engine::scopetable();
 	task_enable_type::arg_list::iterator itp;
 	task_enable_type::arg_list::iterator stop;
-	stmt_list::iterator dtp = postponed_setup.begin();
-	stmt_list::iterator dstop = postponed_setup.end();
+	stmt_list::iterator dtp = _postponedsetup->begin();
+	stmt_list::iterator dstop = _postponedsetup->end();
 	dumpinfo.pre_second_pass();
 	for (; dtp != dstop; ++dtp)
 		{
@@ -517,7 +520,7 @@ setup_stmt::operator()(task_enable_stmt *p) const
 	if (dumpvars_test) 
 		{
 		// Postpone setup to end of setup phase I.
-		postponed_setup.insert(postponed_setup.end(), p);
+		_postponedsetup->insert(_postponedsetup->end(), p);
 		if (dumpinfo.dump_status() == false)
 			dumpinfo.dump_format("vcd"); // Was not set, use default.
 
@@ -757,3 +760,5 @@ setup_stmt::operator()(loop_stmt *p) const
 		}
 	p->_stmt->setup(setup_stmt(_scope, _parent));
 	}
+
+setup_stmt::stmt_list *setup_stmt::_postponedsetup;

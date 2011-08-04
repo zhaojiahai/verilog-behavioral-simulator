@@ -346,6 +346,9 @@ decl_setup::operator()(net_decl *p) const
 			st = new assignment_stmt(lval, expr, false);
 			st->setup(setup_stmt(_scope, st));
 
+			// Avoid memory leak by keeping track of allocated statement.
+			_stmtlist->push_back(basic_ptr<stmt_base>(st));
+
 			// Treat assignment as continuous assignment.
 			cache = new event_cache_type(true, st);
 			ev = new change_event<stmt_type>(cache, DC);
@@ -365,6 +368,15 @@ decl_setup::operator()(net_decl *p) const
 			}
 		}
 	}
+
+void
+decl_setup::reset()
+	{
+	delete _stmtlist;
+	_stmtlist = new stmt_list;
+	}
+
+decl_setup::stmt_list *decl_setup::_stmtlist;
 
 void
 decl_setup::operator()(reg_decl *p) const

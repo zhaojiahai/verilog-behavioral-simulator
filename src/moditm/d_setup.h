@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -49,6 +49,8 @@ struct decl_setup
 		_last = l;
 		}
 
+	static void reset();
+
 	void net_setup(ident_ptr &, range_type *, type) const;
 	void io_setup(ident_list *, range_type *, iodirection_type, bool) const;
 	// Boolean to indicate whether the net should exist.
@@ -63,6 +65,11 @@ struct decl_setup
 	io_list *_iovariable;
 	param_value_ptr *_first;
 	const param_value_ptr *_last;
+
+	// Keep track of statements allocated for declarations that
+	// using assignments.
+	typedef stmt_type::list_type< basic_ptr<stmt_type> > stmt_list;
+	static stmt_list *_stmtlist;
 	};
 
 #endif // _D_SETUP_H

@@ -94,7 +94,6 @@ using std::ifstream;
 using std::setfill;
 using std::setw;
 
-list<hash_value> module_list;
 vbs_error::value_type parse_error_code;
 
 // Single exit point handling.
@@ -210,10 +209,11 @@ find_top_level(void)
 	// Go through each module in the list and mark all modules which are
 	// instantiated as non-top level.
 	symbol_table &symboltable = vbs_engine::symboltable();
+	std::list<hash_value> &modulelist = vbs_engine::modulelist();
 	Stack<int> scope;
 	scope.push(0);
-	list<hash_value>::iterator idx(module_list.begin());
-	list<hash_value>::iterator stop(module_list.end());
+	list<hash_value>::iterator idx(modulelist.begin());
+	list<hash_value>::iterator stop(modulelist.end());
 	st_module *mod;
 	for (; idx != stop; ++idx)
 		{
@@ -246,7 +246,7 @@ find_top_level(void)
 	// Go through the list of modules.  If more than one module is
 	// considered top level return error, else return the index.
 	hash_value tl;
-	idx = module_list.begin();
+	idx = modulelist.begin();
 	for (; idx != stop; ++idx)
 		{
 		mod = symboltable.get(*idx)->get_module();
@@ -363,7 +363,8 @@ store_module_to_symbol_table(p_module m)
 		vbs_err.set_data((vbs_error::value_type) hv._value, mod->_lineno);
 		vbs_err.out(mod->name());
 		}
-	module_list.push_back(hv);
+	std::list<hash_value> &modulelist = vbs_engine::modulelist();
+	modulelist.push_back(hv);
 	delete mod;
 	}
 

@@ -43,7 +43,7 @@ public:
 
 	event_expr(expr_type *, trig_type = TRIG_NONE);
 	event_expr(const event_expr &);
-	~event_expr();
+	virtual ~event_expr();
 
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;

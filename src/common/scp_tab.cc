@@ -113,6 +113,7 @@ scope_table::get_net(const char *st)
 		if (sc == 0)
 			sc = 1; // top level
 		}
+	free(scp);
 	size_type max = symboltable.size();
 	unsigned int last_dot_position = net_name.rfind(".");
 	if (last_dot_position < net_name.length())

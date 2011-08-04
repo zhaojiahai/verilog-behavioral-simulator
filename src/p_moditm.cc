@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -224,7 +224,7 @@ p_create_tfdecl_list(p_tfdecl_list tflst, p_tfdecl tf)
 p_function_declaration
 p_create_function_declaration
 		(
-		const char *name,
+		char *name,
 		p_statement st,
 		p_tfdecl_list tflist,
 		p_part_select r
@@ -234,6 +234,7 @@ p_create_function_declaration
 	ret = new function(name, (stmt_base *) st, (function::decl_list *) tflist,
 		(part_select *) r);
 	ret->_lineno = cur_lineno;
+	free(name);
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created function definition.\n");
 	return ret;
@@ -242,13 +243,14 @@ p_create_function_declaration
 p_task_declaration
 p_create_task_declaration
 		(
-		const char *name,
+		char *name,
 		p_statement st,
 		p_tfdecl_list tflist)
 	{
 	task *ret;
 	ret = new task(name, (stmt_base *) st, (task::decl_list *) tflist);
 	ret->_lineno = cur_lineno;
+	free(name);
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created task definition.\n");
 	return ret;
@@ -304,11 +306,12 @@ p_create_port_connection_list(p_port_connection_list lst, p_port_connection pc)
 	}
 
 p_module_instance
-p_create_module_instance(const char *name, p_port_connection_list lst)
+p_create_module_instance(char *name, p_port_connection_list lst)
 	{
 	module_instance *ret;
 	ret = new module_instance(name, (module_instance::port_conn_list *)lst);
 	ret->_lineno = cur_lineno;
+	free(name);
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created module instance.\n");
 	return ret;
@@ -331,7 +334,7 @@ p_create_module_instance_list(p_module_instance_list lst, p_module_instance mi)
 	}
 
 p_module_instantiation
-p_create_module_instantiation(const char *name, p_module_instance_list milst,
+p_create_module_instantiation(char *name, p_module_instance_list milst,
 		p_expression_list elst)
 	{
 	module_instantiation *ret;
@@ -339,6 +342,7 @@ p_create_module_instantiation(const char *name, p_module_instance_list milst,
 		(module_instantiation::mod_inst_list *) milst,
 		(module_instantiation::param_value_list *) elst);
 	ret->_lineno = cur_lineno;
+	free(name);
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created module instantiation.\n");
 	return ret;

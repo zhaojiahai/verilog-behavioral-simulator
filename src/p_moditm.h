@@ -1,6 +1,6 @@
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -34,7 +34,7 @@ p_port_connection_list
 p_create_port_connection_list(p_port_connection_list, p_port_connection);
 
 p_module_instance
-p_create_module_instance(const char *, p_port_connection_list);
+p_create_module_instance(char *, p_port_connection_list);
 
 p_module_instance_list
 p_create_module_instance_list(p_module_instance_list, p_module_instance);
@@ -75,7 +75,7 @@ p_create_decl_assign(p_lvalue, p_expression);
 p_function_declaration
 p_create_function_declaration
 	(
-	const char *,
+	char *,
 	p_statement,
 	p_tfdecl_list,
 	p_part_select
@@ -84,7 +84,7 @@ p_create_function_declaration
 p_task_declaration
 p_create_task_declaration
 	(
-	const char *,
+	char *,
 	p_statement,
 	p_tfdecl_list
 	);
@@ -97,7 +97,7 @@ p_create_always_construct(p_statement);
 
 p_module_instantiation
 p_create_module_instantiation(
-	const char *,
+	char *,
 	p_module_instance_list,
 	p_expression_list
 	);

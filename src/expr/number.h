@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -30,6 +30,7 @@ public:
 	number(const char *, base_type, size_type);
 	number(position_type, position_type);
 	number(const number &);
+	virtual ~number();
 
 	number *get_number();
 

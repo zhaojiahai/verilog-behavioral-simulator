@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -48,10 +48,17 @@ struct setup_port : public port_setup
 		: _scope(s)
 		{ _port_conn = p; }
 
+	static void reset();
+
 	void operator()(port *) const;
 
 	scopelist_type &_scope;
 	port_conn_type *_port_conn;
+
+	// Save allocated assignment statements for IN/INOUT
+	// connections.  Must be kept to allow event processing
+	// and prevent memory leak.
+	static std::list< basic_ptr<stmt_base> > *_stmtlist;
 	};
 
 struct setup_port_conn : public port_conn_setup

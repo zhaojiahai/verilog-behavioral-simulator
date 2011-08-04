@@ -35,6 +35,8 @@ struct dec_base : public virtual common_base
 	dec_base(const dec_base &p)
 		: common_base(p), _delayed(p._delayed)
 		{}
+	virtual ~dec_base()
+		{}
 
 	virtual dec_base *copy_constructor() const
 		{ return new dec_base(*this); }

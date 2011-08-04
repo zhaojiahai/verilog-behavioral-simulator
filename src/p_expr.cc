@@ -178,6 +178,7 @@ p_create_function_call(char *name, p_expression_list exp)
 	function_call *ret;
 	ret = new function_call(name, (function_call::arg_list *) exp);
 	ret->_lineno = cur_lineno;
+	free(name);
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created function call.\n");
 	return ret;

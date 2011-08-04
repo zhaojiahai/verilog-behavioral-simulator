@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -35,6 +35,8 @@ struct setup_module_item : public mitf_setup, public decl_setup
 		: decl_setup(s, i, f, l)
 		{}
 
+	static void reset();
+
 	void operator()(initial *) const;
 	void operator()(always *) const;
 	void operator()(cont_assign *) const;
@@ -47,6 +49,11 @@ struct setup_module_item : public mitf_setup, public decl_setup
 	void operator()(reg_decl *) const;
 	void operator()(int_decl *) const;
 	void operator()(param_decl *) const;
+
+	// Keep track of statements allocated for initial/always/continuous
+	// statements with one statement.
+	typedef stmt_type::list_type< basic_ptr<stmt_type> > stmt_list;
+	static stmt_list *_stmtlist;
 	};
 
 #endif // _MISETUP_H

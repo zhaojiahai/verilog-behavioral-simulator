@@ -134,7 +134,10 @@ setup_expr::operator()(concatenation *p) const
 setup_expr::size_type
 setup_expr::operator()(number *p) const
 	{
-	p->_result = new num_type(p->size() - 1, 0);
+	// When a number is used in a range select, it is setup multiple
+	// times.  So check if we have already done setup.
+	if (p->_result == 0)
+		p->_result = new num_type(p->size() - 1, 0);
 	return p->_result->size();
 	}
 
