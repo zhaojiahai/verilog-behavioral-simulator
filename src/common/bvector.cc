@@ -212,7 +212,7 @@ bit_vector::bit_vector(unsigned long value)
 		}
 	_end = i - 1;
 	_size = (_end - _begin) + 1;
-	memset(_bits + i, NVL, largest - i);
+	memset(_bits + i, static_cast<int>(NVL), largest - i);
 	}
 
 bit_vector::bit_vector(const str_type &str, base_type base, size_type len)
@@ -261,7 +261,7 @@ bit_vector::bit_vector(const str_type &str, base_type base, size_type len)
 	else
 		{
 		// No initial value, clear to dont-care.
-		memset(_bits, DC, len);
+		memset(_bits, static_cast<int>(DC), len);
 		}
 	}
 
@@ -287,7 +287,7 @@ bit_vector::operator unsigned long() const
 	unsigned long res = 0;
 	position_type numbits = 8 * sizeof(res);
 	position_type j = _begin;
-	if ((size_type)numbits >= _size)
+	if (static_cast<size_type>(numbits) >= _size)
 		numbits = _end;
 	else
 		numbits = (_begin + numbits) - 1;
@@ -296,7 +296,7 @@ bit_vector::operator unsigned long() const
 		if (_bits[j] == HI)
 			res |= 1 << i;
 		else if (_bits[j] > HI)
-			return (unsigned long)-1;
+			return static_cast<unsigned long>(-1);
 		}
 	return res;
 	}
@@ -336,7 +336,7 @@ bit_vector::operator+=(const bit_vector &bv)
 			if (R > HI)
 				{
 				// DC or Z found.  Set the rest of the result to DC's.
-				memset(data+i, DC, (_end+1)-i);
+				memset(data+i, static_cast<int>(DC), (_end+1)-i);
 				break;
 				}
 			}
@@ -344,7 +344,7 @@ bit_vector::operator+=(const bit_vector &bv)
 		if (L > HI)
 			{
 			// DC or Z found.  Set the rest of the result to DC's.
-			memset(data+i, DC, (_end+1)-i);
+			memset(data+i, static_cast<int>(DC), (_end+1)-i);
 			break;
 			}
 		//  Table for adding two bit vectors:
@@ -358,9 +358,9 @@ bit_vector::operator+=(const bit_vector &bv)
 		//   1 0 1 | 2 |  0  1
 		//   1 1 0 | 2 |  0  1
 		//   1 1 1 | 3 |  1  1
-		pad = int(Ci) + int(L) + int(R);
-		data[i] = logic_type::state_value(pad & 1);
-		Ci = logic_type::state_value(pad >> 1);
+		pad = static_cast<int>(Ci) + static_cast<int>(L) + static_cast<int>(R);
+		data[i] = static_cast<logic_type::state_value>(pad & 1);
+		Ci = static_cast<logic_type::state_value>(pad >> 1);
 		}
 	return *this;
 	}
@@ -390,7 +390,7 @@ bit_vector::operator-=(const bit_vector &bv)
 			if (R > HI)
 				{
 				// DC or Z found.  Set the rest of the result to DC's.
-				memset(data+i, DC, (_end+1)-i);
+				memset(data+i, static_cast<int>(DC), (_end+1)-i);
 				break;
 				}
 			}
@@ -398,7 +398,7 @@ bit_vector::operator-=(const bit_vector &bv)
 		if (L > HI)
 			{
 			// DC or Z found.  Set the rest of the result to DC's.
-			memset(data+i, DC, (_end+1)-i);
+			memset(data+i, static_cast<int>(DC), (_end+1)-i);
 			break;
 			}
 		//  Table for subtracting two bit vectors:
@@ -412,9 +412,9 @@ bit_vector::operator-=(const bit_vector &bv)
 		//   1 0 1 | -2 | 0  1
 		//   1 1 0 |  0 | 0  0
 		//   1 1 1 | -1 | 1  1
-		pad = (int(L) - int(R) - int(Bi)) & 3;
-		data[i] = logic_type::state_value(pad & 1);
-		Bi = logic_type::state_value(pad >> 1);
+		pad = (static_cast<int>(L) - static_cast<int>(R) - static_cast<int>(Bi)) & 3;
+		data[i] = static_cast<logic_type::state_value>(pad & 1);
+		Bi = static_cast<logic_type::state_value>(pad >> 1);
 		}
 	return *this;
 	}
@@ -422,30 +422,30 @@ bit_vector::operator-=(const bit_vector &bv)
 inline bit_vector &
 bit_vector::operator<<=(unsigned long amt)
 	{
-	if (amt == (unsigned long)-1)
-		memset (_bits+_begin, DC, _size);
+	if (amt == static_cast<unsigned long>(-1))
+		memset(_bits+_begin, static_cast<int>(DC), _size);
 	else if (amt < _size)
 		{
 		memmove(_bits+_begin + amt, _bits+_begin, _size - amt);
-		memset(_bits+_begin, LO, amt);
+		memset(_bits+_begin, static_cast<int>(LO), amt);
 		}
 	else
-		memset (_bits+_begin, LO, _size);
+		memset(_bits+_begin, static_cast<int>(LO), _size);
 	return *this;
 	}
 
 inline bit_vector &
 bit_vector::operator>>=(unsigned long amt)
 	{
-	if (amt == (unsigned long)-1)
-		memset (_bits+_begin, DC, _size);
+	if (amt == static_cast<unsigned long>(-1))
+		memset(_bits+_begin, static_cast<int>(DC), _size);
 	else if (amt < _size)
 		{
 		memmove(_bits+_begin, _bits+_begin+amt, _size - amt);
-		memset(_bits+_begin+amt+1, LO, amt);
+		memset(_bits+_begin+amt+1, static_cast<int>(LO), amt);
 		}
 	else
-		memset (_bits+_begin, LO, _size);
+		memset(_bits+_begin, static_cast<int>(LO), _size);
 	return *this;
 	}
 
@@ -487,7 +487,7 @@ bit_vector::binary_2_decimal(size_type len) const
 	decimal_type wt = 0, num = 0;
 	position_type numbits = 8 * sizeof(decimal_type);
 	position_type j = _begin;
-	if ((size_type)numbits >= _size)
+	if (static_cast<size_type>(numbits) >= _size)
 		numbits = _end;
 	else
 		numbits = (_begin + numbits) - 1;
@@ -628,7 +628,7 @@ bit_vector::sign_extend(position_type last)
 	if (len > 0)
 		{
 		logic_type hb = _bits[last]; // High bit.
-		memset(_bits+last, hb, len);
+		memset(_bits+last, static_cast<int>(hb), len);
 		}
 	}
 
@@ -721,7 +721,7 @@ bit_vector::assign_from_dec(const str_type &str)
 		if (!isdigit(str[i]))
 			{
 			// Set entire bit vector to don't cares.
-			memset(_bits, DC, _size);
+			memset(_bits, static_cast<int>(DC), _size);
 			return;
 			}
 		}
@@ -730,7 +730,7 @@ bit_vector::assign_from_dec(const str_type &str)
 	decimal_type value = strtoul(str.c_str(), 0, 10);
 	if (value == 0)
 		{
-		memset(_bits, LO, _size);
+		memset(_bits, static_cast<int>(LO), _size);
 		return;
 		}
 
@@ -1001,7 +1001,7 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 				if (l._end > r._end)
 					memcpy(data+i, l_data+li, (l._end+1)-li);
 				else
-					memset(data+i, LO, (res._end+1)-i);
+					memset(data+i, static_cast<int>(LO), (res._end+1)-i);
 				break;
 				}
 			else
@@ -1012,8 +1012,8 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 			R = r_data[ri];
 			if (R > HI)
 				{
-				// DC or Z found.  Set the rest of the result to DC's.
-				memset(data+i, DC, (res._end+1)-i);
+				// DC or Z found.  Set entire result to DC's.
+				memset(res._bits+res._begin, static_cast<int>(DC), res._size);
 				break;
 				}
 			}
@@ -1024,7 +1024,7 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 				if (r._end > l._end)
 					memcpy(data+i, r_data+ri, (r._end+1)-ri);
 				else
-					memset(data+i, LO, (res._end+1)-i);
+					memset(data+i, static_cast<int>(LO), (res._end+1)-i);
 				break;
 				}
 			else
@@ -1035,14 +1035,14 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 			L = l_data[li];
 			if (L > HI)
 				{
-				// DC or Z found.  Set the rest of the result to DC's.
-				memset(data+i, DC, (res._end+1)-i);
+				// DC or Z found.  Set entire result to DC's.
+				memset(res._bits+res._begin, static_cast<int>(DC), res._size);
 				break;
 				}
 			}
-		pad = int(Ci) + int(L) + int(R);
-		data[i] = bit_vector::logic_type::state_value(pad & 1);
-		Ci = bit_vector::logic_type::state_value(pad >> 1);
+		pad = static_cast<int>(Ci) + static_cast<int>(L) + static_cast<int>(R);
+		data[i] = static_cast<bit_vector::logic_type::state_value>(pad & 1);
+		Ci = static_cast<bit_vector::logic_type::state_value>(pad >> 1);
 		}
 	return res;
 	}
@@ -1073,8 +1073,8 @@ binary_sub(bit_vector &res, const bit_vector &l, const bit_vector &r)
 			R = r_data[ri];
 			if (R > HI)
 				{
-				// DC or Z found.  Set the rest of the result to DC's.
-				memset(data+i, DC, (res._end+1)-i);
+				// DC or Z found.  Set entire result to DC's.
+				memset(res._bits+res._begin, static_cast<int>(DC), res._size);
 				break;
 				}
 			}
@@ -1085,14 +1085,14 @@ binary_sub(bit_vector &res, const bit_vector &l, const bit_vector &r)
 			L = l_data[li];
 			if (L > HI)
 				{
-				// DC or Z found.  Set the rest of the result to DC's.
-				memset(data+i, DC, (res._end+1)-i);
+				// DC or Z found.  Set entire result to DC's.
+				memset(res._bits+res._begin, static_cast<int>(DC), res._size);
 				break;
 				}
 			}
-		pad = (int(L) - int(R) - int(Bi)) & 3;
-		data[i] = bit_vector::logic_type::state_value(pad & 1);
-		Bi = bit_vector::logic_type::state_value(pad >> 1);
+		pad = (static_cast<int>(L) - static_cast<int>(R) - static_cast<int>(Bi)) & 3;
+		data[i] = static_cast<bit_vector::logic_type::state_value>(pad & 1);
+		Bi = static_cast<bit_vector::logic_type::state_value>(pad >> 1);
 		}
 	return res;
 	}
@@ -1124,9 +1124,6 @@ binary_div(bit_vector &qoutient, const bit_vector &l, const bit_vector &r)
 	bit_vector remainder(qoutient._begin, qoutient._end, LO);
 	bool is_zero = true;
 
-	// Invalidate result.
-	qoutient = DC;
-
 	// Check input to division.
 	for (i = r._begin; i <= r._end; ++i)
 		{
@@ -1137,6 +1134,9 @@ binary_div(bit_vector &qoutient, const bit_vector &l, const bit_vector &r)
 		}
 	if (is_zero)
 		return qoutient = nan;
+
+	// Initialize result.
+	qoutient = LO;
 
 	for (i = l._end; i >= l._begin; --i)
 		{
@@ -1200,33 +1200,45 @@ binary_mod(bit_vector &remainder, const bit_vector &l, const bit_vector &r)
 	}
 
 bit_vector &
-binary_lshf(bit_vector &res, const bit_vector &bv, unsigned long amt)
+binary_lshf(bit_vector &res, const bit_vector &l, const bit_vector &r)
 	{
-	// Shift <bv> to the left by <amt>.
-	bit_vector::position_type start = amt + res._begin;
-	memset(res._bits+res._begin, LO, res._size);
-	if (start <= res._end)
+	// Shift <l> to the left by <r>.
+	unsigned long c = static_cast<unsigned long>(r);
+	if (c == static_cast<unsigned long>(-1))
+		memset(res._bits+res._begin, static_cast<int>(DC), res._size);
+	else
 		{
-		bit_vector::size_type s = (res._end + 1) - start;
-		if (s > bv._size)
-			s = bv._size;
-		memcpy(res._bits+start, bv._bits+bv._begin, s);
+		bit_vector::position_type start = c + res._begin;
+		memset(res._bits+res._begin, static_cast<int>(LO), res._size);
+		if (start <= res._end)
+			{
+			bit_vector::size_type s = (res._end + 1) - start;
+			if (s > l._size)
+				s = l._size;
+			memcpy(res._bits+start, l._bits+l._begin, s);
+			}
 		}
 	return res;
 	}
 
 bit_vector &
-binary_rshf(bit_vector &res, const bit_vector &bv, unsigned long amt)
+binary_rshf(bit_vector &res, const bit_vector &l, const bit_vector &r)
 	{
-	// Shift <bv> to the right by <amt>.
-	bit_vector::position_type start = amt + bv._begin;
-	memset(res._bits+res._begin, LO, res._size);
-	if (start <= bv._end)
+	// Shift <l> to the right by <r>.
+	unsigned long c = static_cast<unsigned long>(r);
+	if (c == static_cast<unsigned long>(-1))
+		memset(res._bits+res._begin, static_cast<int>(DC), res._size);
+	else
 		{
-		bit_vector::size_type s = (bv._end + 1) - start;
-		if (s > res._size)
-			s = res._size;
-		memcpy(res._bits+res._begin, bv._bits+start, s);
+		bit_vector::position_type start = c + l._begin;
+		memset(res._bits+res._begin, static_cast<int>(LO), res._size);
+		if (start <= l._end)
+			{
+			bit_vector::size_type s = (l._end + 1) - start;
+			if (s > res._size)
+				s = res._size;
+			memcpy(res._bits+res._begin, l._bits+start, s);
+			}
 		}
 	return res;
 	}

@@ -101,23 +101,24 @@ void
 test_shift(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &e)
 	{
+	bit_vector four(4UL), two(2UL);
 	bit_vector test(7,0), test1(7,0), test2(3,0);
 
 	test = e;
-	//test1 = test << 4UL;
-	binary_lshf(test1, test, 4UL);
-	//test2 = e << 2UL;
-	binary_lshf(test2, e, 2UL);
-	cout << "test1(=e<<4)=" << test1 << " (=11010000)"
+	//test1 = test << four;
+	binary_lshf(test1, test, four);
+	//test2 = e << two;
+	binary_lshf(test2, e, two);
+	cout << "test1(e<<4)=" << test1 << " (=11010000)"
 		<< " test2(e<<2)=" << test2 << " (=0100)"
 		<< endl;
 
 	test = test1;
-	//test1 = test >> 4UL;
-	binary_rshf(test1, test, 4UL);
-	//test2 = e >> 2UL;
-	binary_rshf(test2, e, 2UL);
-	cout << "test1(=e>>4)=" << test1 << " (=00001101)"
+	//test1 = test >> four;
+	binary_rshf(test1, test, four);
+	//test2 = e >> two;
+	binary_rshf(test2, e, two);
+	cout << "test1(e>>4)=" << test1 << " (=00001101)"
 		<< " test2(e>>2)=" << test2 << " (=0011)"
 		<< endl;
 	}

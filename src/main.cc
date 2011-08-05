@@ -354,13 +354,13 @@ main(int argc, char *argv[])
 void
 vbs_warn(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
-	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str());
+	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str()) << endl;
 	}
 
 void
 vbs_fatal(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
-	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str());
+	cout << endl << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str()) << endl << endl;
 	cout << "Error detected during " << st << "...exiting" << endl;
 	exit(c);
 	}

@@ -26,8 +26,6 @@ class delay_id : public dec_base
 public:
 	typedef hash_value hash_type;
 	typedef expr_base expr_type;
-	typedef stmt_base stmt_type;
-	typedef event_base<stmt_type> event_type;
 
 	delay_id(expr_type *);
 	delay_id(const delay_id &);
@@ -44,6 +42,8 @@ private:
 
 	// In case the delay amount is zero, we need to append to the
 	// event queue rather than the time wheel.
+	typedef stmt_base stmt_type;
+	typedef event_base<stmt_type> event_type;
 	event_type *_event;
 	};
 

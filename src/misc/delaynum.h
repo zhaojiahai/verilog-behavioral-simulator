@@ -27,8 +27,6 @@ class delay_num : public dec_base, public bit_vector
 public:
 	typedef bit_vector num_type;
 	typedef dec_base::ostream_type ostream_type;
-	typedef stmt_base stmt_type;
-	typedef event_base<stmt_type> event_type;
 
 	delay_num(const num_type &);
 	delay_num(const delay_num &);
@@ -43,6 +41,8 @@ public:
 private:
 	// In case the delay amount is zero, we need to append to the
 	// event queue rather than the time wheel.
+	typedef stmt_base stmt_type;
+	typedef event_base<stmt_type> event_type;
 	event_type *_event;
 	};
 

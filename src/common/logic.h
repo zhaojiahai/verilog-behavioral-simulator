@@ -33,9 +33,11 @@ public:
 	enum edge_type { NOEDGE, POSEDGE, NEGEDGE };
 
 	logic(state_value l = NVL)
-		: _state(l) { }
+		: _state(l)
+		{ }
 	logic(const logic &l)
-		: _state(l._state) { }
+		: _state(l._state)
+		{ }
 
 	logic &operator=(const logic l)
 		{ _state = l._state; return *this; }
@@ -69,26 +71,6 @@ public:
 		size_t size;
 		};
 	static cache_union *cache[cache_size];
-	void *operator new(size_t size)
-		{
-		void *p;
-		cache_union *cu;
-		size += sizeof(cache_union);
-		if (cache[size] != 0)
-			{
-			p = cache[size];
-			cache[size] = cache[size]->next;
-			}
-		else
-			{
-			// Allocate another block of memory.
-			p = malloc(size);
-			}
-		cu = (cache_union *)p;
-		cu->size = size;
-		p = (char *)p + sizeof(cache_union);
-		return p;
-		}
 	void *operator new[](size_t size)
 		{
 		void *p;
@@ -109,15 +91,6 @@ public:
 		p = (char *)p + sizeof(cache_union);
 		return p;
 		}
-	void operator delete(void *ptr)
-		{
-		cache_union *tmp;
-		ptr = (char *)ptr - sizeof(cache_union);
-		cache_union *cu = (cache_union *)ptr;
-		tmp = cache[cu->size];
-		cache[cu->size] = cu;
-		cu->next = tmp;
-		}
 	void operator delete[](void *ptr)
 		{
 		cache_union *tmp;
@@ -125,7 +98,7 @@ public:
 		cache_union *cu = (cache_union *)ptr;
 		tmp = cache[cu->size];
 		cache[cu->size] = cu;
-		cu->next = tmp;
+		cache[cu->size]->next = tmp;
 		}
 	};
 

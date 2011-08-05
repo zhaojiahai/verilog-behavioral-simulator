@@ -376,6 +376,9 @@ preprocessor_find(string &pn)
 	// Find the preprocessor program.
 	static string standard_locations[] =
 		{
+#if defined(VERILOGVPP_DIR)
+		string(VERILOGVPP_DIR),
+#endif // VERILOGVPP_DIR
 		string("/bin/"),
 		string("/usr/bin/"),
 		string("/usr/local/bin/"),
@@ -388,6 +391,7 @@ preprocessor_find(string &pn)
 	if (sep != (string::size_type) -1 && sep > 0)
 		{
 		pn.erase(sep, pn.size());
+		pn.append("/");
 		pn.append(VERILOGVPP_PROG);
 		// Check for existence.
 		if (sim_program_exist(pn.c_str()))
@@ -406,6 +410,7 @@ preprocessor_find(string &pn)
 	for (int i = 0; i < 4; ++i)
 		{
 		pn = standard_locations[i];
+		pn.append("/");
 		pn.append(VERILOGVPP_PROG);
 		if (sim_program_exist(pn.c_str()))
 			return true;
@@ -755,7 +760,6 @@ sim_errmsg(const char *prog, const char *m, const char *fn, int ln, int c, const
 	{
 	stringstream s;
 
-	s << endl;
 	s << prog << ": ";
 	s << fn << '[';
 	if (ln > 0)
@@ -771,7 +775,7 @@ sim_errmsg(const char *prog, const char *m, const char *fn, int ln, int c, const
 	s << "- " << cs;
 
 	// Display the message.
-	s << " (" << m << ")." << endl << endl;
+	s << " (" << m << ").";
 
 	return s.str().c_str();
 	}

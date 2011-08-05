@@ -113,7 +113,7 @@ struct stmt_base : public virtual common_base
 	typedef stmt_trigger trigger_type;
 	typedef stmt_write write_type;
 
-	stmt_base(dec_type *d = 0)
+	stmt_base()
 		: _always(false)
 		{ _ec = 0; _dec = 0; }
 	stmt_base(const stmt_base &s)

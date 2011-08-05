@@ -169,8 +169,8 @@ public:
 	friend bit_vector &binary_mul(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_div(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_mod(bit_vector &, const bit_vector &, const bit_vector &);
-	friend bit_vector &binary_lshf(bit_vector &, const bit_vector &, unsigned long);
-	friend bit_vector &binary_rshf(bit_vector &, const bit_vector &, unsigned long);
+	friend bit_vector &binary_lshf(bit_vector &, const bit_vector &, const bit_vector &);
+	friend bit_vector &binary_rshf(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &logic_op(bit_vector &, const bit_vector &, const bit_vector &, const logic [][NUMLOGIC]);
 	friend bit_vector &logic_and(bit_vector &bv, const bit_vector &l, const bit_vector &r)
 		{ return logic_op(bv, l, r, logic_AND); }
@@ -337,7 +337,7 @@ bit_vector::sub_bit_vector::operator=(const sub_bit_vector &sbv)
 		}
 	// Did we get everything we asked for?
 	if (i <= _end && i <= _BV._end)
-		memset(_BV._bits + i, LO, _end - i + 1);
+		memset(_BV._bits + i, static_cast<int>(LO), _end - i + 1);
 	return *this;
 	}
 
@@ -364,7 +364,7 @@ bit_vector::sub_bit_vector::operator=(const const_sub_bit_vector &sbv)
 		}
 	// Did we get everything we asked for?
 	if (i <= _end && i <= _BV._end)
-		memset(_BV._bits + i, LO, _end - i + 1);
+		memset(_BV._bits + i, static_cast<int>(LO), _end - i + 1);
 	return *this;
 	}
 
@@ -386,7 +386,7 @@ bit_vector::sub_bit_vector::operator=(const bit_vector &bv)
 			_BV._bits[i] = bv._bits[j];
 		}
 	if (i <= _end && i <= _BV._end)
-		memset(_BV._bits + i, LO, _end - i + 1);
+		memset(_BV._bits + i, static_cast<int>(LO), _end - i + 1);
 	return *this;
 	}
 
@@ -407,7 +407,7 @@ operator<<(bit_vector::ostream_type &s, const bit_vector::sub_bit_vector &sbv)
 	// We do not need to reverse the order.
 	bit_vector::position_type i = sbv._end;
 	for (; i >= sbv._begin; --i)
-		s << char (sbv._BV._bits[i]);
+		s << static_cast<char>(sbv._BV._bits[i]);
 	return s;
 	}
 
@@ -459,7 +459,7 @@ operator<<(bit_vector::ostream_type &s, const bit_vector::const_sub_bit_vector &
 	// We do not need to reverse the order.
 	bit_vector::position_type i = sbv._end;
 	for (; i >= sbv._begin; --i)
-		s << char (sbv._BV._bits[i]);
+		s << static_cast<char>(sbv._BV._bits[i]);
 	return s;
 	}
 
@@ -508,8 +508,8 @@ bit_vector::bit_vector(position_type ms, position_type ls, logic_type val)
 	// If we begin offset from zero, we need to setup the unused bits.
 	_bits = new logic_type[_end + 1]; // <_begin> + <_size>!
 	// Initialize array to <val>, default is don't-care.
-	memset(_bits, NVL, _begin);
-	memset(_bits + _begin, val, _size);
+	memset(_bits, static_cast<int>(NVL), _begin);
+	memset(_bits + _begin, static_cast<int>(val), _size);
 	}
 
 inline
@@ -571,9 +571,9 @@ bit_vector::operator=(const bit_vector &bv)
 			{
 			memcpy(dst, src, i);
 			if (dst[i - 1] == DC)
-				memset(dst + i, DC, _size - i);
+				memset(dst + i, static_cast<int>(DC), _size - i);
 			else
-				memset(dst + i, LO, _size - i);
+				memset(dst + i, static_cast<int>(LO), _size - i);
 			}
 		else
 			{
@@ -609,15 +609,15 @@ bit_vector::operator=(const sub_bit_vector &sbv)
 		if (sbv._begin > sbv._BV._end || sbv._end < sbv._BV._begin)
 			{
 			// Access beyond the end.
-			memset(dst, DC, _size);
+			memset(dst, static_cast<int>(DC), _size);
 			}
 		else if (i < _size)
 			{
 			memcpy(dst, src, i);
 			if (dst[i - 1] == DC)
-				memset(dst + i, DC, _size - i);
+				memset(dst + i, static_cast<int>(DC), _size - i);
 			else
-				memset(dst + i, LO, _size - i);
+				memset(dst + i, static_cast<int>(LO), _size - i);
 			}
 		else
 			{
@@ -653,15 +653,15 @@ bit_vector::operator=(const const_sub_bit_vector &sbv)
 		if (sbv._begin > sbv._BV._end || sbv._end < sbv._BV._begin)
 			{
 			// Access beyond the end.
-			memset(dst, DC, _size);
+			memset(dst, static_cast<int>(DC), _size);
 			}
 		else if (i < _size)
 			{
 			memcpy(dst, src, i);
 			if (dst[i - 1] == DC)
-				memset(dst + i, DC, _size - i);
+				memset(dst + i, static_cast<int>(DC), _size - i);
 			else
-				memset(dst + i, LO, _size - i);
+				memset(dst + i, static_cast<int>(LO), _size - i);
 			}
 		else
 			{

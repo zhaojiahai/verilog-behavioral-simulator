@@ -27,8 +27,8 @@ event_expr::event_expr(const event_expr &p)
 
 event_expr::~event_expr()
 	{
+	// _event is managed by a counted_ptr, so no need to delete manually.
 	delete _expr;
-	delete _event;
 	}
 
 event_expr::ostream_type &

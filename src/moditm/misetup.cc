@@ -190,16 +190,6 @@ setup_module_item::operator()(always *p) const
 	}
 
 void
-setup_module_item::reset()
-	{
-	delete _stmtlist;
-	_stmtlist = new stmt_list;
-	}
-
-setup_module_item::stmt_list *setup_module_item::_stmtlist;
-
-
-void
 setup_module_item::operator()(cont_assign *p) const
 	{
 	// A continuous assignment has many similarities with other
@@ -246,6 +236,16 @@ setup_module_item::operator()(cont_assign *p) const
 		eventqueue.add_event(ev);
 		}
 	}
+
+void
+setup_module_item::reset()
+	{
+	delete _stmtlist;
+	_stmtlist = new stmt_list;
+	}
+
+setup_module_item::stmt_list *setup_module_item::_stmtlist;
+
 
 void
 setup_module_item::operator()(function *p) const
