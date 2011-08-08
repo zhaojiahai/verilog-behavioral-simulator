@@ -140,6 +140,11 @@ struct stmt_base : public virtual common_base
 	// better support for it.
 	virtual loop_stmt *get_loop()
 		{ return 0; }
+	// get_assign is used for setting up sequential blocks.  This
+	// should be changed later to dynamic_cast when compilers have
+	// better support for it.
+	virtual assignment_stmt *get_assign()
+		{ return 0; }
 
 	virtual stmt_base *copy_constructor() const
 		{ return new stmt_base(*this); }

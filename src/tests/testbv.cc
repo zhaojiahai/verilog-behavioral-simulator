@@ -37,12 +37,20 @@ test_equality(bit_vector &, bit_vector &, bit_vector &c,
 	bit_vector test1(string("1101"));
 	if (test1 == d)
 		cout << "test1 == d (ok!)" << endl;
+	else
+		cout << "test1 == d (not!)" << endl;
 	if (test1 != d)
 		cout << "test1 != d (not!)" << endl;
+	else
+		cout << "test1 != d (ok!)" << endl;
 	if (test1 == c)
 		cout << "test1 == c (not!)" << endl;
+	else
+		cout << "test1 == c (ok!)" << endl;
 	if (test1 != c)
 		cout << "test1 != c (ok!)" << endl;
+	else
+		cout << "test1 != c (not!)" << endl;
 	}
 
 void
@@ -50,9 +58,13 @@ test_notop(bit_vector &, bit_vector &b, bit_vector &,
 		bit_vector &, bit_vector &)
 	{
 	if (!b)
-		cout << "b is false (not!)" << endl;
+		cout << "!b (not!)" << endl;
+	else
+		cout << "!b (ok!)" << endl;
 	if (!(!b))
-		cout << "b is true (ok!)" << endl;
+		cout << "!(!b) (ok!)" << endl;
+	else
+		cout << "!(!b) (not!)" << endl;
 	}
 
 void
@@ -169,16 +181,24 @@ void
 test_comp(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &)
 	{
-	bit_vector test1(15UL), test2(25UL), test3(15UL);
+	bit_vector test1(15UL), test2(25UL), test3(15UL), test4("e7", bit_vector::BASE16, 8, true);
 
 	if (test1 < test2)
-		cout << test1 << " < " << test2 << " Ok!" << endl;
+		cout << test1 << " < " << test2 << " ok!" << endl;
 	else
-		cout << test1 << " !< " << test2 << " Not!" << endl;
+		cout << test1 << " < " << test2 << " not!" << endl;
 	if (test1 <= test3)
-		cout << test1 << " <= " << test3 << " Ok!" << endl;
+		cout << test1 << " <= " << test3 << " ok!" << endl;
 	else
-		cout << test1 << " !<= " << test3 << " Not!" << endl;
+		cout << test1 << " <= " << test3 << " not!" << endl;
+	if (test1 < test4)
+		cout << test1 << " < " << test4 << " not!" << endl;
+	else
+		cout << test1 << " < " << test4 << " ok!" << endl;
+	if (test4 < test2)
+		cout << test4 << " < " << test2 << " ok!" << endl;
+	else
+		cout << test4 << " < " << test2 << " not!" << endl;
 	}
 
 void
@@ -188,11 +208,11 @@ test_div(bit_vector &, bit_vector &, bit_vector &,
 	bit_vector test(1586UL), test1(1586UL), test2(25UL), test3(63UL);
 	//test = test1 / test2;
 	binary_div(test, test1, test2);
-	cout << "test=" << test;
+	cout << "test1/test2=" << test;
 	if (test == test3)
-		cout << " Ok!" << endl;
+		cout << " ok!" << endl;
 	else
-		cout << " Not!" << endl;
+		cout << " not!" << endl;
 	}
 
 void
@@ -202,11 +222,11 @@ test_mod(bit_vector &, bit_vector &, bit_vector &,
 	bit_vector test(1586UL), test1(1586UL), test2(25UL), test3(11UL);
 	//test = test1 % test2;
 	binary_mod(test, test1, test2);
-	cout << "test=" << test;
+	cout << "test1%test2=" << test;
 	if (test == test3)
-		cout << " Ok!" << endl;
+		cout << " ok!" << endl;
 	else
-		cout << " Not!" << endl;
+		cout << " not!" << endl;
 	}
 
 void
@@ -257,19 +277,20 @@ main()
 	test_div(a,b,c,d,e);
 	test_mod(a,b,c,d,e);
 
-	//d = ~d;
-	unary_inv(d, d);
-	cout << "d inverted = " << d << " (=xx01)" << endl;
-	//e = e + d;
-	binary_add(e, e, d);
-	cout << "e(e+d)=" << e << " (=xx10)" << endl;
+	bit_vector res(d);
+	//res = ~d;
+	unary_inv(res, d);
+	cout << "d inverted = " << res << " (=xx01)" << endl;
+	//res = e + d;
+	binary_add(e, res, d);
+	cout << "e(res+d)=" << e << " (=xxxx)" << endl;
 	printout(a,b,c,d,e);
 
 	bit_vector tmp(string("101101101011"));
 	string tmp1 = tmp.to_string(bit_vector::BASE8);
 	string tmp2 = tmp.to_string(bit_vector::BASE10);
 	string tmp3 = tmp.to_string(bit_vector::BASE16);
-	cout << "101101101011:" << tmp << " "
+	cout << "101101101011: " << tmp << " "
 		<< tmp1 << " "
 		<< tmp2 << " "
 		<< tmp3 << " "

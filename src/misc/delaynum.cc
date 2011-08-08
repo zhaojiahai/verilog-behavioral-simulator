@@ -35,7 +35,7 @@ delay_num::copy_constructor() const
 delay_num::ostream_type &
 delay_num::display(ostream_type &s) const
 	{
-	s << '#' << to_string(num_type::BASE10) << ' ';
+	s << '#' << to_string() << ' ';
 	return s;
 	}
 

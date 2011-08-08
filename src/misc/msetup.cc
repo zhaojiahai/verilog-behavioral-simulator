@@ -137,8 +137,22 @@ setup_select::operator()(part_select *p) const
 	p->_le->setup(setup_expr(_scope, true));
 	p->_re->setup(setup_expr(_scope, true));
 	// Must be constant, so optimize.
-	p->_ln = (unsigned long)p->_le->evaluate(evaluate_expr());
-	p->_rn = (unsigned long)p->_re->evaluate(evaluate_expr());
+	p->_ln = static_cast<unsigned long>(p->_le->evaluate(evaluate_expr()));
+	p->_rn = static_cast<unsigned long>(p->_re->evaluate(evaluate_expr()));
+	if (static_cast<signed long>(p->_ln) < 0)
+		{
+		part_select::strstream_type buf;
+		buf << *p;
+		vbs_err.set_data(vbs_error::SE_SUPPORT, p->_lineno);
+		vbs_err.out(buf);
+		}
+	if (static_cast<signed long>(p->_rn) < 0)
+		{
+		part_select::strstream_type buf;
+		buf << *p;
+		vbs_err.set_data(vbs_error::SE_SUPPORT, p->_lineno);
+		vbs_err.out(buf);
+		}
 	}
 
 

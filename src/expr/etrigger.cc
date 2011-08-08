@@ -55,14 +55,15 @@ get_base_size(const trigger_expr::str_type &fmt,
 	buf[j] = '\0';
 
 	// Convert to format.
-	size = atoi(buf.data());
+	if (j > 0)
+		size = atoi(buf.data());
 	}
 
 void
 display_output(const trigger_expr::str_type &s, const trigger_expr::num_type &n)
 	{
 	trigger_expr::num_type::base_type base = trigger_expr::num_type::BASE10;
-	trigger_expr::num_type::size_type size = 0;
+	trigger_expr::num_type::size_type size = static_cast<unsigned long>(-1);
 	get_base_size(s, base, size);
 	cout << n.to_string(base, size);
 	}

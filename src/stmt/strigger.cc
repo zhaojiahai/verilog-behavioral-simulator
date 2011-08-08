@@ -617,7 +617,7 @@ trigger_stmt::operator()(assignment_stmt *p) const
 				if (dec != 0)
 					dec->_delayed = true;
 				p->_delayed_store->_delayed = true;
-				if (p->_delayed_store->trigger(trigger_dec(_parent)) == 1)
+				if (p->_delayed_store->trigger(trigger_dec(_parent)) != 0)
 					return false;
 				}
 			}

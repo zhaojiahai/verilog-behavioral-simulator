@@ -201,16 +201,21 @@ const evaluate_expr::num_type &
 evaluate_expr::operator()(const ternary_op_expr *p) const
 	{
 	const num_type &expr(p->_expr->evaluate(evaluate_expr()));
-	num_type::logic_type comp = (expr == LO);
-	if (comp == HI)
-		*p->_result = p->_false_expr->evaluate(evaluate_expr());
-	else if (comp == LO)
-		*p->_result = p->_true_expr->evaluate(evaluate_expr());
-	else
+	const num_type zero(LO);
+	num_type::logic_type non_zero = (expr > zero);
+	switch (static_cast<int>(non_zero))
 		{
-		const num_type &t(p->_true_expr->evaluate(evaluate_expr()));
-		const num_type &f(p->_false_expr->evaluate(evaluate_expr()));
-		ternary_cmp(*p->_result, t, f);
+		case 0:
+			*p->_result = p->_false_expr->evaluate(evaluate_expr());
+			break;
+		case 1:
+			*p->_result = p->_true_expr->evaluate(evaluate_expr());
+			break;
+		default:
+			const num_type &t(p->_true_expr->evaluate(evaluate_expr()));
+			const num_type &f(p->_false_expr->evaluate(evaluate_expr()));
+			ternary_cmp(*p->_result, t, f);
+			break;
 		}
 	p->_result->set_tristate();
 	return *p->_result;

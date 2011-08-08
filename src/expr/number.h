@@ -27,7 +27,7 @@ public:
 	typedef expr_base::str_type nstr_type;
 	typedef expr_base::ostream_type nostream_type;
 
-	number(const char *, base_type, size_type);
+	number(const char *, base_type, size_type, bool);
 	number(position_type, position_type);
 	number(const number &);
 	virtual ~number();

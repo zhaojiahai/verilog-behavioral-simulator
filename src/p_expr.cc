@@ -135,19 +135,30 @@ p_create_number(char *s)
 		}
 	else
 		{
+		int idx = 1;
 		if (str[0] == '\'')
 			{
+			if (*(str + 1) == 's')
+				{
+				negative = true;
+				idx++;
+				}
 			len = 32; // Unsized constants must be at least 32bits.
-			base = *(str + 1);
-			num = str + 2;
+			base = *(str + idx++);
+			num = str + idx;
 			}
 		else
 			{
 			char *tmp = vbs_strdup(str);
 			siz = strtok(tmp, "\'");
+			if (*(str + strlen(siz) + 1) == 's')
+				{
+				negative = true;
+				idx++;
+				}
 			len = negative ? 32 : atoi(siz);
-			base = *(str + strlen(siz) + 1);
-			num = str + strlen(siz) + 2;
+			base = *(str + strlen(siz) + idx++);
+			num = str + strlen(siz) + idx;
 			free(tmp);
 			}
 		}
@@ -158,13 +169,13 @@ p_create_number(char *s)
 		case 'd': case 'D': type = bit_vector::BASE10; break;
 		case 'h': case 'H': type = bit_vector::BASE16; break;
 		}
-	ret = new number(num, type, len);
+	ret = new number(num, type, len, negative);
 	ret->_lineno = cur_lineno;
 	if (negative)
 		{
 		number tmp(*ret);
 		unary_inv(tmp, *ret);
-		binary_add(*ret, tmp, number("1", bit_vector::BASE10, 1));
+		binary_add(*ret, tmp, number("1", bit_vector::BASE10, 1, false));
 		}
 	free(s);
 	DEBUG_STATE(DEBUG_PARSER);

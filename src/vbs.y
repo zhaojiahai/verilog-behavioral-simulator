@@ -1,7 +1,7 @@
 %{
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -1640,7 +1640,7 @@ statement:
 	|	non_blocking_assign ';'
 			{ $$ = $1; }
 	|	procedural_continuous_statement
-			{ $$ = $1; yyerror(" procedural continuous assignment "); }
+			{ $$ = $1; yyerror(" procedural continuous statement "); }
 	|	procedural_timing_control_statement
 			{ $$ = $1; }
 	|	conditional_statement
@@ -1684,13 +1684,13 @@ non_blocking_assign:
 
 procedural_continuous_statement:
 		YYASSIGN type_assignment ';'
-			{ $$ = $2; }
+			{ $$ = p_create_null_statement(); }
 	|	YYDEASSIGN reg_lvalue ';'
-			{ $$ = $2; }
+			{ $$ = p_create_null_statement(); }
 	|	YYFORCE type_assignment ';'
-			{ $$ = $2; }
+			{ $$ = p_create_null_statement(); }
 	|	YYRELEASE reg_lvalue ';'
-			{ $$ = $2; }
+			{ $$ = p_create_null_statement(); }
 	;
 
 procedural_timing_control_statement:

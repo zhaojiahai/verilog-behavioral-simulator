@@ -55,7 +55,8 @@ public:
 		BASE8 = 8,
 		BASE10 = 10,
 		BASE16 = 16,
-		BASESTR = -1
+		BASESTR = -1,
+		BASEDFLT = -2
 		};
 
 	// Size type is used as a magnitude quantity.
@@ -139,7 +140,7 @@ public:
 	friend logic_type operator!=(const bit_vector &l, const bit_vector &r)
 		{ return !(l == r); }
 	friend logic_type operator<(const bit_vector &l, const bit_vector &r)
-		{ return compare_backward(l, r, LO, Z, logic_EQL); }
+		{ return compare_backward(l, r, LO, Z, logic_LES); }
 	friend logic_type operator>(const bit_vector &l, const bit_vector &r)
 		{ return r < l; }
 	friend logic_type operator<=(const bit_vector &l, const bit_vector &r)
@@ -195,8 +196,8 @@ public:
 
 	bit_vector(logic_type = NVL);
 	bit_vector(decimal_type);
-	bit_vector(position_type, position_type, logic_type = DC);
-	bit_vector(const str_type &, base_type = BASE2, size_type = 0);
+	bit_vector(position_type, position_type, bool = false, logic_type = DC);
+	bit_vector(const str_type &, base_type = BASE2, size_type = 0, bool = false);
 	bit_vector(const bit_vector &);
 	virtual ~bit_vector();
 
@@ -245,6 +246,8 @@ private:
 	// mostly used for error checking.
 	bool _msb_lower;
 	bool _tristate;
+	bool _signed;
+	base_type _base;
 	position_type _begin;
 	position_type _end;
 	size_type _size;
@@ -279,7 +282,7 @@ public:
 		}
 
 	// Public helper functions.
-	const str_type to_string(base_type = BASE10, size_type = 0) const;
+	const str_type to_string(base_type = BASEDFLT, size_type = 0) const;
 	ostream_type &info(ostream_type &) const;
 	};
 
@@ -465,7 +468,7 @@ operator<<(bit_vector::ostream_type &s, const bit_vector::const_sub_bit_vector &
 
 inline
 bit_vector::bit_vector(logic_type b)
-	: _msb_lower(false), _tristate(false)
+	: _msb_lower(false), _tristate(false), _signed(false), _base(BASE2)
 	{
 	// The default constructor.  If no default logic value is given,
 	// then we assume the caller wants a invalid bit vector.
@@ -486,8 +489,8 @@ bit_vector::bit_vector(logic_type b)
 	}
 
 inline
-bit_vector::bit_vector(position_type ms, position_type ls, logic_type val)
-	: _tristate(false)
+bit_vector::bit_vector(position_type ms, position_type ls, bool neg, logic_type val)
+	: _tristate(false), _signed(neg), _base(BASE10)
 	{
 	// Create a bit vector with the specified size.
 	// According to the Verilog LRM, <ls> can be greater than
@@ -514,7 +517,7 @@ bit_vector::bit_vector(position_type ms, position_type ls, logic_type val)
 
 inline
 bit_vector::bit_vector(const bit_vector &bv)
-	: _msb_lower(bv._msb_lower), _tristate(false),
+	: _msb_lower(bv._msb_lower), _tristate(false), _signed(bv._signed), _base(bv._base),
 	_begin(bv._begin), _end(bv._end), _size(bv._size)
 	{
 	// Copy constructor, make an exact copy.

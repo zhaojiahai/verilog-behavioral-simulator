@@ -142,8 +142,10 @@ struct eqhandler : public event_queue_handler<T>
 	{
 	void operator()(T *st) const
 		{
-		DEBUG_STATE(DEBUG_EVENT);
-		DEBUG_OUTPUT("DEBUG_EVENT:  Executing next event...\n");
+		DEBUG_STATE(DEBUG_USERX);
+		DEBUG_OUTPUT("DEBUG_USERX:  Triggering...\n");
+		DEBUG_OUTPUT(*st);
+		DEBUG_OUTPUT("\n");
 		bool end_reached = st->trigger(trigger_stmt(st));
 		if (end_reached == true)
 			trigger_postproc(st);
@@ -363,8 +365,11 @@ store_module_to_symbol_table(p_module m)
 		vbs_err.set_data((vbs_error::value_type) hv._value, mod->_lineno);
 		vbs_err.out(mod->name());
 		}
-	std::list<hash_value> &modulelist = vbs_engine::modulelist();
-	modulelist.push_back(hv);
+	else
+		{
+		std::list<hash_value> &modulelist = vbs_engine::modulelist();
+		modulelist.push_back(hv);
+		}
 	delete mod;
 	}
 
@@ -450,7 +455,7 @@ preprocessor_simple(FILE *out, char *vf)
 FILE *
 sim_preprocess(char *vf, const string &bn)
 	{
-	bool status = false;
+	int status = -1;
 	string tmp_fn, pn;
 
 	tmpfile_get(bn, tmp_fn);
@@ -460,13 +465,17 @@ sim_preprocess(char *vf, const string &bn)
 
 #if defined(VERILOGVPP_PROG)
 	if (preprocessor_find(pn))
+		{
 		status = preprocessor_external(tmp_fp, vf, pn);
+		if (status < 0)
+			status = preprocessor_simple(tmp_fp, vf);
+		}
 	else
 #endif // VERILOGVPP_PROG
 		status = preprocessor_simple(tmp_fp, vf);
 
 	fclose(tmp_fp);
-	if (status == false)
+	if (status <= 0)
 		{
 		tmpfile_remove(bn); // Remove tmp file before quitting.
 		return 0;

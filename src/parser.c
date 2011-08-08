@@ -49,13 +49,14 @@ vbs_strdup(const char *str)
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #ifndef _POSIX_SOURCE
 extern int fileno(FILE *); /* Needed by lexer. */
 #endif /* _POSIX_SOURCE */
 
-int parms_cnt = 1;
-char *parms[128];
+int parms_cnt;
+char *parms[16];
 
 int
 sim_program_exist(const char *fn)
@@ -89,11 +90,13 @@ sim_program_exec(const char *pn, char *vf, FILE *out)
 		prog_status = fcntl(fileno(out), F_SETFD, 1);
 		if (prog_status < 0)
 			exit(0);
+		parms_cnt = 1;
 		parms[0] = (char *)pn; /* Program name. */
 		parms[parms_cnt++] = "-E"; /* C style preprocessor. */
 		parms[parms_cnt++] = "-L"; /* Generate `line directive. */
 		parms[parms_cnt++] = "-q"; /* Silence status message. */
 		parms[parms_cnt++] = vf;
+		parms[parms_cnt++] = '\0';
 		prog_status = execv(pn, parms);
 		if (prog_status < 0)
 			exit(0);
@@ -101,11 +104,18 @@ sim_program_exec(const char *pn, char *vf, FILE *out)
 		}
 
 	/* Wait for child to finish, then check status. */
+	prog_status = 0;
 	wait_pid = waitpid(cpid, &prog_status, 0);
 	if (wait_pid < 0)
+		{
+		if (errno == EINTR)
+			return -1;
 		return 0;
+		}
 	else if (wait_pid != cpid || prog_status != 0)
+		{
 		return 0;
+		}
 	return 1;
 	}
 

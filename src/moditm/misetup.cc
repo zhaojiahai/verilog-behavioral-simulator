@@ -172,8 +172,19 @@ setup_module_item::operator()(always *p) const
 		seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
 		lst->push_back(cpy);
 		st = new seq_block_stmt(lst);
-		st->_ec = cpy->_ec;
-		cpy->_ec = 0;
+		if (cpy->_ec != 0)
+			{
+			st->_ec = cpy->_ec;
+			cpy->_ec = 0;
+			}
+		else
+			{
+			if (cpy->_dec != 0)
+				{
+				st->_dec = cpy->_dec;
+				cpy->_dec = 0;
+				}
+			}
 		}
 	st->_always = true;
 	st->setup(setup_stmt(_scope, st));

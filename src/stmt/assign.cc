@@ -43,6 +43,10 @@ assignment_stmt::~assignment_stmt()
 	}
 
 assignment_stmt *
+assignment_stmt::get_assign()
+	{ return this; }
+
+assignment_stmt *
 assignment_stmt::copy_constructor() const
 	{ return new assignment_stmt(*this); }
 

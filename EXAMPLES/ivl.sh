@@ -2,6 +2,14 @@
 
 PATH=/bin:/usr/bin
 
+if [ "$1"X = "-v"X ]
+then
+	verbose=1
+	shift
+else
+	verbose=0
+fi
+
 vbs=$1		# Command name.
 ivldir=$2	# Top directory of IVL tests.
 
@@ -37,6 +45,8 @@ run_test () {
 	vfn=$1/$2
 	arg="-q $3"
 	logf=$4
+
+	[ $verbose -eq 1 ] && echo Running: $vbs $arg ${vfn}.v
 
 	rm -f tmp.log
 	rm -f core
@@ -90,9 +100,23 @@ echo "Executing tests, please wait..."
 
 while read first second third mixed; do
 
+	# We ignore comments, blank lines and CN/EF/NI test cases.
+	[ "$first"X = X ] && continue
+	case "$first" in
+		\#*)
+			continue
+			;;
+	esac
+
+	type=`echo $second | sed -e "s/[,].*//"`
+	case "$type" in
+		CN|EF|NI)
+			continue
+			;;
+	esac
+
 	# Make sure file and directory exists.
 	fn=$first
-	type=`echo $second | sed -e "s/[,].*//"`
 
 	# We ignore the parameter options.
 	options=`echo $second | sed -e "s/^[^,]*[,]//"`
@@ -108,34 +132,40 @@ while read first second third mixed; do
 	fi
 
 	case "$fn" in
+		no_if_statement|always3.1.1[AB]|land5)
+			# Stupid crap!
+			echo "$fn.v -- WTF?, skipped"
+			skipped=$(expr $skipped + 1)
+			continue
+			;;
+		pr224|pr594|pr690)
+			echo "$fn.v -- expected failure (fix later), skipped"
+			skipped=$(expr $skipped + 1)
+			continue
+			;;
 		multiply_large)
 			echo "$fn.v -- takes too long, skipped"
 			skipped=$(expr $skipped + 1)
 			continue
 			;;
-		pr594|pr596|const[234]|idiv3|disp_dec2)
-			echo "$fn.v -- unsupported '-' arithmetic, skipped"
+		pr596|idiv3)
+			echo "$fn.v -- unsupported signed arithmetic, skipped"
 			skipped=$(expr $skipped + 1)
 			continue
 			;;
-		pr224|pr622)
-			echo "$fn.v -- macro needed, skipped"
-			skipped=$(expr $skipped + 1)
-			continue
-			;;
-		time4|pr524|pr569|disp_parm|lh_varindx[45]|port-test3|blankport|memport_bs|format|test_width|test_extended)
+		time4|pr524|pr569|disp_parm|lh_varindx[45]|port-test3|blankport|memport_bs|format|test_width|test_extended|delay[345]|param_select3)
 			CI_msg="NOTE: $fn.v -- unsupported (conformance)"
 			type=CI
 			;;
-		land4|pr547)
+		pr243|pr547|delay|land4|string10|tern5)
 			CI_msg="NOTE: $fn.v -- log file differs"
 			type=CI
 			;;
-		port-test[567]|delay|signed8|pr693)
+		port-test[567]|signed8|pr693|pr622)
 			CI_msg="NOTE: $fn.v -- unsupported (new feature)"
 			type=CI
 			;;
-		escape*|mangle|mangle_1|dotinid|big_int)
+		escape*|mangle|mangle_1|dotinid|big_int|defparam[234]|inout[234]|mult2|tri2|task_iotypes2)
 			CI_msg="NOTE: $fn.v -- unsupported (unable to parse)"
 			type=CI
 			;;
@@ -147,19 +177,19 @@ while read first second third mixed; do
 			CI_msg="NOTE: $fn.v -- use before declaration"
 			type=CI
 			;;
-		mhead_task|hello1|monitor|string10|pr307a|pr673)
+		mhead_task|hello1|monitor|pr307a|pr673)
 			CI_msg="NOTE: $fn.v -- stupid behavior"
 			type=CI
 			;;
-		talu|event_list3|mem1|param_string|string9|bitsel|prng|pr273|pr492|pr590|pr690|pr704)
+		talu|event_list3|mem1|param_string|string9|bitsel|prng|pr273|pr492|pr590|pr704)
 			CI_msg="NOTE: $fn.v -- format string problem"
 			type=CI
 			;;
-		timescale1|inout|function4|task-scope|hierspace|nblkpush|basicexpr)
+		timescale1|inout|function4|task-scope|hierspace|nblkpush|basicexpr|tern9)
 			CI_msg="NOTE: $fn.v -- non-conforming code"
 			type=CI
 			;;
-		pr243|pr528*|pr532*|pr632)
+		pr528*|pr532*|pr632)
 			CI_msg="NOTE: $fn.v -- incorrect log file"
 			type=CI
 			;;

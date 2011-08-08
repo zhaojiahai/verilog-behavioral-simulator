@@ -242,7 +242,7 @@ const logic logic_EQU[][NUMLOGIC] =
 	  {DC, DC, DC, DC, DC}
 	};
 
-const logic logic_EQL[][NUMLOGIC] =
+const logic logic_LES[][NUMLOGIC] =
 	{
 	// This table is used with < comparisons.
 	  { Z, HI, DC, DC, DC},

@@ -35,6 +35,7 @@ public:
 	assignment_stmt(const assignment_stmt &);
 	virtual ~assignment_stmt();
 
+	assignment_stmt *get_assign();
 	assignment_stmt *copy_constructor() const;
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;

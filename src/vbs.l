@@ -1,7 +1,7 @@
 %{
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -48,10 +48,10 @@ Float					[-+]?{Number}\.{Number}
 FloatE					[-+]?{Number}(\.{Number})?[eE][-+]?{Number}
 Word					{LetterU}{WordNumU}*
 WordDot					{Word}(\.{Word})*
-Binary					([-+]?{Number}{WS}*)?\'[bB]{WS}*[01xXzZ?][01xXzZ?_]*
-Octal					([-+]?{Number}{WS}*)?\'[oO]{WS}*[0-7xXzZ?][0-7xXzZ?_]*
-Decimal					([-+]?{Number}{WS}*)?\'[dD]{WS}*{Number}
-Hexdecimal				([-+]?{Number}{WS}*)?\'[hH]{WS}*[0-9a-fA-FxXzZ?][0-9a-fA-FxXzZ?_]*
+Binary					([-+]?{Number}{WS}*)?\'[s]?[bB]{WS}*[01xXzZ?][01xXzZ?_]*
+Octal					([-+]?{Number}{WS}*)?\'[s]?[oO]{WS}*[0-7xXzZ?][0-7xXzZ?_]*
+Decimal					([-+]?{Number}{WS}*)?\'[s]?[dD]{WS}*{Number}
+Hexdecimal				([-+]?{Number}{WS}*)?\'[s]?[hH]{WS}*[0-9a-fA-FxXzZ?][0-9a-fA-FxXzZ?_]*
 QoutedString			\"[^\"]*\"
 
 %%

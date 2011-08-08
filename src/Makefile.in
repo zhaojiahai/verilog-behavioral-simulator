@@ -246,7 +246,7 @@ endif
 	@echo "     test-st ......... test symbol table class"
 	@echo "     test-tw ......... test time wheel class"
 	@echo "     test-all ........ test all the above"
-	@echo "     testv-ivl ....... test IVL testsuite, set IVL to directory"
+	@echo "     testv-ivl ....... test IVL test suite, set IVLDIR and IVLOPTS"
 	@echo "     testv-all ....... test all .v, or list below:"
 	@echo "       testv-module, testv-dec, testv-expr,"
 	@echo "       testv-mi, testv-stmt, testv-x"
@@ -399,6 +399,7 @@ testv-expr:
 	$(EX_COM) $(EX_DIR)/expr_noteq.v
 	$(EX_COM) $(EX_DIR)/expr_oror.v
 	$(EX_COM) $(EX_DIR)/expr_rshift.v
+	$(EX_COM) $(EX_DIR)/expr_signcmp.v
 	$(EX_COM) $(EX_DIR)/expr_sub.v
 	$(EX_COM) $(EX_DIR)/expr_qstr.v
 	$(EX_COM) $(EX_DIR)/expr_eqeqeq.v
@@ -464,7 +465,7 @@ testv-y:
 	-$(EX_COM) $(EX_DIR)/y_namedarg.v
 
 testv-ivl:
-	$(EX_DIR)/ivl.sh ./vbs $(IVL)
+	$(EX_DIR)/ivl.sh $(IVLOPTS) ./vbs $(IVLDIR)
 
 #
 # Explicit dependencies.

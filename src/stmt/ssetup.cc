@@ -392,6 +392,25 @@ setup_stmt::operator()(seq_block_stmt *p) const
 	seq_block_stmt::stmt_list::iterator stop(p->_stmt->end());
 	for (; itp != stop; ++itp)
 		(*itp)->setup(setup_stmt(_scope, _parent));
+
+	// The following construct will result in an infinite loop.
+	//    always lval <= #parm expr;
+	// We converted this non-blocking statement into a sequential
+	// block, so now we need to check this scenario.  Note, this
+	// doesn't prevent the case where we have a list of nb
+	// assignment statements.
+	if (_parent != 0 && _parent->_always && p->_stmt->size() == 1
+	 && _parent->_dec == 0 && _parent->_ec == 0)
+		{
+		itp = p->_stmt->begin();
+		stmt_type *s = itp->get();
+		assignment_stmt *as = s->get_assign();
+		if (as != 0 && as->_nonblocking)
+			{
+			vbs_err.set_data(vbs_error::SE_SUPPORT, _parent->_lineno);
+			vbs_err.out("causes infinite loop");
+			}
+		}
 	}
 
 void

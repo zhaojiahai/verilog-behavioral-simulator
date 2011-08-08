@@ -186,7 +186,7 @@ find_hw(bit_vector::decimal_type val, bit_vector::decimal_type &wt)
 // Public member functions for bit_vector class.
 
 bit_vector::bit_vector(unsigned long value)
-	: _msb_lower(false), _tristate(false), _begin(0)
+	: _msb_lower(false), _tristate(false), _signed(false), _base(BASE10), _begin(0)
 	{
 	// Automatic conversion from integer.
 	if (value == 0)
@@ -215,8 +215,8 @@ bit_vector::bit_vector(unsigned long value)
 	memset(_bits + i, static_cast<int>(NVL), largest - i);
 	}
 
-bit_vector::bit_vector(const str_type &str, base_type base, size_type len)
-	: _msb_lower(false), _tristate(false), _begin(0)
+bit_vector::bit_vector(const str_type &str, base_type base, size_type len, bool neg)
+	: _msb_lower(false), _tristate(false), _signed(neg), _base(base), _begin(0)
 	{
 	// Set our bit vector from the base specified in <base>, with
 	// the value contained in <str>.  <len> is optional, and set
@@ -517,18 +517,33 @@ bit_vector::binary_2_decimal(size_type len) const
 			case 0x5: ch = 'Z'; break;
 			default: ch = 'X'; break;
 			}
-		return str_type(len > 0 ? len : 1, ch);
+		return str_type(1, ch);
 		}
 
 	// Convert decimal to string.
 	size_type size = 0;
-	if (len > 0)
-		size = len;
-	else
+	if (len == 0)
 		size = find_hw(num, wt);
+	else if (static_cast<signed long>(len) < 0)
+		{
+		decimal_type lnum = static_cast<decimal_type>(-1);
+		size = find_hw(lnum, wt);
+		}
+	else
+		size = len;
+	position_type i;
+	if (_signed && _bits[_end] == HI)
+		{
+		// Takes 2's complement and change sign later.
+		num = ~num + 1;
+		++size;
+		i = size - 2;
+		}
+	else
+		i = size - 1;
 	str_type res(size, ' ');
 	decimal_type tmp1 = 10, tmp2 = 0;
-	for (position_type i = size - 1; i != npos; --i, tmp1 *= 10)
+	for (; i != npos; --i, tmp1 *= 10)
 		{
 		tmp2 = num % tmp1;
 		num -= tmp2;
@@ -538,6 +553,8 @@ bit_vector::binary_2_decimal(size_type len) const
 		if (num <= 0)
 			break;
 		}
+	if (_signed && _bits[_end] == HI)
+		res[i-1] = '-';
 	return res;
 	}
 
@@ -854,6 +871,59 @@ compare_backward(const bit_vector &l, const bit_vector &r,
 	bit_vector::position_type li = l._end;
 	bit_vector::position_type ri = r._end;
 	bit_vector::logic_type res;
+
+	// See if we're comparing 2's complement numbers.
+	if (l._signed && l._bits[l._end] == HI)
+		{
+		if (!r._signed || (r._signed && r._bits[r._end] == LO))
+			{
+			// Now make sure there are no DC/Z.
+			while (li >= l._begin || ri >= r._begin)
+				{
+				if (li >= l._begin)
+					{
+					if (l._bits[li] > HI)
+						return DC;
+					else
+						--li;
+					}
+				if (ri >= r._begin)
+					{
+					if (r._bits[ri] > HI)
+						return DC;
+					else
+						--ri;
+					}
+				}
+			return HI;
+			}
+		}
+	else if (r._signed && r._bits[r._end] == HI)
+		{
+		if (!l._signed || (l._signed && l._bits[l._end] == LO))
+			{
+			// Now make sure there are no DC/Z.
+			while (li >= l._begin || ri >= r._begin)
+				{
+				if (li >= l._begin)
+					{
+					if (l._bits[li] > HI)
+						return DC;
+					else
+						--li;
+					}
+				if (ri >= r._begin)
+					{
+					if (r._bits[ri] > HI)
+						return DC;
+					else
+						--ri;
+					}
+				}
+			return LO;
+			}
+		}
+
 	if (l._size <= r._size)
 		{
 		li += r._size - l._size;
@@ -1100,7 +1170,7 @@ binary_sub(bit_vector &res, const bit_vector &l, const bit_vector &r)
 bit_vector &
 binary_mul(bit_vector &sum, const bit_vector &l, const bit_vector &r)
 	{
-	// Unsigned multiplication using shift and add algorithm.
+	// Multiplication using shift and add algorithm.
 	bit_vector::position_type i;
 	bit_vector tmp(sum._begin, sum._end);
 
@@ -1118,10 +1188,10 @@ binary_mul(bit_vector &sum, const bit_vector &l, const bit_vector &r)
 bit_vector &
 binary_div(bit_vector &qoutient, const bit_vector &l, const bit_vector &r)
 	{
-	// Unsigned division using shift and subtract algorithm.
+	// Division using shift and subtract algorithm.
 	bit_vector::position_type i;
-	bit_vector nan(qoutient._begin, qoutient._end, DC);
-	bit_vector remainder(qoutient._begin, qoutient._end, LO);
+	bit_vector nan(qoutient._begin, qoutient._end, false, DC);
+	bit_vector remainder(qoutient._begin, qoutient._end, false, LO);
 	bool is_zero = true;
 
 	// Check input to division.
@@ -1162,8 +1232,8 @@ binary_mod(bit_vector &remainder, const bit_vector &l, const bit_vector &r)
 	{
 	// Unsigned modulo using shift and subtract algorithm.
 	bit_vector::position_type i;
-	bit_vector nan(remainder._begin, remainder._end, DC);
-	bit_vector qoutient(remainder._begin, remainder._end, LO);
+	bit_vector nan(remainder._begin, remainder._end, false, DC);
+	bit_vector qoutient(remainder._begin, remainder._end, false, LO);
 	bool is_zero = true;
 
 	// Contents of remainder are used in calculation, so clear it.
@@ -1282,11 +1352,15 @@ logic_op(bit_vector &bv, const bit_vector &l, const bit_vector &r,
 const bit_vector::str_type
 bit_vector::to_string(base_type base, size_type len) const
 	{
-	// <Rnd> rounds the size given in <s> to the next higher size of the
-	// base given in <b>.  I.e.  if s = 31, and b = 3 (octal), then the
+	// <Rnd> rounds the size given in <len> to the next higher size of the
+	// base given in <base>.  I.e.  if s = 31, and b = 3 (octal), then the
 	// next higher size is 33.  Thus, <Rnd> will evaluate to 33.
 #define Rnd(s,b)	((s%b)==0 ? s : s + (b-s%b))
 	int tmp[17] = { -1,-1,1,-1,-1,-1,-1,-1,3,-1,-1,-1,-1,-1,-1,-1,4 };
+
+	// See if caller wants to use the default base.
+	if (base == BASEDFLT)
+		base = _base;
 
 	// If the base is decimal (10), call the convert function for it.
 	if (base == BASESTR)
@@ -1298,12 +1372,23 @@ bit_vector::to_string(base_type base, size_type len) const
 
 	// Find out the size of the resulting string.
 	size_type size;
-	if (len > 0)
-		size = len;
-	else
+	if (len == 0)
+		{
+		size_type nzlen = _size;
+		for (position_type i = _end; i >= _begin; --i)
+			{
+			if (_bits[i] > LO)
+				break;
+			--nzlen;
+			}
+		size = Rnd(nzlen, tmp[base]) / tmp[base];
+		}
+	else if (static_cast<signed long>(len) < 0)
 		size = Rnd(_size, tmp[base]) / tmp[base];
+	else
+		size = len;
 	if (size <= 0)
-		return str_type(1, 'x');
+		size = 1; // Have at least one digit.
 
 	// For base 2, 8 and 16, the conversion process is almost the same.
 	str_type res(size, ' ');

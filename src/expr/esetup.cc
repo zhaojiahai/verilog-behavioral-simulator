@@ -117,6 +117,13 @@ setup_expr::operator()(concatenation *p) const
 		{
 		p->_repeat_expr->setup(setup_expr(_scope, true));
 		repeat_count = p->_repeat_expr->evaluate(evaluate_expr());
+		if (static_cast<signed long>(repeat_count) < 0)
+			{
+			vbs_error::strstream_type buf;
+			buf << *p;
+			vbs_err.set_data(vbs_error::SE_RANGE, p->_lineno);
+			vbs_err.out(buf);
+			}
 		}
 
 	for (; itp != stop; ++itp)
@@ -137,7 +144,7 @@ setup_expr::operator()(number *p) const
 	// When a number is used in a range select, it is setup multiple
 	// times.  So check if we have already done setup.
 	if (p->_result == 0)
-		p->_result = new num_type(p->size() - 1, 0);
+		p->_result = new num_type(*p);
 	return p->_result->size();
 	}
 
@@ -191,6 +198,7 @@ setup_expr::operator()(range_id *p) const
 	// The range depends on the type of identifier.
 	vbs_error::value_type er = vbs_error::SE_NONE;
 	size_type rs = 0;
+	bool neg = false;
 	if (net != 0)
 		{
 		rs = net->size();
@@ -205,6 +213,7 @@ setup_expr::operator()(range_id *p) const
 				break;
 			case net_type::INTEGER:
 				// Integers are not constant.
+				neg = true;
 				if (_check_const)
 					er = vbs_error::SE_TYPE;
 				break;
@@ -260,7 +269,7 @@ setup_expr::operator()(range_id *p) const
 		vbs_err.out(buf);
 		}
 
-	p->_result = new num_type(rs - 1, 0);
+	p->_result = new num_type(rs - 1, 0, neg);
 	return p->_result->size();
 	}
 
@@ -269,10 +278,15 @@ setup_expr::operator()(unary_op_expr *p) const
 	{
 	size_type s = p->_expr->setup(setup_expr(_scope, _check_const, _parent, _result_size));
 	size_type size = 0, rs = 0;
+	bool neg = false;
 	switch (p->_operator)
 		{
-		case unary_op_expr::PLUS_EXPR:
 		case unary_op_expr::MINUS_EXPR:
+			// If the expression is a constant, this operator will make it a signed constant.
+			if (p->_expr->get_number() != 0)
+				neg = true;
+			// no break
+		case unary_op_expr::PLUS_EXPR:
 			rs = s;
 			size = rs < _result_size ? _result_size : rs;
 			break;
@@ -292,7 +306,7 @@ setup_expr::operator()(unary_op_expr *p) const
 			size = rs = 1;
 			break;
 		}
-	p->_result = new num_type(size - 1, 0);
+	p->_result = new num_type(size - 1, 0, neg);
 	return p->_result->size();
 	}
 

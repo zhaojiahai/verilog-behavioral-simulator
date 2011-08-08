@@ -366,30 +366,36 @@ public:
 			if (!_active.empty())
 				{
 				DEBUG_STATE(DEBUG_EVENT);
-				DEBUG_OUTPUT("DEBUG_EVENT:  Triggering sensitivity event.\n");
+				DEBUG_OUTPUT("DEBUG_EVENT:  Handling sensitivity queue.\n");
 				move_events(temp, _active);
 				handle_events(temp, handler);
 				}
 			else if (!_inactive.empty())
 				{
 				DEBUG_STATE(DEBUG_EVENT);
-				DEBUG_OUTPUT("DEBUG_EVENT:  Triggering nonblock event.\n");
+				DEBUG_OUTPUT("DEBUG_EVENT:  Handling non-block queue.\n");
 				move_events(temp, _inactive);
 				handle_events(temp, handler);
 				}
 
-			DEBUG_STATE(DEBUG_EVENT);
-			DEBUG_OUTPUT("DEBUG_EVENT:  Triggering monitor event.\n");
-			move_events(temp, _monitor);
-			handle_events(temp, handler);
+			if (!_monitor.empty())
+				{
+				DEBUG_STATE(DEBUG_EVENT);
+				DEBUG_OUTPUT("DEBUG_EVENT:  Handling monitor queue.\n");
+				move_events(temp, _monitor);
+				handle_events(temp, handler);
+				}
 			}
 
-		// Strobe events are triggered right before time is advanced,
-		// this is it...
-		DEBUG_STATE(DEBUG_EVENT);
-		DEBUG_OUTPUT("DEBUG_EVENT:  Triggering strobe event.\n");
-		move_events(temp, _strobe);
-		handle_events(temp, handler);
+		if (!_strobe.empty())
+			{
+			// Strobe events are triggered right before time is advanced,
+			// this is it...
+			DEBUG_STATE(DEBUG_EVENT);
+			DEBUG_OUTPUT("DEBUG_EVENT:  Handling strobe queue.\n");
+			move_events(temp, _strobe);
+			handle_events(temp, handler);
+			}
 		}
 	amount_type queued_events() const
 		{ return _queued_active + _queued_inactive

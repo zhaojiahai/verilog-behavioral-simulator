@@ -243,8 +243,8 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 				// Direction declared first but the index order was different.
 				delete net->_storage;
 				delete net->_result;
-				net->_storage = new num_type(ms, ls);
-				net->_result = new num_type(ms, ls);
+				net->_storage = new num_type(ms, ls, true);
+				net->_result = new num_type(ms, ls, true);
 				}
 			else
 				{
@@ -298,7 +298,9 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 		else
 			{
 			if (t == net_type::WIRE)
-				net->_storage = new num_type(ms, ls, Z);
+				net->_storage = new num_type(ms, ls, false, Z);
+			else if (t == net_type::INTEGER)
+				net->_storage = new num_type(ms, ls, true);
 			else
 				net->_storage = new num_type(ms, ls);
 			net->_result = new num_type(ms, ls);
