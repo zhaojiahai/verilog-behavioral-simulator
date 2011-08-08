@@ -10,8 +10,19 @@ for simulation.
 
 What's New in 1.5.0
 
+In release this release, VBS has moved to Google Code project hosting.
+You can get the latest source code from:
+
+	code.google.com/p/verilog-behavioral-simulator/
+
+The following new features and bug fixes are included in this release.
+
 $stime API support
 Support GCC 4.2 builds
+More conforming format string handling
+More checks to avoid crashes
+Fixed signed 'integer' comparison
+Fixed handling of delay or event control in always block
 
 
 What's New in 1.4.0
