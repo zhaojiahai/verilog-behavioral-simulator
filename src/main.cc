@@ -15,7 +15,6 @@
 #include "config.h"
 #endif
 #include <cstring>
-#include <cstdlib> // exit()
 #if defined(HAVE_GETOPT_H)
 #include <getopt.h>
 #elif defined(HAVE_PROTO_GETOPT)
@@ -339,16 +338,17 @@ main(int argc, char *argv[])
 	vbs_sim_init(argv[0]);
 
 	// Here we go!
+	retval = 0;
 	infiles = argc - optind;
 	if (infiles > 0)
-		vbs_sim_start(infiles, &argv[optind]);
+		retval = vbs_sim_start(infiles, &argv[optind]);
 	else
 		cout << "No input file(s)..." << endl;
 
 	// Cleanup engine.
 	vbs_engine::reset();
 
-	return 0;
+	return retval;
 	}
 
 void
@@ -360,7 +360,8 @@ vbs_warn(int c, const string &cm, const char *st, const string &fn, int ln, cons
 void
 vbs_fatal(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
+	extern jmp_buf vbs_sim_finish;
 	cout << endl << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str()) << endl << endl;
 	cout << "Error detected during " << st << "...exiting" << endl;
-	exit(c);
+	longjmp(vbs_sim_finish, 1);
 	}

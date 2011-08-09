@@ -51,7 +51,7 @@ struct decl_setup
 
 	static void reset();
 
-	void net_setup(ident_ptr &, range_type *, type) const;
+	void net_setup(ident_ptr &, range_type *, type, range_type::position_type = 0) const;
 	void io_setup(ident_list *, range_type *, iodirection_type, bool) const;
 	// Boolean to indicate whether the net should exist.
 	// Default is yes.  A task or function definition would use false.

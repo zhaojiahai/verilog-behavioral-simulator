@@ -151,7 +151,7 @@ setup_expr::operator()(number *p) const
 setup_expr::size_type
 setup_expr::operator()(qouted_str *p) const
 	{
-	p->_result = new num_type(p->_value.size() - 1, 0);
+	p->_result = new num_type(p->_value);
 	return p->_result->size();
 	}
 
@@ -269,7 +269,7 @@ setup_expr::operator()(range_id *p) const
 		vbs_err.out(buf);
 		}
 
-	p->_result = new num_type(rs - 1, 0, neg);
+	p->_result = new num_type(rs - 1, 0, num_type::BASE10, neg);
 	return p->_result->size();
 	}
 
@@ -306,7 +306,7 @@ setup_expr::operator()(unary_op_expr *p) const
 			size = rs = 1;
 			break;
 		}
-	p->_result = new num_type(size - 1, 0, neg);
+	p->_result = new num_type(size - 1, 0, num_type::BASE10, neg);
 	return p->_result->size();
 	}
 

@@ -14,10 +14,10 @@ qouted_str::qouted_str(const char *s)
 	: expr_base(true), _str(s, strlen(s))
 	{
 	int len = 8 * (_str.size() - 2); // Don't include the qoutes.
-	_value = num_type(0, len > 0 ? len - 1 : 0);
+	_value = num_type(len > 0 ? len - 1 : 0, 0, num_type::BASESTR);
 	++s;
-	for (int i = 0, j = 7; i < len; i += 8, j += 8, ++s)
-		_value(i, j) = num_type((unsigned long) (*s));
+	for (int i = len - 8, j = len - 1; i >= 0; i -= 8, j -= 8, ++s)
+		_value(j, i) = num_type(static_cast<unsigned long>(*s));
 	}
 
 qouted_str::qouted_str(const qouted_str &p)

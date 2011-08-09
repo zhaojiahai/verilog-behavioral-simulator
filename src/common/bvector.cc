@@ -483,26 +483,37 @@ bit_vector::binary_2_string(size_type len) const
 const bit_vector::str_type
 bit_vector::binary_2_decimal(size_type len) const
 	{
-	// Convert from binary to decimal.
-	decimal_type wt = 0, num = 0;
+	bit_vector tmp(*this);
+	position_type j = tmp._begin;
+	bool neg = _signed && _bits[_end] == HI;
+	if (neg)
+		{
+		// The conversion below uses unsigned number.  So take
+		// the 2's complement first, then prepend sign after.
+		bit_vector one(HI);
+		bit_vector inv(_end, _begin);
+		unary_inv(inv, *this);
+		binary_add(tmp, inv, one);
+		}
 	position_type numbits = 8 * sizeof(decimal_type);
-	position_type j = _begin;
 	if (static_cast<size_type>(numbits) >= _size)
 		numbits = _end;
 	else
 		numbits = (_begin + numbits) - 1;
 	bool have_x, have_z, have_n;
+	logic_type b;
+	decimal_type wt = 0, num = 0;
 	have_x = have_z = have_n = false;
 	for (int i = 0; j <= numbits; ++i, ++j)
 		{
-		if (_bits[j] == DC)
+		b = tmp._bits[j];
+		if (b == DC)
 			have_x = true;
-		else if (_bits[j] == Z)
+		else if (b == Z)
 			have_z = true;
 		else
 			{
-			if (_bits[j] == HI)
-				num |= 1 << i;
+			num |= static_cast<int>(b) << i;
 			have_n = true;
 			}
 		}
@@ -531,31 +542,20 @@ bit_vector::binary_2_decimal(size_type len) const
 		}
 	else
 		size = len;
-	position_type i;
-	if (_signed && _bits[_end] == HI)
-		{
-		// Takes 2's complement and change sign later.
-		num = ~num + 1;
-		++size;
-		i = size - 2;
-		}
-	else
-		i = size - 1;
+	if (size == 0)
+		size = 1;
 	str_type res(size, ' ');
-	decimal_type tmp1 = 10, tmp2 = 0;
-	for (; i != npos; --i, tmp1 *= 10)
+	position_type i = size - 1;
+	decimal_type digit = 0;
+	for (; i != npos; --i)
 		{
-		tmp2 = num % tmp1;
-		num -= tmp2;
-		// Shift the number down to less than 10.
-		tmp2 = tmp2 / (tmp1 / 10);
-		res[i] = tmp2 + '0';
+		digit = num % 10; // Get lowest digit.
+		num /= 10; // Remove lowest digit.
+		res[i] = digit + '0'; // Convert to ASCII.
 		if (num <= 0)
 			break;
 		}
-	if (_signed && _bits[_end] == HI)
-		res[i-1] = '-';
-	return res;
+	return (neg) ? ("-" + res) : res;
 	}
 
 int BITS2INT[4][5] =
@@ -1190,8 +1190,8 @@ binary_div(bit_vector &qoutient, const bit_vector &l, const bit_vector &r)
 	{
 	// Division using shift and subtract algorithm.
 	bit_vector::position_type i;
-	bit_vector nan(qoutient._begin, qoutient._end, false, DC);
-	bit_vector remainder(qoutient._begin, qoutient._end, false, LO);
+	bit_vector nan(qoutient._end, qoutient._begin, bit_vector::BASE10, false, DC);
+	bit_vector remainder(qoutient._end, qoutient._begin, bit_vector::BASE10, false, LO);
 	bool is_zero = true;
 
 	// Check input to division.
@@ -1232,8 +1232,8 @@ binary_mod(bit_vector &remainder, const bit_vector &l, const bit_vector &r)
 	{
 	// Unsigned modulo using shift and subtract algorithm.
 	bit_vector::position_type i;
-	bit_vector nan(remainder._begin, remainder._end, false, DC);
-	bit_vector qoutient(remainder._begin, remainder._end, false, LO);
+	bit_vector nan(remainder._end, remainder._begin, bit_vector::BASE10, false, DC);
+	bit_vector qoutient(remainder._end, remainder._begin, bit_vector::BASE10, false, LO);
 	bool is_zero = true;
 
 	// Contents of remainder are used in calculation, so clear it.

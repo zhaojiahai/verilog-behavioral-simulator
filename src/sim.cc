@@ -94,8 +94,6 @@ using std::ifstream;
 using std::setfill;
 using std::setw;
 
-vbs_error::value_type parse_error_code;
-
 // Single exit point handling.
 jmp_buf vbs_sim_finish;
 
@@ -320,7 +318,7 @@ extension_type(const char *fn, string &bn, string &ext)
 void
 write_module_to_file(p_module m)
 	{
-	if (parse_error_code != 0)
+	if (vbs_err.get_data() != vbs_error::SE_NONE)
 		return; // Do not process, might contain invalid data.
 
 	module *mod = (module *)m;
@@ -338,7 +336,7 @@ write_module_to_file(p_module m)
 void
 store_module_to_symbol_table(p_module m)
 	{
-	if (parse_error_code != 0)
+	if (vbs_err.get_data() != vbs_error::SE_NONE)
 		return; // Do not process, might contain invalid data.
 
 	// After we parsed a complete module, we need to store it into
@@ -424,7 +422,7 @@ preprocessor_find(string &pn)
 	return false;
 	}
 
-bool
+int
 preprocessor_external(FILE *out, char *vf, const string &pn)
 	{
 	return sim_program_exec(pn.c_str(), vf, out);
@@ -465,17 +463,13 @@ sim_preprocess(char *vf, const string &bn)
 
 #if defined(VERILOGVPP_PROG)
 	if (preprocessor_find(pn))
-		{
 		status = preprocessor_external(tmp_fp, vf, pn);
-		if (status < 0)
-			status = preprocessor_simple(tmp_fp, vf);
-		}
 	else
 #endif // VERILOGVPP_PROG
 		status = preprocessor_simple(tmp_fp, vf);
 
 	fclose(tmp_fp);
-	if (status <= 0)
+	if (status < 0)
 		{
 		tmpfile_remove(bn); // Remove tmp file before quitting.
 		return 0;
@@ -714,9 +708,17 @@ vbs_sim_run(int end_time)
 	return timewheel.current_time();
 	}
 
-void
+int
 vbs_sim_start(int amt, char **lst)
 	{
+	symbol_table &symboltable = vbs_engine::symboltable();
+	int retval;
+	vbs_error::state_type s;
+
+	// Our own exception handler...
+	if (setjmp(vbs_sim_finish) != 0)
+		goto return_check; // $finish enabled or an error occurred.
+
 	// First, parse all files.  Do not stop on error...
 	for (int i = 0; i < amt; ++i)
 		{
@@ -724,20 +726,12 @@ vbs_sim_start(int amt, char **lst)
 		read_verilog_file(lst[i]);
 		vbs_err.pop_filename();
 		}
-	if (parse_error_code != 0)
-		{
-		cout << endl << "Error detected during compilation...exiting" << endl;
-		exit(parse_error_code);
-		}
 
 	// Start simulation if user did not specify anything to prevent it.
 	if (vbs_err.test_state(vbs_error::SS_PREPROCESS_ONLY)
-	 || vbs_err.test_state(vbs_error::SS_COMPILE_ONLY))
-		return;
-
-	// Our own exception handler...
-	if (setjmp(vbs_sim_finish) != 0)
-		return; // $finish enabled or an error occurred.
+	 || vbs_err.test_state(vbs_error::SS_COMPILE_ONLY)
+	 || vbs_err.get_data() != vbs_error::SE_NONE)
+		goto return_check;
 
 	// Setup for simulation.
 	vbs_err.clear_state(vbs_error::SS_STATE_MASK);
@@ -748,7 +742,6 @@ vbs_sim_start(int amt, char **lst)
 	vbs_sim_setup();
 	vbs_err.pop_filename();
 
-	symbol_table &symboltable = vbs_engine::symboltable();
 	DEBUG_STATE(DEBUG_SYMBOL_TABLE);
 	DEBUG_OUTPUT("DEBUG_SYMBOL_TABLE:  Symbol table after setup:\n");
 	DEBUG_OUTPUT(symboltable);
@@ -762,6 +755,13 @@ vbs_sim_start(int amt, char **lst)
 	DEBUG_OUTPUT("DEBUG_SIM_STATE:  Starting simulation...\n");
 	vbs_sim_run(-1);
 	vbs_err.pop_filename();
+
+return_check:
+	retval = vbs_err.get_data();
+	s = vbs_error::state_type(vbs_error::SS_PREPROCESS | vbs_error::SS_COMPILE);
+	if (retval != 0 && vbs_err.test_state(s))
+		cout << endl << "Error detected during compilation...exiting" << endl;
+	return retval;
 	}
 
 const char *
@@ -807,10 +807,6 @@ sim_perror(char *type, char *mesg, char *word, int ln)
 
 	vbs_err.set_data(val, ln);
 	vbs_err.out(buf);
-
-	// Save error state to prevent simulation/setup.
-	if (parse_error_code == 0)
-		parse_error_code = val;
 	}
 
 void

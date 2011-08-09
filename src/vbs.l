@@ -31,6 +31,7 @@ char *savedword;
 %}
 
 %s COMMENT
+%s VENDOR
 %s DIRECTIVE
 %s POUND
 
@@ -48,10 +49,10 @@ Float					[-+]?{Number}\.{Number}
 FloatE					[-+]?{Number}(\.{Number})?[eE][-+]?{Number}
 Word					{LetterU}{WordNumU}*
 WordDot					{Word}(\.{Word})*
-Binary					([-+]?{Number}{WS}*)?\'[s]?[bB]{WS}*[01xXzZ?][01xXzZ?_]*
-Octal					([-+]?{Number}{WS}*)?\'[s]?[oO]{WS}*[0-7xXzZ?][0-7xXzZ?_]*
-Decimal					([-+]?{Number}{WS}*)?\'[s]?[dD]{WS}*{Number}
-Hexdecimal				([-+]?{Number}{WS}*)?\'[s]?[hH]{WS}*[0-9a-fA-FxXzZ?][0-9a-fA-FxXzZ?_]*
+Binary					({Number}{WS}*)?\'[s]?[bB]{WS}*[01xXzZ?][01xXzZ?_]*
+Octal					({Number}{WS}*)?\'[s]?[oO]{WS}*[0-7xXzZ?][0-7xXzZ?_]*
+Decimal					({Number}{WS}*)?\'[s]?[dD]{WS}*{Number}
+Hexdecimal				({Number}{WS}*)?\'[s]?[hH]{WS}*[0-9a-fA-FxXzZ?][0-9a-fA-FxXzZ?_]*
 QoutedString			\"[^\"]*\"
 
 %%
@@ -60,10 +61,15 @@ QoutedString			\"[^\"]*\"
 <INITIAL>{WSs}			{ }
 <INITIAL>"//".*$		{ }
 <INITIAL>"/*"			{ BEGIN COMMENT; }
+<INITIAL>"(*[^)]"			{ BEGIN VENDOR; }
 
 <COMMENT>{NL}			{ cur_lineno++; }
 <COMMENT>.				{ }
 <COMMENT>"*/"			{ BEGIN INITIAL; }
+
+<VENDOR>{NL}			{ cur_lineno++; }
+<VENDOR>.				{ }
+<VENDOR>"*)"			{ BEGIN INITIAL; }
 
 
 	/*
@@ -75,6 +81,8 @@ QoutedString			\"[^\"]*\"
 <INITIAL>"#"			{ save_word("#"); BEGIN POUND; return YYPOUND; }
 <INITIAL>"@"			{ save_word("@"); return YYAT; }
 <INITIAL>"->"			{ save_word("->"); return YYMINUSGREATER; }
+<INITIAL>"-:"			{ save_word("-:"); return YYMINUSCOLON; }
+<INITIAL>"+:"			{ save_word("+:"); return YYPLUSCOLON; }
 
 	/* Unary. */
 <INITIAL>"+"            { save_word("+"); return YYPLUS; }
@@ -93,6 +101,7 @@ QoutedString			\"[^\"]*\"
 <INITIAL>"*"            { save_word("*"); return YYASTERIC; }
 <INITIAL>"/"            { save_word("/"); return YYSLASH; }
 <INITIAL>"%"            { save_word("%"); return YYPERCENT; }
+<INITIAL>"**"			{ save_word("**"); return YYASTERICASTERIC; }
 <INITIAL>"=="           { save_word("=="); return YYEQUALEQUAL; }
 <INITIAL>"!="           { save_word("!="); return YYEXCLAMEQUAL; }
 <INITIAL>"==="          { save_word("==="); return YYEQUALEQUALEQUAL; }
@@ -159,6 +168,7 @@ QoutedString			\"[^\"]*\"
 <INITIAL>integer        { save_word("integer"); return YYINTEGER; }
 <INITIAL>join           { save_word("join"); return YYJOIN; }
 <INITIAL>large          { save_word("large"); return YYLARGE; }
+<INITIAL>localparam		{ save_word("localparam"); return YYLOCALPARAM; }
 <INITIAL>macromodule    { save_word("macromodule"); return YYMACROMODULE; }
 <INITIAL>medium         { save_word("medium"); return YYMEDIUM; }
 <INITIAL>module         { save_word("module"); return YYMODULE; }
@@ -294,6 +304,15 @@ yywrap(void)
 
 	/* Return no more files. */
 	return 1;
+	}
+
+void
+yyreset(void)
+	{
+#ifdef YY_FLUSH_BUFFER
+	YY_FLUSH_BUFFER;
+#endif
+	BEGIN(INITIAL);
 	}
 
 void

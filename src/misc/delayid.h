@@ -40,6 +40,11 @@ public:
 private:
 	expr_type *_expr;
 
+	// The identifier in '# param_identifier' must be a constant.
+	// Which could be a number or a parameter.  Either way, we
+	// can calculate it at setup time.
+	expr_type::num_type _value;
+
 	// In case the delay amount is zero, we need to append to the
 	// event queue rather than the time wheel.
 	typedef stmt_base stmt_type;

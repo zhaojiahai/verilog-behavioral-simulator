@@ -40,6 +40,7 @@ extern char *cur_filename; /* File name of error. */
 extern char *savedword; /* Save keyword for error reporting. */
 extern void yyerror(char *str); /* Our version. */
 extern int yywrap(void); /* Our version. */
+extern void yyreset(void); /* Out reset routine. */
 extern int yylex(void); /* Lexical analyzer function. */
 extern int yyparse(void); /* Parser function. */
 

@@ -102,7 +102,10 @@ void
 setup_dec::operator()(delay_id *p) const
 	{
 	// Setup expression.
-	p->_expr->setup(setup_expr(_scope));
+	p->_expr->setup(setup_expr(_scope, true));
+
+	// Is constant, so evaluate it now to avoid recalculations later.
+	p->_value = p->_expr->evaluate(evaluate_expr());
 
 	// This object is always needed because we do not know if the
 	// expression will evaluate to zero.  If it does, we need this

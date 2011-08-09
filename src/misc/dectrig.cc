@@ -72,8 +72,7 @@ trigger_dec::operator()(delay_id *p) const
 	{
 	// The delay is specified by the identifier.
 	int retval;
-	const num_type &amt(p->_expr->evaluate(evaluate_expr()));
-	unsigned long next_time = amt;
+	unsigned long next_time = p->_value;
 	if (next_time == 0)
 		{
 		// Delay is zero, append to eventqueue to be executed

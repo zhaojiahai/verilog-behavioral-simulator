@@ -23,6 +23,7 @@ p_start(FILE *fp, const char *fn, int ln)
 	if (cur_filename != 0)
 		free(cur_filename);
 	cur_filename = vbs_strdup(fn);
+	yyreset(); /* Reset lexer. */
 	return yyparse();
 	}
 
@@ -49,6 +50,7 @@ vbs_strdup(const char *str)
 #include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <errno.h>
 
 #ifndef _POSIX_SOURCE
@@ -75,48 +77,74 @@ sim_program_exist(const char *fn)
 int
 sim_program_exec(const char *pn, char *vf, FILE *out)
 	{
-	int wait_pid, prog_status;
+	struct sigaction ignore, sintr, squit;
+	sigset_t cmask, smask;
+	int retval = 0;
 	pid_t cpid;
+
+	/* Ignore SIGINT/SIGQUIT, block SIGCHLD. */
+	ignore.sa_handler = SIG_IGN;
+	sigemptyset(&ignore.sa_mask);
+	ignore.sa_flags = 0;
+	if (sigaction(SIGINT, &ignore, &sintr) < 0)
+		return -1;
+	if (sigaction(SIGQUIT, &ignore, &squit) < 0)
+		return -1;
+	sigemptyset(&cmask);
+	sigaddset(&cmask, SIGCHLD);
+	if (sigprocmask(SIG_BLOCK, &cmask, &smask) < 0)
+		return -1;
+
 	cpid = fork();
 	if (cpid < 0)
-		return 0;
+		return -1;
 	else if (cpid == 0)
 		{
-		/* In the child. */
-		prog_status = dup2(fileno(out), STDOUT_FILENO);
-		if (prog_status < 0)
-			exit(0);
+		/* In the child.  Restore signals and masks. */
+		sigaction(SIGINT, &sintr, 0);
+		sigaction(SIGQUIT, &squit, 0);
+		sigprocmask(SIG_SETMASK, &smask, 0);
+
+		retval = dup2(fileno(out), STDOUT_FILENO);
+		if (retval < 0)
+			return retval;
 		/* Close on exec. */
-		prog_status = fcntl(fileno(out), F_SETFD, 1);
-		if (prog_status < 0)
-			exit(0);
-		parms_cnt = 1;
-		parms[0] = (char *)pn; /* Program name. */
+		retval = fcntl(fileno(out), F_SETFD, 1);
+		if (retval < 0)
+			return retval;
+		parms_cnt = 0;
+		parms[parms_cnt++] = (char *)pn; /* Program name. */
 		parms[parms_cnt++] = "-E"; /* C style preprocessor. */
 		parms[parms_cnt++] = "-L"; /* Generate `line directive. */
 		parms[parms_cnt++] = "-q"; /* Silence status message. */
 		parms[parms_cnt++] = vf;
 		parms[parms_cnt++] = '\0';
-		prog_status = execv(pn, parms);
-		if (prog_status < 0)
-			exit(0);
+		retval = execv(pn, parms);
+		if (retval < 0)
+			exit(retval);
 		/* Should not get here... */
 		}
 
 	/* Wait for child to finish, then check status. */
-	prog_status = 0;
-	wait_pid = waitpid(cpid, &prog_status, 0);
-	if (wait_pid < 0)
+	retval = 0;
+	while (waitpid(cpid, &retval, 0) < 0)
 		{
-		if (errno == EINTR)
-			return -1;
-		return 0;
+		if (errno != EINTR)
+			{
+			retval = -1;
+			break;
+			}
 		}
-	else if (wait_pid != cpid || prog_status != 0)
-		{
-		return 0;
-		}
-	return 1;
+
+	/* Restore signals and masks. */
+	if (sigaction(SIGINT, &sintr, 0) < 0)
+		return -1;
+	if (sigaction(SIGQUIT, &squit, 0) < 0)
+		return -1;
+	if (sigprocmask(SIG_SETMASK, &smask, 0) < 0)
+		return -1;
+
+	return retval;
 	}
 
 #endif // VERILOGVPP_PROG

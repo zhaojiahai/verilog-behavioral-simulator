@@ -117,6 +117,7 @@ struct vbs_error
 	void set_program_name(const str_type &);
 	void push_filename(const str_type &);
 	void pop_filename(void);
+	value_type get_data();
 	void set_data(value_type, size_type);
 	void set_state(state_type);
 	void clear_state(state_type);

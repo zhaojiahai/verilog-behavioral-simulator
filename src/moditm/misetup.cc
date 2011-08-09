@@ -243,8 +243,9 @@ setup_module_item::operator()(cont_assign *p) const
 		counted_ptr< event_base<stmt_type> > e(ev);
 		st->_rval->monitor(monitor_expr(&e));
 
-		// Schedule assignment at least once.
-		eventqueue.add_event(ev);
+		// Schedule assignment at least once, if not already.
+		if (!ev->is_queued())
+			eventqueue.add_event(ev);
 		}
 	}
 

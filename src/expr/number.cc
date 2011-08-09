@@ -11,8 +11,8 @@
 #include <cstdlib>
 #include "expr/number.h"
 
-number::number(const char *n, number::base_type b, number::size_type s, bool neg)
-	: expr_base(true), bit_vector(n, b, s, neg)
+number::number(const char *n, number::base_type b, number::size_type s)
+	: expr_base(true), bit_vector(n, b, s)
 	{}
 
 number::number(number::position_type m, number::position_type l)

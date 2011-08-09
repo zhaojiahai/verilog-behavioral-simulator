@@ -12,6 +12,7 @@
 // dumpstrm.cc
 
 #include <cstdio> // sprintf
+#include <csetjmp> // longjmp()
 #include <iostream>
 #include "dumpstrm.h"
 
@@ -87,7 +88,8 @@ dump_stream_c::close()
 	if (gzclose(gout) != Z_OK)
 		{
 		cerr << "Error: failed gzclose of vcd_dump" << endl;
-		exit(-1);
+		extern jmp_buf vbs_sim_finish;
+		longjmp(vbs_sim_finish, 1);
 		}
 #endif
 	}

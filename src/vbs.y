@@ -112,6 +112,8 @@
 %token YYMINUSGREATER
 %token YYASTERICGREATER
 %token YYEQUALGREATER
+%token YYMINUSCOLON
+%token YYPLUSCOLON
 
 	/* Unary. */
 %token YYEXCLAM
@@ -127,6 +129,7 @@
 %token YYASTERIC
 %token YYSLASH
 %token YYPERCENT
+%token YYASTERICASTERIC
 %token YYEQUALEQUAL
 %token YYEXCLAMEQUAL
 %token YYEQUALEQUALEQUAL
@@ -196,6 +199,7 @@
 %token YYINTEGER
 %token YYJOIN
 %token YYLARGE
+%token YYLOCALPARAM
 %token YYMACROMODULE
 %token YYMEDIUM
 %token YYMODULE
@@ -294,7 +298,7 @@
 %left YYGREATEREQUAL YYLESSEQUAL YYGREATER YYLESS
 %left YYLESSLESS YYGREATERGREATER
 %left YYPLUS YYMINUS
-%left YYASTERIC YYSLASH YYPERCENT
+%left YYASTERIC YYSLASH YYPERCENT YYASTERICASTERIC
 %right YYTILDE YYEXCLAM
 %left YYUNARY_PREC
 %nonassoc LT_YYELSE
@@ -347,6 +351,7 @@
 %type <always_construct> always_construct
 
 %type <param_declaration> parameter_declaration
+%type <param_declaration> localparam_declaration
 %type <io_declaration> input_declaration
 %type <io_declaration> output_declaration
 %type <io_declaration> inout_declaration
@@ -372,8 +377,8 @@
 %type <simple_string> memory_identifier
 %type <range_identifier_list> list_of_port_identifiers
 
-%type <not_supported> signed_opt
-%type <not_supported> v_or_s
+%type <simple_keyword> signed_opt
+%type <simple_keyword> v_or_s
 %type <not_supported> drive_strength_opt
 %type <not_supported> charge_strength_opt
 
@@ -383,6 +388,7 @@
 %type <delay_or_event_control> delay2
 %type <delay_or_event_control> delay_value
 %type <simple_string> param_identifier
+/*%type <expression> param_identifier*/
 
 %type <part_select> range_opt
 %type <part_select> range
@@ -589,6 +595,22 @@ port_reference:
 			{ $$ = 0; yyerror(" port_identifier [cexp] "); }
 	|	port_identifier part_select
 			{ $$ = 0; yyerror(" port_identifier [cexp:cexp] "); }
+	|	port_direction signed_opt range_opt port_identifier
+			{ yyerror(" ANSI port decl "); }
+	|	port_direction net_type signed_opt range_opt port_identifier
+			{ yyerror(" ANSI net decl "); }
+	|	port_direction YYREG signed_opt range_opt port_identifier
+			{ yyerror(" ANSI reg decl "); }
+	|	YYINTEGER port_identifier
+			{ yyerror(" ANSI integer decl "); }
+	|	YYTIME port_identifier
+			{ yyerror(" ANSI time decl "); }
+	;
+
+port_direction:
+		YYINPUT
+	|	YYOUTPUT
+	|	YYINOUT
 	;
 
 port_reference_brace:
@@ -606,6 +628,10 @@ bit_select:
 part_select:
 		'[' const_expression YYCOLON const_expression ']'
 			{ $$ = p_create_part_select($2, $4); }
+	|	'[' const_expression YYMINUSCOLON const_expression ']'
+			{ $$ = p_create_part_select($2, $4); yyerror(" -: "); }
+	|	'[' const_expression YYPLUSCOLON const_expression ']'
+			{ $$ = p_create_part_select($2, $4); yyerror(" +: "); }
 	;
 
 port_identifier:
@@ -649,6 +675,8 @@ module_item:
 
 module_item_declaration:
 		parameter_declaration
+			{ $$ = $1; }
+	|	localparam_declaration
 			{ $$ = $1; }
 	|	input_declaration
 			{ $$ = $1; }
@@ -770,6 +798,11 @@ parameter_declaration:
 			{ $$ = p_create_param_declaration($3, $2); }
 	;
 
+localparam_declaration:
+		YYLOCALPARAM range_opt list_of_sdecl_assignments ';'
+			{ $$ = p_create_param_declaration($3, $2); }
+	;
+
 input_declaration:
 		YYINPUT range_opt list_of_port_identifiers ';'
 			{ $$ = p_create_io_declaration(YYINPUT, $3, $2); }
@@ -804,14 +837,22 @@ signed_opt:
 		/* Optional. */
 			{ $$ = 0; }
 	|	YYSIGNED
-			{ $$ = 0; yyerror(" signed declaration "); }
+			{ $$ = YYSIGNED; }
 	;
 
 reg_declaration:
 		YYREG signed_opt range_opt list_of_mdecl_identifiers ';'
-			{ $$ = p_create_reg_declaration($4, $3); }
+			{
+			if ($2 != 0)
+				yyerror(" signed ");
+			$$ = p_create_reg_declaration($4, $3);
+			}
 	|	YYREG signed_opt range_opt list_of_mdecl_assignments ';'
-			{ $$ = p_create_reg_declaration($4, $3); }
+			{
+			if ($2 != 0)
+				yyerror(" signed ");
+			$$ = p_create_reg_declaration($4, $3);
+			}
 	;
 
 time_declaration:
@@ -868,18 +909,22 @@ v_or_s:
 			/* Optional. */
 			{ $$ = 0; }
 	|	YYVECTORED
-			{ $$ = 0; yyerror(" vectored "); }
+			{ $$ = YYVECTORED; }
 	|	YYSCALARED
-			{ $$ = 0; yyerror(" scalared "); }
+			{ $$ = YYSCALARED; }
 	;
 
 net_declaration:
-		net_type v_or_s range_opt delay3_opt
+		net_type v_or_s signed_opt range_opt delay3_opt
 				list_of_sdecl_identifiers ';'
 			{
-			if ($4 != 0)
+			if ($2 != 0)
+				yyerror(" vectored or scalared ");
+			if ($3 != 0)
+				yyerror(" signed ");
+			if ($5 != 0)
 				yyerror(" delay3 ");
-			$$ = p_create_net_declaration($1, $5, $3);
+			$$ = p_create_net_declaration($1, $6, $4);
 			}
 	|	YYTRIREG v_or_s charge_strength_opt range_opt delay3_opt
 				list_of_sdecl_identifiers ';'
@@ -887,17 +932,23 @@ net_declaration:
 			yyerror(" trireg declaration ");
 			$$ = 0;
 			}
-	|	net_type v_or_s range_opt delay3_opt
+	|	net_type v_or_s signed_opt range_opt delay3_opt
 				list_of_sdecl_assignments ';'
 			{
-			if ($4 != 0)
+			if ($2 != 0)
+				yyerror(" vectored or scalared ");
+			if ($3 != 0)
+				yyerror(" signed ");
+			if ($5 != 0)
 				yyerror(" delay3 ");
-			$$ = p_create_net_declaration($1, $5, $3);
+			$$ = p_create_net_declaration($1, $6, $4);
 			}
 	|	net_type v_or_s drive_strength range_opt delay3_opt
 				list_of_sdecl_assignments ';'
 			{
 			/* Must flatten out to avoid shift/reduce error. */
+			if ($2 != 0)
+				yyerror(" vectored or scalared ");
 			if ($5 != 0)
 				yyerror(" delay3 ");
 			$$ = p_create_net_declaration($1, $6, $4);
@@ -1019,7 +1070,7 @@ delay_value:
 	;
 
 param_identifier:
-		YYCHARSTR
+		YYCHARSTR /*const_expression*/
 			{ $$ = $1; }
 	;
 
@@ -1745,6 +1796,8 @@ ored_event_expression:
 			{ $$ = p_create_event_expression_list(0, $1); }
 	|	ored_event_expression YYOR event_expression
 			{ $$ = p_create_event_expression_list($1, $3); }
+	|	ored_event_expression ',' event_expression
+			{ $$ = p_create_event_expression_list($1, $3); }
 	;
 
 event_expression:
@@ -2162,6 +2215,8 @@ expression:
 			{ $$ = p_create_binary_op_expr(YYSLASH, $1, $3); }
 	|	expression YYPERCENT expression
 			{ $$ = p_create_binary_op_expr(YYPERCENT, $1, $3); }
+	|	expression YYASTERICASTERIC expression
+			{ $$ = p_create_binary_op_expr(YYASTERICASTERIC, $1, $3); }
 	|	expression YYEQUALEQUAL expression
 			{ $$ = p_create_binary_op_expr(YYEQUALEQUAL, $1, $3); }
 	|	expression YYEXCLAMEQUAL expression
@@ -2231,7 +2286,7 @@ concatenation:
 	;
 
 multiple_concatenation:
-		'{' expression '{' expression_brace '}' '}'
+		'{' const_expression '{' expression_brace '}' '}'
 			{ $$ = p_create_concatenation($2, $4); }
 	;
 

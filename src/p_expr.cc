@@ -112,22 +112,16 @@ p_create_qouted_string(char *str)
 p_number
 p_create_number(char *s)
 	{
-	bool negative = false;
 	bit_vector::size_type len = 0;
 	bit_vector::base_type type = bit_vector::BASE2;
 	char *str, *siz, *num, base;
 	number *ret;
 
-	// Handle signed constant literals.
-	str = strchr(s, '-');
-	if (str != 0)
-		{
-		negative = true;
-		++str;
-		}
-	else
-		str = s;
+	// A constant number is never negative.  The minus in front of
+	// a number will result in a unary expression.  Thus, we just
+	// ignore any sign specifier here.
 
+	str = s;
 	if (strchr(str, '\'') == 0)
 		{
 		base = 'd';
@@ -139,10 +133,7 @@ p_create_number(char *s)
 		if (str[0] == '\'')
 			{
 			if (*(str + 1) == 's')
-				{
-				negative = true;
 				idx++;
-				}
 			len = 32; // Unsized constants must be at least 32bits.
 			base = *(str + idx++);
 			num = str + idx;
@@ -152,11 +143,8 @@ p_create_number(char *s)
 			char *tmp = vbs_strdup(str);
 			siz = strtok(tmp, "\'");
 			if (*(str + strlen(siz) + 1) == 's')
-				{
-				negative = true;
 				idx++;
-				}
-			len = negative ? 32 : atoi(siz);
+			len = atoi(siz);
 			base = *(str + strlen(siz) + idx++);
 			num = str + strlen(siz) + idx;
 			free(tmp);
@@ -169,14 +157,8 @@ p_create_number(char *s)
 		case 'd': case 'D': type = bit_vector::BASE10; break;
 		case 'h': case 'H': type = bit_vector::BASE16; break;
 		}
-	ret = new number(num, type, len, negative);
+	ret = new number(num, type, len);
 	ret->_lineno = cur_lineno;
-	if (negative)
-		{
-		number tmp(*ret);
-		unary_inv(tmp, *ret);
-		binary_add(*ret, tmp, number("1", bit_vector::BASE10, 1, false));
-		}
 	free(s);
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created number.\n");

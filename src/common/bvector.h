@@ -196,7 +196,7 @@ public:
 
 	bit_vector(logic_type = NVL);
 	bit_vector(decimal_type);
-	bit_vector(position_type, position_type, bool = false, logic_type = DC);
+	bit_vector(position_type, position_type, base_type = BASE10, bool = false, logic_type = DC);
 	bit_vector(const str_type &, base_type = BASE2, size_type = 0, bool = false);
 	bit_vector(const bit_vector &);
 	virtual ~bit_vector();
@@ -489,8 +489,8 @@ bit_vector::bit_vector(logic_type b)
 	}
 
 inline
-bit_vector::bit_vector(position_type ms, position_type ls, bool neg, logic_type val)
-	: _tristate(false), _signed(neg), _base(BASE10)
+bit_vector::bit_vector(position_type ms, position_type ls, base_type b, bool neg, logic_type val)
+	: _tristate(false), _signed(neg), _base(b)
 	{
 	// Create a bit vector with the specified size.
 	// According to the Verilog LRM, <ls> can be greater than

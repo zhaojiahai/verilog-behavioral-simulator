@@ -12,7 +12,6 @@
 // vbs_api.cc
 
 #include <csetjmp> // longjmp()
-#include <cstdlib> // exit()
 #include <list>
 #include <sstream>
 #include <iostream>
@@ -37,7 +36,6 @@ using std::stringstream;
 typedef symbol_table::size_type size_type;
 typedef symbol_table::bucket_type bucket_type;
 
-extern list<hash_value> module_list;
 extern "C" void vbs_sim_setup(void);
 extern "C" long int vbs_sim_run(int);
 extern "C" bool vbs_sim_step();
@@ -175,9 +173,10 @@ char *
 vbs_list_modules()
 	{
 	symbol_table &symboltable = vbs_engine::symboltable();
+	list<hash_value> &modulelist = vbs_engine::modulelist();
 	string mod_list;
-	list<hash_value>::iterator idx(module_list.begin());
-	list<hash_value>::iterator stop(module_list.end());
+	list<hash_value>::iterator idx(modulelist.begin());
+	list<hash_value>::iterator stop(modulelist.end());
 	for (; idx != stop; ++idx)
 		mod_list += symboltable.get(*idx)->get_module()->name() + " ";
 	return vbs_strdup(mod_list.c_str());
@@ -297,6 +296,7 @@ void
 vbs_fatal(int c, const string &cm, const char *st, const string &fn, int ln, const string &m, const string &p)
 	{
 	extern const char *sim_errmsg(const char *, const char *, const char *, int, int, const char *);
+	extern jmp_buf vbs_sim_finish;
 	cout << sim_errmsg(p.c_str(), m.c_str(), fn.c_str(), ln, c, cm.c_str()) << st << endl;
-	exit(c);
+	longjmp(vbs_sim_finish, 1);
 	}

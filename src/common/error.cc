@@ -131,11 +131,21 @@ void
 vbs_error::pop_filename(void)
 	{ _file_name.pop(); }
 
+vbs_error::value_type
+vbs_error::get_data()
+	{
+	return _value;
+	}
+
 void
 vbs_error::set_data(value_type num, size_type ln)
 	{
-	_value = num;
-	_line_number = ln;
+	// Report the unsupported error if it occurred.
+	if (_value != SE_TFSUPPORT && _value != SE_SUPPORT)
+		{
+		_value = num;
+		_line_number = ln;
+		}
 	}
 
 void

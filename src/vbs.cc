@@ -57,9 +57,8 @@ vbs_engine::initialize()
 
 	// Clear other global variables to restart the engine.
 
-	// Reset parser error code reporting.
-	extern vbs_error::value_type parse_error_code;
-	parse_error_code = vbs_error::SE_NONE;
+	// Reset error code reporting.
+	vbs_err.set_data(vbs_error::SE_NONE, 0);
 
 	// Reallocate event list used by monitor_expr.
 	monitor_expr::reset();

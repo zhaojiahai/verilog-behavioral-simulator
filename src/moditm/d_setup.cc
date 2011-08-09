@@ -131,7 +131,7 @@ decl_setup::operator()(io_decl *p, bool must_exist) const
 	}
 
 inline void
-decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
+decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position_type ps) const
 	{
 	// Find the symbol table node, if it exists.
 	symbol_table &symboltable = vbs_engine::symboltable();
@@ -224,6 +224,11 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 			ms = 31;
 			ls = 0;
 			}
+		else if (t == net_type::PARAMETER)
+			{
+			ms = ps - 1;
+			ls = 0;
+			}
 
 		if (net->_storage->msb_lower())
 			{
@@ -243,8 +248,8 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 				// Direction declared first but the index order was different.
 				delete net->_storage;
 				delete net->_result;
-				net->_storage = new num_type(ms, ls, true);
-				net->_result = new num_type(ms, ls, true);
+				net->_storage = new num_type(ms, ls, num_type::BASE10, true);
+				net->_result = new num_type(ms, ls, num_type::BASE10, true);
 				}
 			else
 				{
@@ -268,11 +273,17 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 				vbs_err.out(id->name());
 				}
 			}
-		else if (t == net_type::INTEGER || t == net_type::PARAMETER)
+		else if (t == net_type::INTEGER)
 			{
 			ms = 31;
 			ls = 0;
 			}
+		else if (t == net_type::PARAMETER)
+			{
+			ms = ps - 1;
+			ls = 0;
+			}
+
 		// Check if this is a memory declaration.
 		if (id->select() != 0)
 			{
@@ -298,9 +309,9 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t) const
 		else
 			{
 			if (t == net_type::WIRE)
-				net->_storage = new num_type(ms, ls, false, Z);
+				net->_storage = new num_type(ms, ls, num_type::BASE10, false, Z);
 			else if (t == net_type::INTEGER)
-				net->_storage = new num_type(ms, ls, true);
+				net->_storage = new num_type(ms, ls, num_type::BASE10, true);
 			else
 				net->_storage = new num_type(ms, ls);
 			net->_result = new num_type(ms, ls);
@@ -365,8 +376,9 @@ decl_setup::operator()(net_decl *p) const
 				net->assignment(num, -1, -1, -1, -1);
 				}
 
-			// Schedule assignment at least once.
-			eventqueue.add_event(ev);
+			// Schedule assignment at least once, if not already.
+			if (!ev->is_queued())
+				eventqueue.add_event(ev);
 			}
 		}
 	}
@@ -443,10 +455,16 @@ decl_setup::operator()(param_decl *p) const
 	symbol_table &symboltable = vbs_engine::symboltable();
 	param_decl::decl_assign_list::const_iterator itp(p->_id_list->begin());
 	param_decl::decl_assign_list::const_iterator stop(p->_id_list->end());
+	range_type::position_type ps;
 	for (; itp != stop; ++itp)
 		{
+		// Must setup expression if exist.  Need to know how big to set
+		// the storage in the symbol table.
+		if ((*itp)->_rval != 0)
+			ps = (*itp)->_rval->setup(setup_expr(_scope, true));
+
 		// Add identifier to symbol table.
-		net_setup((*itp)->_ident, p->_range, net_type::PARAMETER);
+		net_setup((*itp)->_ident, p->_range, net_type::PARAMETER, ps);
 
 		// Setup expression.
 		if ((*itp)->_rval != 0)
@@ -454,7 +472,6 @@ decl_setup::operator()(param_decl *p) const
 			// Assign value into symbol table.
 			net_type *net;
 			(*itp)->_ident->setup(setup_expr(_scope));
-			(*itp)->_rval->setup(setup_expr(_scope, true));
 			net = (symboltable.get((*itp)->_ident->index()))->get_net();
 			if (_first != 0 && *_first != *_last)
 				{
