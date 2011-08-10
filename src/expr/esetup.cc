@@ -8,6 +8,7 @@
 //
 // esetup.cc
 
+#include <cmath> // pow
 #include "common/error.h"
 #include "common/sym_tab.h"
 #include "common/st_func.h"
@@ -313,8 +314,13 @@ setup_expr::operator()(unary_op_expr *p) const
 setup_expr::size_type
 setup_expr::operator()(binary_op_expr *p) const
 	{
-	size_type ls = p->_left->setup(setup_expr(_scope, _check_const, _parent, _result_size));
-	size_type rs = p->_right->setup(setup_expr(_scope, _check_const, _parent, _result_size));
+	bool cc = _check_const;
+	if (p->_operator == binary_op_expr::POWER)
+		cc = true; // Expressions must be constants.
+	size_type ls = p->_left->setup(setup_expr(_scope, cc, _parent, _result_size));
+	size_type rs = p->_right->setup(setup_expr(_scope, cc, _parent, _result_size));
+	num_type tmp;
+	num_type::decimal_type r, e;
 	size_type size = 0, s = 0;
 	switch (p->_operator)
 		{
@@ -332,6 +338,14 @@ setup_expr::operator()(binary_op_expr *p) const
 			s = ls > rs ? ls : rs;
 			size = s < _result_size ? _result_size : s;
 			break;
+		case binary_op_expr::POWER:
+			// We calculate the result now, so we need a size
+			// that can store the result.
+			r = p->_left->evaluate(evaluate_expr());
+			e = p->_right->evaluate(evaluate_expr());
+			tmp = num_type(static_cast<num_type::decimal_type>(pow(r, e)));
+			size = tmp.size();
+			break;
 		case binary_op_expr::EQUAL_EQUAL:
 		case binary_op_expr::NOT_EQUAL:
 		case binary_op_expr::EQUAL_EQUAL_EQUAL:
@@ -342,7 +356,7 @@ setup_expr::operator()(binary_op_expr *p) const
 		case binary_op_expr::LESS_EQUAL:
 		case binary_op_expr::GRT_THAN:
 		case binary_op_expr::GRT_EQUAL:
-			size = s = 1;
+			size = 1;
 			break;
 		case binary_op_expr::LOGIC_AND:
 		case binary_op_expr::LOGIC_NAND:
@@ -361,6 +375,8 @@ setup_expr::operator()(binary_op_expr *p) const
 			break;
 		}
 	p->_result = new num_type(size - 1, 0);
+	if (p->_operator == binary_op_expr::POWER)
+		*p->_result = tmp;
 	return p->_result->size();
 	}
 

@@ -45,6 +45,7 @@ binary_op_expr::display(ostream_type &s) const
 		case MULTIPLY: op = "*"; break;
 		case DIVIDE: op = "/"; break;
 		case MODULO: op = "%"; break;
+		case POWER: op = "**"; break;
 		case EQUAL_EQUAL: op = "=="; break;
 		case NOT_EQUAL: op = "!="; break;
 		case EQUAL_EQUAL_EQUAL: op = "==="; break;

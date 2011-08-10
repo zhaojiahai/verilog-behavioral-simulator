@@ -141,58 +141,63 @@ evaluate_expr::operator()(const unary_op_expr *p) const
 const evaluate_expr::num_type &
 evaluate_expr::operator()(const binary_op_expr *p) const
 	{
-	const num_type &left(p->_left->evaluate(evaluate_expr()));
-	const num_type &right(p->_right->evaluate(evaluate_expr()));
-	switch (p->_operator)
+	// We already calculated result for power operator.
+	if (p->_operator != binary_op_expr::POWER)
 		{
-		case binary_op_expr::ADD:
-			binary_add(*p->_result, left, right); break;
-		case binary_op_expr::SUB:
-			binary_sub(*p->_result, left, right); break;
-		case binary_op_expr::MULTIPLY:
-			binary_mul(*p->_result, left, right); break;
-		case binary_op_expr::DIVIDE:
-			binary_div(*p->_result, left, right); break;
-		case binary_op_expr::MODULO:
-			binary_mod(*p->_result, left, right); break;
-		case binary_op_expr::EQUAL_EQUAL:
-			*p->_result = (left == right); break;
-		case binary_op_expr::NOT_EQUAL:
-			*p->_result = (left != right); break;
-		case binary_op_expr::EQUAL_EQUAL_EQUAL:
-			*p->_result = compare_c(left, right); break;
-		case binary_op_expr::NOT_EQUAL_EQUAL:
-			*p->_result = !compare_c(left, right); break;
-		case binary_op_expr::AND_AND:
-			*p->_result = (left && right); break;
-		case binary_op_expr::OR_OR:
-			*p->_result = (left || right); break;
-		case binary_op_expr::LESS_THAN:
-			*p->_result = (left < right); break;
-		case binary_op_expr::LESS_EQUAL:
-			*p->_result = (left <= right); break;
-		case binary_op_expr::GRT_THAN:
-			*p->_result = (left > right); break;
-		case binary_op_expr::GRT_EQUAL:
-			*p->_result = (left >= right); break;
-		case binary_op_expr::LOGIC_AND:
-			logic_and(*p->_result, left, right); break;
-		case binary_op_expr::LOGIC_NAND:
-			logic_nand(*p->_result, left, right); break;
-		case binary_op_expr::LOGIC_OR:
-			logic_or(*p->_result, left, right); break;
-		case binary_op_expr::LOGIC_NOR:
-			logic_nor(*p->_result, left, right); break;
-		case binary_op_expr::LOGIC_XOR:
-			logic_xor(*p->_result, left, right); break;
-		case binary_op_expr::LOGIC_XNOR:
-			logic_xnor(*p->_result, left, right); break;
-		case binary_op_expr::LOGIC_NXOR:
-			logic_xnor(*p->_result, left, right); break;
-		case binary_op_expr::LEFT_SHIFT:
-			binary_lshf(*p->_result, left, right); break;
-		case binary_op_expr::RIGHT_SHIFT:
-			binary_rshf(*p->_result, left, right); break;
+		const num_type &left(p->_left->evaluate(evaluate_expr()));
+		const num_type &right(p->_right->evaluate(evaluate_expr()));
+		switch (p->_operator)
+			{
+			case binary_op_expr::ADD:
+				binary_add(*p->_result, left, right); break;
+			case binary_op_expr::SUB:
+				binary_sub(*p->_result, left, right); break;
+			case binary_op_expr::MULTIPLY:
+				binary_mul(*p->_result, left, right); break;
+			case binary_op_expr::DIVIDE:
+				binary_div(*p->_result, left, right); break;
+			case binary_op_expr::MODULO:
+				binary_mod(*p->_result, left, right); break;
+			case binary_op_expr::POWER: break; // Handled above.
+			case binary_op_expr::EQUAL_EQUAL:
+				*p->_result = (left == right); break;
+			case binary_op_expr::NOT_EQUAL:
+				*p->_result = (left != right); break;
+			case binary_op_expr::EQUAL_EQUAL_EQUAL:
+				*p->_result = compare_c(left, right); break;
+			case binary_op_expr::NOT_EQUAL_EQUAL:
+				*p->_result = !compare_c(left, right); break;
+			case binary_op_expr::AND_AND:
+				*p->_result = (left && right); break;
+			case binary_op_expr::OR_OR:
+				*p->_result = (left || right); break;
+			case binary_op_expr::LESS_THAN:
+				*p->_result = (left < right); break;
+			case binary_op_expr::LESS_EQUAL:
+				*p->_result = (left <= right); break;
+			case binary_op_expr::GRT_THAN:
+				*p->_result = (left > right); break;
+			case binary_op_expr::GRT_EQUAL:
+				*p->_result = (left >= right); break;
+			case binary_op_expr::LOGIC_AND:
+				logic_and(*p->_result, left, right); break;
+			case binary_op_expr::LOGIC_NAND:
+				logic_nand(*p->_result, left, right); break;
+			case binary_op_expr::LOGIC_OR:
+				logic_or(*p->_result, left, right); break;
+			case binary_op_expr::LOGIC_NOR:
+				logic_nor(*p->_result, left, right); break;
+			case binary_op_expr::LOGIC_XOR:
+				logic_xor(*p->_result, left, right); break;
+			case binary_op_expr::LOGIC_XNOR:
+				logic_xnor(*p->_result, left, right); break;
+			case binary_op_expr::LOGIC_NXOR:
+				logic_xnor(*p->_result, left, right); break;
+			case binary_op_expr::LEFT_SHIFT:
+				binary_lshf(*p->_result, left, right); break;
+			case binary_op_expr::RIGHT_SHIFT:
+				binary_rshf(*p->_result, left, right); break;
+			}
 		}
 	return *p->_result;
 	}

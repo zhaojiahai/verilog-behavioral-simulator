@@ -230,6 +230,7 @@ p_create_binary_op_expr(int type, p_expression l, p_expression r)
 		case YYASTERIC: op = binary_op_expr::MULTIPLY; break;
 		case YYSLASH: op = binary_op_expr::DIVIDE; break;
 		case YYPERCENT: op = binary_op_expr::MODULO; break;
+		case YYASTERICASTERIC: op = binary_op_expr::POWER; break;
 		case YYEQUALEQUAL: op = binary_op_expr::EQUAL_EQUAL; break;
 		case YYEXCLAMEQUAL: op = binary_op_expr::NOT_EQUAL; break;
 		case YYEQUALEQUALEQUAL: op = binary_op_expr::EQUAL_EQUAL_EQUAL; break;

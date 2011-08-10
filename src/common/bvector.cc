@@ -212,7 +212,7 @@ bit_vector::bit_vector(unsigned long value)
 		}
 	_end = i - 1;
 	_size = (_end - _begin) + 1;
-	memset(_bits + i, static_cast<int>(NVL), largest - i);
+	memset(_bits + i, static_cast<int>(LO), largest - i);
 	}
 
 bit_vector::bit_vector(const str_type &str, base_type base, size_type len, bool neg)

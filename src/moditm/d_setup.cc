@@ -409,7 +409,7 @@ decl_setup::operator()(reg_decl *p) const
 			// Assign value into symbol table.
 			net_type *net;
 			(*itp)->_ident->setup(setup_expr(_scope));
-			(*itp)->_rval->setup(setup_expr(_scope, true));
+			(*itp)->_rval->setup(setup_expr(_scope, true, 0, net->size()));
 			net = (symboltable.get((*itp)->_ident->index()))->get_net();
 			if (net != 0)
 				{
@@ -437,7 +437,7 @@ decl_setup::operator()(int_decl *p) const
 			// Assign value into symbol table.
 			net_type *net;
 			(*itp)->_ident->setup(setup_expr(_scope));
-			(*itp)->_rval->setup(setup_expr(_scope, true));
+			(*itp)->_rval->setup(setup_expr(_scope, true, 0, 32));
 			net = (symboltable.get((*itp)->_ident->index()))->get_net();
 			if (net != 0)
 				{

@@ -387,8 +387,8 @@
 %type <delay_or_event_control> delay2_opt
 %type <delay_or_event_control> delay2
 %type <delay_or_event_control> delay_value
-%type <simple_string> param_identifier
-/*%type <expression> param_identifier*/
+%type <delay_or_event_control> delay_expression
+%type <expression> param_identifier
 
 %type <part_select> range_opt
 %type <part_select> range
@@ -906,7 +906,7 @@ range:
 	;
 
 v_or_s:
-			/* Optional. */
+		/* Optional. */
 			{ $$ = 0; }
 	|	YYVECTORED
 			{ $$ = YYVECTORED; }
@@ -1037,8 +1037,8 @@ delay3_opt:
 delay3:
 		delay2
 			{ $$ = $1; }
-	|	YYPOUND '(' delay_value ',' delay_value ',' delay_value ')'
-			{ $$ = $3; yyerror(" #(integer,integer,integer) "); }
+	|	YYPOUND '(' delay_expression ',' delay_expression ',' delay_expression ')'
+			{ $$ = $3; yyerror(" #(value, value, value) "); }
 	;
 
 delay2_opt:
@@ -1051,10 +1051,10 @@ delay2_opt:
 delay2:
 		YYPOUND delay_value
 			{ $$ = $2; }
-	|	YYPOUND '(' delay_value ')'
+	|	YYPOUND '(' delay_expression ')'
 			{ $$ = $3; }
-	|	YYPOUND '(' delay_value ',' delay_value ')'
-			{ $$ = $3; yyerror(" #(integer,integer) "); }
+	|	YYPOUND '(' delay_expression ',' delay_expression ')'
+			{ $$ = $3; yyerror(" #(value, value) "); }
 	;
 
 delay_value:
@@ -1063,15 +1063,17 @@ delay_value:
 	|	real_number
 			{ $$ = p_create_delay_number($1); yyerror(" #real "); }
 	|	param_identifier
-			{
-			p_range_identifier tmp = p_create_range_identifier($1, 0);
-			$$ = p_create_delay_identifier(tmp);
-			}
+			{ $$ = p_create_delay_identifier($1); }
 	;
 
 param_identifier:
-		YYCHARSTR /*const_expression*/
-			{ $$ = $1; }
+		YYCHARSTR
+			{ $$ = p_create_range_identifier($1, 0); }
+	;
+
+delay_expression:
+		expression
+			{ $$ = p_create_delay_identifier($1); }
 	;
 
 function_declaration:
