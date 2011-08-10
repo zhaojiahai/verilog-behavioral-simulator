@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -8,7 +8,6 @@
 //
 // sym_tab.cc
 
-#include <algorithm>
 #include "common/error.h"
 #include "common/sym_tab.h"
 
