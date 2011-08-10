@@ -108,6 +108,12 @@ void trigger_postproc(stmt_base *st)
 	time_wheel<stmt_base> &timewheel = vbs_engine::timewheel();
 	if (st->_always == true)
 		{
+		// End of a nesting block, re-execute statement.  Must advance
+		// current statement pointer so we move forward.  Unlike for
+		// initial statement, we must always advance the current statement
+		// pointer.
+		seq_block_stmt *sqblk = st->get_seq_block();
+		++(sqblk->_curstmt);
 		if (st->_ec == 0)
 			{
 			if (st->_dec != 0)
