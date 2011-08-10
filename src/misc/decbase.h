@@ -48,8 +48,8 @@ struct dec_base : public virtual common_base
 		{}
 	virtual void setup(const setup_type &)
 		{}
-	virtual int trigger(const trigger_type &)
-		{ return -2; }
+	virtual void trigger(const trigger_type &)
+		{}
 
 	bool _delayed; // Delayed already, trigger statement immediately.
 	};
@@ -69,9 +69,9 @@ struct dec_setup
 struct dec_trigger
 	{
 	virtual ~dec_trigger() {}
-	virtual int operator()(delay_num *) const { return -2; }
-	virtual int operator()(delay_id *) const { return -2; }
-	virtual int operator()(ored_event_expr *) const { return -2; }
+	virtual void operator()(delay_num *) const {}
+	virtual void operator()(delay_id *) const {}
+	virtual void operator()(ored_event_expr *) const {}
 	};
 
 struct dec_write

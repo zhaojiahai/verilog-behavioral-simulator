@@ -698,8 +698,16 @@ setup_stmt::operator()(assignment_stmt *p) const
 	handle_dec(p);
 	if (p->_delayed_store != 0)
 		{
-		// Trigger only this statement, not the parent.
-		p->_delayed_store->setup(setup_dec(_scope, p, _parent));
+		// Trigger only this statement for non-blocking assignment.
+		if (p->_nonblocking)
+			p->_delayed_store->setup(setup_dec(_scope, p, 0));
+		else
+			p->_delayed_store->setup(setup_dec(_scope, p, _parent));
+		}
+	if (p->_nonblocking)
+		{
+		event_cache_type *c = new event_cache_type(false, p);
+		p->_event = new nonblock_event<stmt_type>(c, DC);
 		}
 	setup_lvalue::size_type size = p->_lval->setup(setup_lvalue(_scope));
 	p->_rval->setup(setup_expr(_scope, false, _parent, size));

@@ -90,10 +90,16 @@ setup_dec::operator()(delay_num *p) const
 	// An event object is needed in case the delay amount is zero.
 	// In which case, we need to append this event into the event
 	// queue.
-	num_type zero(0UL);
-	if (*p == zero)
+	p->_value = *p;
+	if (p->_value == static_cast<unsigned long>(-1))
+		p->_value = 0;
+	if (p->_value == 0)
 		{
-		event_cache_type *c = new event_cache_type(false, _stmt);
+		event_cache_type *c;
+		if (_parent_stmt != 0)
+			c = new event_cache_type(false, _parent_stmt);
+		else
+			c = new event_cache_type(false, _stmt);
 		p->_event = new nonblock_event<stmt_type>(c, DC);
 		}
 	}
@@ -106,12 +112,17 @@ setup_dec::operator()(delay_id *p) const
 
 	// Is constant, so evaluate it now to avoid recalculations later.
 	p->_value = p->_expr->evaluate(evaluate_expr());
-
-	// This object is always needed because we do not know if the
-	// expression will evaluate to zero.  If it does, we need this
-	// object.
-	event_cache_type *c = new event_cache_type(false, _stmt);
-	p->_event = new nonblock_event<stmt_type>(c, DC);
+	if (p->_value == static_cast<unsigned long>(-1))
+		p->_value = 0;
+	if (p->_value == 0)
+		{
+		event_cache_type *c;
+		if (_parent_stmt != 0)
+			c = new event_cache_type(false, _parent_stmt);
+		else
+			c = new event_cache_type(false, _stmt);
+		p->_event = new nonblock_event<stmt_type>(c, DC);
+		}
 	}
 
 void
@@ -119,7 +130,10 @@ setup_dec::operator()(ored_event_expr *p) const
 	{
 	ored_event_expr::event_expr_list::iterator itp(p->_ored_list->begin());
 	ored_event_expr::event_expr_list::iterator stop(p->_ored_list->end());
-	p->_cache = new event_cache_type(_parent_stmt->_always, _parent_stmt);
+	if (_parent_stmt != 0)
+		p->_cache = new event_cache_type(_parent_stmt->_always, _parent_stmt);
+	else
+		p->_cache = new event_cache_type(_stmt->_always, _stmt);
 	for (; itp != stop; ++itp)
 		(*itp).get()->setup(setup_event_expr(_scope, p->_cache));
 	}

@@ -11,6 +11,7 @@
 #ifndef _ASSIGN_H
 #define _ASSIGN_H
 
+#include "common/event.h"
 #include "expr/exprbase.h"
 #include "stmt/stmtbase.h"
 #include "misc/lvalue.h"
@@ -43,14 +44,15 @@ public:
 	bool trigger(const trigger_type &);
 
 private:
-	num_type *_value;
 	lvalue_type *_lval;
 	expr_type *_rval;
-
-	// If a delay number is used after the equal sign, it means the
-	// actual storage of the data is delayed.
-	bool _nonblocking;
 	dec_type *_delayed_store;
+
+	// Non-blocking assignment needs an event.
+	typedef event_base<stmt_type> event_type;
+	bool _nonblocking;
+	num_type *_value;
+	event_type *_event;
 	};
 
 #endif // _ASSIGN_H

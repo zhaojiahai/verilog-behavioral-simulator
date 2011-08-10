@@ -35,7 +35,7 @@ public:
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;
 	void setup(const setup_type &);
-	int trigger(const trigger_type &);
+	void trigger(const trigger_type &);
 
 private:
 	expr_type *_expr;
@@ -43,7 +43,7 @@ private:
 	// The identifier in '# param_identifier' must be a constant.
 	// Which could be a number or a parameter.  Either way, we
 	// can calculate it at setup time.
-	expr_type::num_type _value;
+	expr_type::num_type::decimal_type _value;
 
 	// In case the delay amount is zero, we need to append to the
 	// event queue rather than the time wheel.

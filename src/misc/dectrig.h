@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -24,9 +24,9 @@ struct trigger_dec : public dec_trigger
 	trigger_dec(stmt_type *st)
 		{ _stmt = st; }
 
-	int operator()(delay_num *) const;
-	int operator()(delay_id *) const;
-	int operator()(ored_event_expr *) const;
+	void operator()(delay_num *) const;
+	void operator()(delay_id *) const;
+	void operator()(ored_event_expr *) const;
 
 	stmt_type *_stmt;
 	};

@@ -47,6 +47,6 @@ void
 delay_num::setup(const setup_type &setup)
 	{ setup(this); }
 
-int
+void
 delay_num::trigger(const trigger_type &trigger)
-	{ return trigger(this); }
+	{ trigger(this); }

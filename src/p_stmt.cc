@@ -129,8 +129,6 @@ p_create_non_blocking_assignment
 		)
 	{
 	assignment_stmt *ret;
-	if (dec == 0)
-		dec = new delay_num(0UL); /* Non-blocking assignment. */
 	ret = new assignment_stmt((lvalue *)lv, (expr_base *)exp, true,
 							  (dec_base *)dec);
 	ret->_lineno = cur_lineno;

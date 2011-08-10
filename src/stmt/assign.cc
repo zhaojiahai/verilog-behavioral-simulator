@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -10,36 +10,36 @@
 
 #include "stmt/assign.h"
 
-assignment_stmt::assignment_stmt(lvalue_type *l, expr_type *e, bool nb,
-								 dec_type *d)
+assignment_stmt::assignment_stmt(lvalue_type *l, expr_type *e, bool nb, dec_type *d)
+	: _nonblocking(nb)
 	{
-	_value = 0;
 	_lval = l;
 	_rval = e;
-	_nonblocking = nb;
 	_delayed_store = d;
+	_value = 0;
+	_event = 0;
 	}
 
 assignment_stmt::assignment_stmt(const assignment_stmt &p)
-	: common_base(p), stmt_base(p)
+	: common_base(p), stmt_base(p), _nonblocking(p._nonblocking)
 	{
-	_value = 0;
 	_lval = new lvalue(*p._lval);
 	_rval = p._rval->copy_constructor();
-	_nonblocking = p._nonblocking;
 	if (p._delayed_store != 0)
 		_delayed_store = p._delayed_store->copy_constructor();
 	else
 		_delayed_store = 0;
+	_value = 0;
+	_event = 0;
 	}
 
 assignment_stmt::~assignment_stmt()
 	{
-	delete _value;
 	delete _lval;
 	delete _rval;
-	if (_delayed_store != 0)
-		delete _delayed_store;
+	delete _delayed_store;
+	delete _value;
+	delete _event;
 	}
 
 assignment_stmt *

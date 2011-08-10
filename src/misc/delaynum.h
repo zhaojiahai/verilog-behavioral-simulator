@@ -36,9 +36,13 @@ public:
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;
 	void setup(const setup_type &);
-	int trigger(const trigger_type &);
+	void trigger(const trigger_type &);
 
 private:
+	// '#number' is constant, so we can just calculate the value
+	// ahead of time and use that.
+	decimal_type _value;
+
 	// In case the delay amount is zero, we need to append to the
 	// event queue rather than the time wheel.
 	typedef stmt_base stmt_type;

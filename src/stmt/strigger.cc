@@ -398,7 +398,7 @@ inline int
 trigger_stmt::handle_dec(stmt_type *p) const
 	{
 	// Take care of delay or event control before statement.
-	int retval = -2;
+	int retval = 0;
 	stmt_type::dec_type *dec = p->_dec;
 
 	// Event controls might be stored in _ec, for always construct.
@@ -416,7 +416,8 @@ trigger_stmt::handle_dec(stmt_type *p) const
 		else
 			{
 			dec->_delayed = true;
-			retval = dec->trigger(trigger_dec(_parent));
+			dec->trigger(trigger_dec(_parent));
+			retval = 1;
 			}
 		}
 
@@ -428,16 +429,11 @@ trigger_stmt::operator()(null_stmt *p) const
 	{
 	// This function is used as a template for all the other statement
 	// trigger functions.  Since all of them are the same, no need to
-	// recomment each one.
+	// re-comment each one.
 
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
 	// We should now do whatever is necessary.  For null statements,
 	// there is nothing to do, so return.
@@ -448,13 +444,8 @@ bool
 trigger_stmt::operator()(seq_block_stmt *p) const
 	{
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
 	// This is the new simulation procedure.  We must handle one statement
 	// at a time.  This means we do not go through the entire list
@@ -540,13 +531,8 @@ bool
 trigger_stmt::operator()(task_enable_stmt *p) const
 	{
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
 	// If this task enable is enabled via a change event, i.e. $monitor or
 	// $strobe system tasks, then we toggle our flag so nothing happens when
@@ -574,63 +560,68 @@ bool
 trigger_stmt::operator()(assignment_stmt *p) const
 	{
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
-	if (p->_delayed_store == 0)
-		{
-		// Regular blocking assignment, evaluate the expr and store it.
-		const num_type &res(p->_rval->evaluate(evaluate_expr()));
-		p->_lval->clr_target();
-		if (!res.is_tristate())
-			p->_lval->trigger(trigger_lvalue(res));
-		}
-	else
-		{
-		stmt_type::dec_type *dec = p->_dec;
-		if (dec == 0 && !_parent->_always)
-			dec = p->_ec;
+	// Need to update delay or event control state so if we delay
+	// to the future.  When we are triggered in the future, we
+	// won't do another delay.
+	stmt_type::dec_type *dec = p->_dec;
+	if (dec == 0 && !_parent->_always)
+		dec = p->_ec;
 
-		if (p->_value == 0)
+	if (p->_value == 0)
+		{
+		// First time through or after delay...
+		if (p->_nonblocking)
 			{
-			// Non-blocking assignment or blocking assignment with delay
-			// after the equal sign.  We need to evaluate the expression
-			// now, but do the actual assignment later.
-			p->_value = new num_type;
-			*(p->_value) = p->_rval->evaluate(evaluate_expr());
-			if (p->_nonblocking)
+			p->_lval->set_target();
+			if (dec != 0)
+				dec->_delayed = true;
+			p->_value = new num_type(p->_rval->evaluate(evaluate_expr()));
+			if (p->_delayed_store != 0)
 				{
-				p->_lval->set_target();
-				if (dec != 0)
-					dec->_delayed = true;
 				p->_delayed_store->_delayed = true;
+				// We want to trigger this statement only, not delay the parent.
 				p->_delayed_store->trigger(trigger_dec(p));
 				}
 			else
 				{
-				p->_lval->clr_target();
-				if (dec != 0)
-					dec->_delayed = true;
-				p->_delayed_store->_delayed = true;
-				if (p->_delayed_store->trigger(trigger_dec(_parent)) != 0)
-					return false;
+				event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
+				eventqueue.add_event(p->_event);
 				}
 			}
 		else
 			{
-			if (dec != 0)
-				dec->_delayed = false;
-			p->_delayed_store->_delayed = false;
-			if (!p->_value->is_tristate())
-				p->_lval->trigger(trigger_lvalue(*p->_value));
-			delete p->_value;
-			p->_value = 0;
+			p->_lval->clr_target();
+			if (p->_delayed_store != 0)
+				{
+				p->_value = new num_type(p->_rval->evaluate(evaluate_expr()));
+				if (dec != 0)
+					dec->_delayed = true;
+				p->_delayed_store->_delayed = true;
+				// Delay the parent.
+				p->_delayed_store->trigger(trigger_dec(_parent));
+				return false;
+				}
+			else
+				{
+				const num_type &res(p->_rval->evaluate(evaluate_expr()));
+				if (!res.is_tristate())
+					p->_lval->trigger(trigger_lvalue(res));
+				}
 			}
+		}
+	else
+		{
+		if (dec != 0)
+			dec->_delayed = false;
+		if (p->_delayed_store != 0)
+			p->_delayed_store->_delayed = false;
+		if (!p->_value->is_tristate())
+			p->_lval->trigger(trigger_lvalue(*p->_value));
+		delete p->_value;
+		p->_value = 0;
 		}
 	return true;
 	}
@@ -639,13 +630,8 @@ bool
 trigger_stmt::operator()(if_else_stmt *p) const
 	{
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
 	if (bool(p->_expr->evaluate(evaluate_expr())) != false)
 		return p->_true_stmt->trigger(trigger_stmt(_parent));
@@ -660,13 +646,8 @@ bool
 trigger_stmt::operator()(case_stmt *p) const
 	{
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
 	bool ret = true;
 	bool status = false;
@@ -691,13 +672,8 @@ bool
 trigger_stmt::operator()(loop_stmt *p) const
 	{
 	// Do we need to delay?
-	switch (handle_dec(p))
-		{
-		case 0: return true;
-		case 1: return false;
-		case -1: return false;
-		default: break;
-		}
+	if (handle_dec(p) != 0)
+		return false;
 
 	// Test whether we were delayed before.
 	bool test_cond = false;

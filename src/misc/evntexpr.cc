@@ -104,6 +104,6 @@ void
 ored_event_expr::setup(const setup_type &setup)
 	{ setup(this); }
 
-int
+void
 ored_event_expr::trigger(const trigger_type &trigger)
-	{ return trigger(this); }
+	{ trigger(this); }

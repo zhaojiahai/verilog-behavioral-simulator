@@ -106,7 +106,7 @@ public:
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;
 	void setup(const setup_type &);
-	int trigger(const trigger_type &);
+	void trigger(const trigger_type &);
 
 private:
 	event_expr_list *_ored_list;
