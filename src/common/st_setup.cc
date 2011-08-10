@@ -8,6 +8,7 @@
 //
 // st_setup.cc
 
+#include <algorithm>
 #include "common/error.h"
 #include "common/sym_tab.h"
 #include "common/st_mod.h"
@@ -43,6 +44,18 @@ setup_st_node::setup_st_node(scopelist_type &s, port_conn_list *p,
 	_first = f;
 	_last = l;
 	}
+
+struct test_name
+	{
+	std::string _name;
+	test_name(const std::string &n)
+		: _name(n) {}
+	bool operator()(const setup_st_node::port_conn_ptr &pc)
+		{
+		const std::string *p = pc->name();
+		return p != 0 ? (*p == _name) : false;
+		}
+	};
 
 void
 setup_st_node::operator()(st_module *p) const
@@ -110,14 +123,34 @@ setup_st_node::operator()(st_module *p) const
 				vbs_err.set_data(vbs_error::SE_NARGLST, (*itp)->_lineno);
 				vbs_err.out(p->_name);
 				}
-			port_conn_list::iterator idx(_port_conn->begin());
+			// Port connections have two forms, ordered and named.  Detect
+			// which is used and setup accordingly.
 			module_type::port_list::iterator pitp(p->_port_list->begin());
 			module_type::port_list::iterator pstop(p->_port_list->end());
-			for (; pitp != pstop; ++idx, ++pitp)
+			port_conn_list::iterator pc;
+			pc = find_if(_port_conn->begin(), _port_conn->end(), test_name((*pitp)->name()));
+			if (pc != _port_conn->end())
 				{
-				// Ports and port connections lists are the same length.
-				// So no need worry about going pass the end.
-				(*pitp)->setup(setup_port(localscope, (*idx).get()));
+				// Named port connection.
+				for (; pitp != pstop; ++pitp)
+					{
+					// Find again so we don't have to use special handling.  Skip setup if
+					// not found.
+					pc = find_if(_port_conn->begin(), _port_conn->end(), test_name((*pitp)->name()));
+					if (pc != _port_conn->end())
+						(*pitp)->setup(setup_port(localscope, pc->get()));
+					}
+				}
+			else
+				{
+				// Ordered port connection.
+				pc = _port_conn->begin();
+				for (; pitp != pstop; ++pc, ++pitp)
+					{
+					// Ports and port connections lists are the same length.
+					// So no need worry about going pass the end.
+					(*pitp)->setup(setup_port(localscope, pc->get()));
+					}
 				}
 			}
 		}

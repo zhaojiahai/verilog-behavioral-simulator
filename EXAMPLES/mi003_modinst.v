@@ -36,7 +36,8 @@ module main;
 	wire b1, main_b1, b2, main_b2;
 
 	a_module a_mod1(a1, main_a1, b1, main_b1);
-	a_module a_mod2(a2, main_a2, b2, main_b2);
+	//a_module a_mod2(a2, main_a2, b2, main_b2);
+	a_module a_mod2(.module_b(main_b2), .b(b2), .module_a(main_a2), .a(a2));
 
 	initial
 		begin

@@ -10,17 +10,25 @@
 
 #include "misc/portconn.h"
 
-port_connection::port_connection(expr_type *e)
-	{ _expr = e; }
+port_connection::port_connection(expr_type *e, const char *pn)
+	{ _expr = e; _port_name = pn != 0 ? new str_type(pn) : 0; }
 
 port_connection::~port_connection()
-	{ delete _expr; }
+	{ delete _expr; delete _port_name; }
+
+const port_connection::str_type *
+port_connection::name()
+	{return _port_name; }
 
 port_connection::ostream_type &
 port_connection::display(ostream_type &s) const
 	{
+	if (_port_name != 0)
+		s << "." << *_port_name << "(";
 	if (_expr != 0)
 		s << *_expr;
+	if (_port_name != 0)
+		s << ")";
 	return s;
 	}
 

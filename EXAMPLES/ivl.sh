@@ -51,6 +51,12 @@ ln -s $ivldir/ivltests .
 ln -s $ivldir/contrib .
 ln -s $ivldir/gold .
 
+bad_exit() {
+	echo The following command line caused a fatal exit, quitting shell script.
+	echo $@
+	exit -1
+}
+
 run_test () {
 	vfn=$1/$2
 	arg="-q $3"
@@ -62,10 +68,10 @@ run_test () {
 	rm -f core
 	$vbs $arg ${vfn}.v > tmp.log
 	retval=$?
-	if [ -f core ]; then
-		echo "'$vbs $arg ${vfn}.v' caused a core dump."
-		exit -1
-	fi
+
+	# Bus error, segmentation fault
+	[ $retval -eq 138 ] && bad_exit $vbs $arg ${vfn}.v
+	[ $retval -eq 139 ] && bad_exit $vbs $arg ${vfn}.v
 
 	# Problem during compilation.
 	[ $retval -eq 16 ] && return 200
@@ -146,6 +152,11 @@ while read first second third mixed; do
 	fi
 
 	case "$fn" in
+		multiply_large)
+			echo "$fn.v -- takes too long, skipped"
+			skipped=$(expr $skipped + 1)
+			continue
+			;;
 		time4|memport_bs|lh_varindx[45])
 			echo "$fn.v -- expected failure, skipped"
 			skipped=$(expr $skipped + 1)
@@ -162,11 +173,6 @@ while read first second third mixed; do
 			skipped=$(expr $skipped + 1)
 			continue
 			;;
-		multiply_large)
-			echo "$fn.v -- takes too long, skipped"
-			skipped=$(expr $skipped + 1)
-			continue
-			;;
 		pr243|pr547|pr596|delay|test_extended|format|test_width|land4|string10|tern5)
 			CI_msg="NOTE: $fn.v -- log file differs"
 			type=CI
@@ -179,7 +185,7 @@ while read first second third mixed; do
 			CI_msg="NOTE: $fn.v -- unsupported (unimplemented)"
 			type=CI
 			;;
-		delay[45])
+		delay[345]|delay_assign_nb2)
 			CI_msg="NOTE: $fn.v -- unsupported (non-conforming)"
 			type=CI
 			;;

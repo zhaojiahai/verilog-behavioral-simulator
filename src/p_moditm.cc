@@ -279,10 +279,10 @@ p_create_always_construct(p_statement st)
 	}
 
 p_port_connection
-p_create_port_connection(p_expression exp)
+p_create_port_connection(p_expression exp, const char *pn)
 	{
 	port_connection *ret;
-	ret = new port_connection((expr_base *) exp);
+	ret = new port_connection((expr_base *) exp, pn);
 	ret->_lineno = cur_lineno;
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created port connection.\n");

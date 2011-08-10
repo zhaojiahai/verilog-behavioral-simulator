@@ -1536,7 +1536,7 @@ ordered_port_connection_brace:
 
 ordered_port_connection:
 		expression_opt
-			{ $$ = p_create_port_connection($1); }
+			{ $$ = p_create_port_connection($1, 0); }
 	;
 
 named_port_connection_brace:
@@ -1548,7 +1548,7 @@ named_port_connection_brace:
 
 named_port_connection:
 		'.' port_identifier '(' expression_opt ')'
-			{ $$ = p_create_port_connection($4); /* FIXME: simplification! */ }
+			{ $$ = p_create_port_connection($4, $2); }
 	;
 
 

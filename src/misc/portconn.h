@@ -28,14 +28,17 @@ public:
 	typedef port_conn_setup setup_type;
 	typedef port_conn_write write_type;
 
-	port_connection(expr_type * = 0);
+	port_connection(expr_type * = 0, const char * = 0);
 	~port_connection();
+
+	const str_type *name();
 
 	ostream_type &display(ostream_type &) const;
 	void write(const write_type &) const;
 	bool setup(const setup_type &);
 
 private:
+	str_type *_port_name;
 	expr_type *_expr;
 	};
 

@@ -28,7 +28,7 @@ extern "C" {
 
 
 p_port_connection
-p_create_port_connection(p_expression);
+p_create_port_connection(p_expression, const char *);
 
 p_port_connection_list
 p_create_port_connection_list(p_port_connection_list, p_port_connection);
