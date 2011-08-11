@@ -13,6 +13,7 @@
 
 #include "common/ptr.h"
 #include "common/hash.h"
+#include "common/event.h"
 #include "expr/exprbase.h"
 #include "stmt/stmtbase.h"
 
@@ -26,6 +27,8 @@ class task_enable_stmt : public stmt_base
 
 public:
 	typedef hash_value hash_type;
+	typedef stmt_base stmt_type;
+	typedef event_base<stmt_type> event_type;
 	typedef expr_base expr_type;
 	typedef basic_ptr<expr_type> arg_type;
 	typedef list_type<arg_type> arg_list;
@@ -46,10 +49,9 @@ private:
 	str_type _name; // Name of system task w/ '$'
 	int _scope; // Scope of the block that contains this statement.
 	bool _delayed; // For delays in task enable.
-	bool _change_enabled; // Task is enabled via change event.
 	hash_type _index; // Index of task in symbol table.
-	arg_list *_argument; // String constant for format
-                          // and list of arguments
+	arg_list *_argument; // List of arguments
+	counted_ptr<event_type> *_event;
 	};
 
 #endif // _TASKENBL_H

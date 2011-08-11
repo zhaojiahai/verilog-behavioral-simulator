@@ -22,6 +22,7 @@
 #include "common/st_util.h"
 #include "expr/qstr.h"
 #include "expr/eeval.h"
+#include "expr/emon.h"
 #include "expr/etrigger.h"
 #include "misc/dectrig.h"
 #include "misc/mtrigger.h"
@@ -534,14 +535,30 @@ trigger_stmt::operator()(task_enable_stmt *p) const
 	if (handle_dec(p) != 0)
 		return false;
 
-	// If this task enable is enabled via a change event, i.e. $monitor or
-	// $strobe system tasks, then we toggle our flag so nothing happens when
-	// we are triggered via non-change events.
-	// FIXME: this doesn't work if we are inside a loop.  But why are we
-	// in a loop anyway?
-	if (p->_change_enabled)
+	// Setup of $monitor/$strobe has been delayed until now.
+	// We don't want to monitor the changes until the task has been
+	// enabled.  Otherwise, extraneous output will be generated.
+	// This should only occur once, since we remove the pointer
+	// afterwards.
+	if (p->_event != 0)
 		{
-		p->_change_enabled = false;
+		task_enable_stmt::arg_list::iterator itp(p->_argument->begin());
+		task_enable_stmt::arg_list::iterator stop(p->_argument->end());
+		++itp; // Skip the format string.
+		for (; itp != stop; ++itp)
+			{
+			if (!(*itp)->monitor(monitor_expr(p->_event)))
+				{
+				strstream_type buf;
+				buf << *(*itp);
+				vbs_err.set_data(vbs_error::SE_TYPE, (*itp)->_lineno);
+				vbs_err.out(buf);
+				}
+			}
+		delete p->_event;
+		p->_event = 0;
+
+		// Enabling $monitor/$strobe doesn't generate output.
 		return true;
 		}
 
@@ -587,8 +604,11 @@ trigger_stmt::operator()(assignment_stmt *p) const
 				}
 			else
 				{
-				event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
-				eventqueue.add_event(p->_event);
+				if (!p->_event->is_queued())
+					{
+					event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
+					eventqueue.add_event(p->_event);
+					}
 				}
 			}
 		else

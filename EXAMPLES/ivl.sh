@@ -173,7 +173,7 @@ while read first second third mixed; do
 			skipped=$(expr $skipped + 1)
 			continue
 			;;
-		pr243|pr547|pr596|delay|test_extended|format|test_width|land4|string10|tern5)
+		pr596|delay|test_extended|format|test_width|land4|string10|tern5)
 			CI_msg="NOTE: $fn.v -- log file differs"
 			type=CI
 			;;

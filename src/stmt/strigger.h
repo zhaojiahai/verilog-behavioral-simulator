@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -44,6 +44,7 @@ struct trigger_stmt : public stmt_trigger
 	typedef stmt_base stmt_type;
 	typedef stmt_type::str_type str_type;
 	typedef stmt_type::expr_type expr_type;
+	typedef stmt_type::strstream_type strstream_type;
 	typedef expr_type::num_type num_type;
 	typedef task_enable_stmt task_caller_type;
 	typedef st_function func_type;

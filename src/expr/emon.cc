@@ -75,7 +75,7 @@ monitor_expr::operator()(const number *) const
 	// executed.
 	if (!_via_select)
 		{
-		if (_event != 0 && !_event->get()->is_queued())
+		if (!_event->get()->is_queued())
 			{
 			// Something is monitoring a constant, so put an event on the
 			// event queue and trigger it at the end of time unit 0.
@@ -95,7 +95,7 @@ monitor_expr::operator()(const qouted_str *) const
 	// executed.
 	if (!_via_select)
 		{
-		if (_event != 0 && !_event->get()->is_queued())
+		if (!_event->get()->is_queued())
 			{
 			// Something is monitoring a constant, so put an event on the
 			// event queue and trigger it at the end of time unit 0.

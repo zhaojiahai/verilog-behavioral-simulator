@@ -21,7 +21,6 @@
 #include "expr/rangeid.h"
 #include "expr/eeval.h"
 #include "expr/esetup.h"
-#include "expr/emon.h"
 #include "misc/decsetup.h"
 #include "misc/lvalue.h"
 #include "misc/msetup.h"
@@ -662,34 +661,20 @@ setup_stmt::operator()(task_enable_stmt *p) const
 	// expressions in the arguments.
 	event_cache_type *cache = 0;
 	event_type *ev = 0;
-	counted_ptr<event_type> *eptr = 0;
 	if (monitor_test)
 		{
 		cache = new event_cache_type(true, p);
 		ev = new monitor_event<stmt_type>(cache, DC);
-		eptr = new counted_ptr<event_type>(ev);
-		p->_change_enabled = true;
+		p->_event = new counted_ptr<event_type>(ev);
 		}
 	else if (strobe_test)
 		{
 		cache = new event_cache_type(true, p);
 		ev = new strobe_event<stmt_type>(cache, DC);
-		eptr = new counted_ptr<event_type>(ev);
-		p->_change_enabled = true;
+		p->_event = new counted_ptr<event_type>(ev);
 		}
 	for (; itp != stop; ++itp)
-		{
 		(*itp)->setup(setup_expr(_scope));
-		if (!(*itp)->monitor(monitor_expr(eptr)))
-			{
-			strstream_type buf;
-			buf << *(*itp);
-			vbs_err.set_data(vbs_error::SE_TYPE, (*itp)->_lineno);
-			vbs_err.out(buf);
-			}
-		}
-	if (monitor_test || strobe_test)
-		delete eptr;
 	}
 
 void

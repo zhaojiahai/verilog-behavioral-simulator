@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002-2003 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002-2003,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -11,13 +11,13 @@
 #include "stmt/taskenbl.h"
 
 task_enable_stmt::task_enable_stmt(const char *n, arg_list *a)
-	: _name(n), _scope(-1), _delayed(false), _change_enabled(false)
-	{ _argument = a; }
+	: _name(n), _scope(-1), _delayed(false)
+	{ _argument = a; _event = 0; }
 
 task_enable_stmt::task_enable_stmt(const task_enable_stmt &p)
 	: common_base(p), stmt_base(p),
 	  _name(p._name), _scope(p._scope), _delayed(p._delayed),
-	  _change_enabled(p._change_enabled), _index(p._index)
+	  _index(p._index)
 	{
 	if (p._argument != 0)
 		{
@@ -29,10 +29,11 @@ task_enable_stmt::task_enable_stmt(const task_enable_stmt &p)
 		}
 	else
 		_argument = 0;
+	_event = 0;
 	}
 
 task_enable_stmt::~task_enable_stmt()
-	{ delete _argument; }
+	{ delete _argument; delete _event; }
 
 bool
 task_enable_stmt::delayed() const

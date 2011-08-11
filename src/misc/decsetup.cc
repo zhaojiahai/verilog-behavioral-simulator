@@ -100,7 +100,7 @@ setup_dec::operator()(delay_num *p) const
 			c = new event_cache_type(false, _parent_stmt);
 		else
 			c = new event_cache_type(false, _stmt);
-		p->_event = new nonblock_event<stmt_type>(c, DC);
+		p->_event = new inactive_event<stmt_type>(c, DC);
 		}
 	}
 
@@ -121,7 +121,7 @@ setup_dec::operator()(delay_id *p) const
 			c = new event_cache_type(false, _parent_stmt);
 		else
 			c = new event_cache_type(false, _stmt);
-		p->_event = new nonblock_event<stmt_type>(c, DC);
+		p->_event = new inactive_event<stmt_type>(c, DC);
 		}
 	}
 

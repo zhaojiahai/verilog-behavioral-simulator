@@ -32,13 +32,14 @@ struct TRIG_TYPE
 	{
 	enum
 		{
-		TRIG_NONE    = 0x00,
-		TRIG_NEGEDGE = 0x01,
-		TRIG_POSEDGE = 0x02,
-		TRIG_CHNG    = 0x04,
-		TRIG_NONBLK  = 0x10,
-		TRIG_MONITOR = 0x20,
-		TRIG_STROBE  = 0x40
+		TRIG_NONE     = 0x00,
+		TRIG_NEGEDGE  = 0x01,
+		TRIG_POSEDGE  = 0x02,
+		TRIG_CHNG     = 0x04,
+		TRIG_INACTIVE = 0x10,
+		TRIG_NONBLK   = 0x20,
+		TRIG_MONITOR  = 0x40,
+		TRIG_STROBE   = 0x80
 		};
 
 	explicit TRIG_TYPE(int t = TRIG_NONE)
@@ -57,6 +58,7 @@ const TRIG_TYPE TRIG_NONE(TRIG_TYPE::TRIG_NONE);
 const TRIG_TYPE TRIG_NEGEDGE(TRIG_TYPE::TRIG_NEGEDGE);
 const TRIG_TYPE TRIG_POSEDGE(TRIG_TYPE::TRIG_POSEDGE);
 const TRIG_TYPE TRIG_CHNG(TRIG_TYPE::TRIG_CHNG);
+const TRIG_TYPE TRIG_INACTIVE(TRIG_TYPE::TRIG_INACTIVE);
 const TRIG_TYPE TRIG_NONBLK(TRIG_TYPE::TRIG_NONBLK);
 const TRIG_TYPE TRIG_MONITOR(TRIG_TYPE::TRIG_MONITOR);
 const TRIG_TYPE TRIG_STROBE(TRIG_TYPE::TRIG_STROBE);
@@ -151,12 +153,13 @@ public:
 		{
 		switch (type())
 			{
-			case trig_type::TRIG_NEGEDGE: return "TRIG_NEGEDGE";
-			case trig_type::TRIG_POSEDGE: return "TRIG_POSEDGE";
-			case trig_type::TRIG_CHNG:    return "TRIG_CHNG";
-			case trig_type::TRIG_NONBLK:  return "TRIG_NONBLK";
-			case trig_type::TRIG_MONITOR: return "TRIG_MONITOR";
-			case trig_type::TRIG_STROBE:  return "TRIG_STROBE";
+			case trig_type::TRIG_NEGEDGE:  return "TRIG_NEGEDGE";
+			case trig_type::TRIG_POSEDGE:  return "TRIG_POSEDGE";
+			case trig_type::TRIG_CHNG:     return "TRIG_CHNG";
+			case trig_type::TRIG_INACTIVE: return "TRIG_INACTIVE";
+			case trig_type::TRIG_NONBLK:   return "TRIG_NONBLK";
+			case trig_type::TRIG_MONITOR:  return "TRIG_MONITOR";
+			case trig_type::TRIG_STROBE:   return "TRIG_STROBE";
 			}
 		return "TRIG_???";
 		}
@@ -210,6 +213,21 @@ public:
 
 	trig_type type() const
 		{ return TRIG_CHNG; }
+	};
+
+template<class T>
+class inactive_event : public event_base<T>
+	{
+	typedef typename event_base<T>::num_type num_type;
+	typedef typename event_base<T>::trig_type trig_type;
+	typedef typename event_base<T>::event_container container_type;
+
+public:
+	inactive_event(container_type *c, const num_type &ival)
+		: event_base<T>(c, ival) {}
+
+	trig_type type() const
+		{ return TRIG_INACTIVE; }
 	};
 
 template<class T>
@@ -291,12 +309,12 @@ public:
 		//		assignments (non-blocking and continuous)
 		//		strobe
 		//		monitor
-		if ((ev->type() & TRIG_NONBLK) != TRIG_NONE)
+		if ((ev->type() & TRIG_STROBE) != TRIG_NONE)
 			{
 			DEBUG_STATE(DEBUG_EVENT);
-			DEBUG_OUTPUT("DEBUG_EVENT:  Queuing TRIG_NONBLK event.\n");
-			_inactive.push_back(ev);
-			++_queued_inactive;
+			DEBUG_OUTPUT("DEBUG_EVENT:  Queuing TRIG_STROBE event.\n");
+			_strobe.push_back(ev);
+			++_queued_strobe;
 			}
 		else if ((ev->type() & TRIG_MONITOR) != TRIG_NONE)
 			{
@@ -305,12 +323,19 @@ public:
 			_monitor.push_back(ev);
 			++_queued_monitor;
 			}
-		else if ((ev->type() & TRIG_STROBE) != TRIG_NONE)
+		else if ((ev->type() & TRIG_NONBLK) != TRIG_NONE)
 			{
 			DEBUG_STATE(DEBUG_EVENT);
-			DEBUG_OUTPUT("DEBUG_EVENT:  Queuing TRIG_STROBE event.\n");
-			_strobe.push_back(ev);
-			++_queued_strobe;
+			DEBUG_OUTPUT("DEBUG_EVENT:  Queuing TRIG_NONBLK event.\n");
+			_nonblocking.push_back(ev);
+			++_queued_nonblocking;
+			}
+		else if ((ev->type() & TRIG_INACTIVE) != TRIG_NONE)
+			{
+			DEBUG_STATE(DEBUG_EVENT);
+			DEBUG_OUTPUT("DEBUG_EVENT:  Queuing TRIG_INACTIVE event.\n");
+			_inactive.push_back(ev);
+			++_queued_inactive;
 			}
 		else
 			{
@@ -355,14 +380,11 @@ public:
 		// It is not a copy, the actual event is stored in the
 		// symbol table and should not be deleted.
 		event_list temp;
-		while (!_active.empty() || !_inactive.empty() || !_monitor.empty())
+		while (!_active.empty() || !_inactive.empty() || !_nonblocking.empty() || !_monitor.empty())
 			{
 			// Move events out of the queue.  This allows the trigger
 			// action to queue more events.
 
-			// The event processing is ordered in such a way that monitor
-			// event processing are interleaved between active and inactive
-			// events.
 			if (!_active.empty())
 				{
 				DEBUG_STATE(DEBUG_EVENT);
@@ -373,12 +395,18 @@ public:
 			else if (!_inactive.empty())
 				{
 				DEBUG_STATE(DEBUG_EVENT);
-				DEBUG_OUTPUT("DEBUG_EVENT:  Handling non-block queue.\n");
+				DEBUG_OUTPUT("DEBUG_EVENT:  Handling inactive queue.\n");
 				move_events(temp, _inactive);
 				handle_events(temp, handler);
 				}
-
-			if (!_monitor.empty())
+			else if (!_nonblocking.empty())
+				{
+				DEBUG_STATE(DEBUG_EVENT);
+				DEBUG_OUTPUT("DEBUG_EVENT:  Handling nonblocking queue.\n");
+				move_events(temp, _nonblocking);
+				handle_events(temp, handler);
+				}
+			else if (!_monitor.empty())
 				{
 				DEBUG_STATE(DEBUG_EVENT);
 				DEBUG_OUTPUT("DEBUG_EVENT:  Handling monitor queue.\n");
@@ -408,11 +436,13 @@ private:
 	// description of the scheduling semantics.
 	amount_type _queued_active;
 	amount_type _queued_inactive;
+	amount_type _queued_nonblocking;
 	amount_type _queued_monitor;
 	amount_type _queued_strobe;
 	amount_type _triggered_events;
 	event_list _active;
 	event_list _inactive;
+	event_list _nonblocking;
 	event_list _monitor;
 	event_list _strobe;
 	};
