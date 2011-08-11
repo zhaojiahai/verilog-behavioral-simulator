@@ -49,6 +49,7 @@
 	p_net_declaration net_declaration;
 	p_reg_declaration reg_declaration;
 	p_int_declaration int_declaration;
+	p_time_declaration time_declaration;
 	p_function_declaration function_declaration;
 	p_task_declaration task_declaration;
 
@@ -356,7 +357,7 @@
 %type <io_declaration> output_declaration
 %type <io_declaration> inout_declaration
 %type <reg_declaration> reg_declaration
-%type <int_declaration> time_declaration
+%type <time_declaration> time_declaration
 %type <int_declaration> integer_declaration
 %type <int_declaration> real_declaration
 %type <int_declaration> realtime_declaration
@@ -857,9 +858,9 @@ reg_declaration:
 
 time_declaration:
 		YYTIME list_of_mdecl_identifiers ';'
-			{ $$ = p_create_int_declaration($2); }
+			{ $$ = p_create_time_declaration($2); }
 	|	YYTIME list_of_mdecl_assignments ';'
-			{ $$ = p_create_int_declaration($2); }
+			{ $$ = p_create_time_declaration($2); }
 	;
 
 integer_declaration:

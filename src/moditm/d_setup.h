@@ -59,6 +59,7 @@ struct decl_setup
 	void operator()(net_decl *) const;
 	void operator()(reg_decl *) const;
 	void operator()(int_decl *) const;
+	void operator()(time_decl *) const;
 	void operator()(param_decl *) const;
 
 	scopelist_type &_scope;

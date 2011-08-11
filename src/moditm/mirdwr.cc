@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1996,2001,2002 Jimen Ching
+// Copyright (C) 1996,2001,2002,2011 Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -197,6 +197,10 @@ write_module_item::operator()(const reg_decl *p) const
 
 void
 write_module_item::operator()(const int_decl *p) const
+	{ decl_write::operator()(p); }
+
+void
+write_module_item::operator()(const time_decl *p) const
 	{ decl_write::operator()(p); }
 
 void

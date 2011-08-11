@@ -26,6 +26,7 @@ class io_decl;
 class net_decl;
 class reg_decl;
 class int_decl;
+class time_decl;
 class param_decl;
 
 struct mitf_setup;
@@ -71,6 +72,7 @@ struct mitf_setup
 	virtual void operator()(net_decl *) const {}
 	virtual void operator()(reg_decl *) const {}
 	virtual void operator()(int_decl *) const {}
+	virtual void operator()(time_decl *) const {}
 	virtual void operator()(param_decl *) const {}
 	};
 
@@ -93,6 +95,7 @@ struct mitf_write
 	virtual void operator()(const net_decl *) const {}
 	virtual void operator()(const reg_decl *) const {}
 	virtual void operator()(const int_decl *) const {}
+	virtual void operator()(const time_decl *) const {}
 	virtual void operator()(const param_decl *) const {}
 	};
 

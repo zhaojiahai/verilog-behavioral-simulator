@@ -18,6 +18,7 @@ assignment_stmt::assignment_stmt(lvalue_type *l, expr_type *e, bool nb, dec_type
 	_delayed_store = d;
 	_value = 0;
 	_event = 0;
+	_update = 0;
 	}
 
 assignment_stmt::assignment_stmt(const assignment_stmt &p)
@@ -31,6 +32,7 @@ assignment_stmt::assignment_stmt(const assignment_stmt &p)
 		_delayed_store = 0;
 	_value = 0;
 	_event = 0;
+	_update = 0;
 	}
 
 assignment_stmt::~assignment_stmt()
@@ -40,6 +42,7 @@ assignment_stmt::~assignment_stmt()
 	delete _delayed_store;
 	delete _value;
 	delete _event;
+	delete _update;
 	}
 
 assignment_stmt *

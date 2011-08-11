@@ -419,6 +419,8 @@ setup_stmt::reset()
 	_postponedsetup = new stmt_list;
 	}
 
+setup_stmt::stmt_list *setup_stmt::_postponedsetup;
+
 void
 setup_stmt::second_pass()
 	{
@@ -681,19 +683,35 @@ void
 setup_stmt::operator()(assignment_stmt *p) const
 	{
 	handle_dec(p);
-	if (p->_delayed_store != 0)
-		{
-		// Trigger only this statement for non-blocking assignment.
-		if (p->_nonblocking)
-			p->_delayed_store->setup(setup_dec(_scope, p, 0));
-		else
-			p->_delayed_store->setup(setup_dec(_scope, p, _parent));
-		}
 	if (p->_nonblocking)
 		{
-		event_cache_type *c = new event_cache_type(false, p);
-		p->_event = new nonblock_event<stmt_type>(c, DC);
+		if (_inloop)
+			{
+			vbs_err.set_data(vbs_error::SE_SUPPORT, p->_lineno);
+			vbs_err.out("non-blocking assignment inside a loop");
+			}
+
+		// Create an assignment statement to perform the update
+		// of the non-blocking assignment.
+		assignment_stmt::lvalue_type *lval = new assignment_stmt::lvalue_type(*p->_lval);
+		assignment_stmt::expr_type *expr = p->_rval->copy_constructor();
+		p->_update = new assignment_stmt(lval, expr, false);
+		p->_update->setup(setup_stmt(_scope, p->_update));
+
+		if (p->_delayed_store != 0)
+			p->_delayed_store->setup(setup_dec(_scope, p->_update, 0));
+		else
+			{
+			event_cache_type *c = new event_cache_type(false, p->_update);
+			p->_event = new nonblock_event<stmt_type>(c, DC);
+			}
 		}
+	else
+		{
+		if (p->_delayed_store != 0)
+			p->_delayed_store->setup(setup_dec(_scope, p, _parent));
+		}
+
 	setup_lvalue::size_type size = p->_lval->setup(setup_lvalue(_scope));
 	p->_rval->setup(setup_expr(_scope, false, _parent, size));
 	}
@@ -707,18 +725,24 @@ setup_stmt::operator()(if_else_stmt *p) const
 	// a sequential-block wrapper statement to handle it.
 	if (p->_true_stmt->_dec != 0 || p->_true_stmt->_ec != 0)
 		{
-		seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
-		lst->push_back(p->_true_stmt);
-		p->_true_stmt = new seq_block_stmt(lst);
+		if (p->_true_stmt->get_seq_block() == 0)
+			{
+			seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
+			lst->push_back(p->_true_stmt);
+			p->_true_stmt = new seq_block_stmt(lst);
+			}
 		}
 	p->_true_stmt->setup(setup_stmt(_scope, _parent));
 	if (p->_false_stmt != 0)
 		{
 		if (p->_false_stmt->_dec != 0 || p->_false_stmt->_ec != 0)
 			{
-			seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
-			lst->push_back(p->_false_stmt);
-			p->_false_stmt = new seq_block_stmt(lst);
+			if (p->_false_stmt->get_seq_block() == 0)
+				{
+				seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
+				lst->push_back(p->_false_stmt);
+				p->_false_stmt = new seq_block_stmt(lst);
+				}
 			}
 		p->_false_stmt->setup(setup_stmt(_scope, _parent));
 		}
@@ -766,11 +790,12 @@ setup_stmt::operator()(loop_stmt *p) const
 	// a sequential-block wrapper statement to handle it.
 	if (p->_stmt->_dec != 0 || p->_stmt->_ec != 0)
 		{
-		seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
-		lst->push_back(p->_stmt);
-		p->_stmt = new seq_block_stmt(lst);
+		if (p->_stmt->get_seq_block() == 0)
+			{
+			seq_block_stmt::stmt_list *lst = new seq_block_stmt::stmt_list;
+			lst->push_back(p->_stmt);
+			p->_stmt = new seq_block_stmt(lst);
+			}
 		}
-	p->_stmt->setup(setup_stmt(_scope, _parent));
+	p->_stmt->setup(setup_stmt(_scope, _parent, true));
 	}
-
-setup_stmt::stmt_list *setup_stmt::_postponedsetup;

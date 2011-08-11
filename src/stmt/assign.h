@@ -53,6 +53,7 @@ private:
 	bool _nonblocking;
 	num_type *_value;
 	event_type *_event;
+	assignment_stmt *_update;
 	};
 
 #endif // _ASSIGN_H

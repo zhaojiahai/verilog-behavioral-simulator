@@ -511,9 +511,9 @@ bit_vector::binary_2_decimal(size_type len) const
 			have_x = true;
 		else if (b == Z)
 			have_z = true;
-		else
+		else if (b == HI)
 			{
-			num |= static_cast<int>(b) << i;
+			num |= static_cast<decimal_type>(1) << i;
 			have_n = true;
 			}
 		}

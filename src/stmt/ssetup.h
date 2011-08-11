@@ -35,8 +35,8 @@ struct setup_stmt : public stmt_setup
 	typedef st_task task_type;
 	typedef st_net net_type;
 
-	setup_stmt(scopelist_type &s, stmt_type *st)
-		: _scope(s)
+	setup_stmt(scopelist_type &s, stmt_type *st, bool ilp = false)
+		: _inloop(ilp), _scope(s)
 		{ _parent = st; }
 	virtual ~setup_stmt()
 		{}
@@ -69,6 +69,7 @@ struct setup_stmt : public stmt_setup
 	void operator()(case_stmt *) const;
 	void operator()(loop_stmt *) const;
 
+	bool _inloop;
 	scopelist_type &_scope;
 	stmt_type *_parent;
 

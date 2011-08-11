@@ -411,5 +411,9 @@ setup_module_item::operator()(int_decl *p) const
 	{ decl_setup::operator()(p); }
 
 void
+setup_module_item::operator()(time_decl *p) const
+	{ decl_setup::operator()(p); }
+
+void
 setup_module_item::operator()(param_decl *p) const
 	{ decl_setup::operator()(p); }

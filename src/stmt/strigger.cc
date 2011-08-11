@@ -580,32 +580,25 @@ trigger_stmt::operator()(assignment_stmt *p) const
 	if (handle_dec(p) != 0)
 		return false;
 
-	// Need to update delay or event control state so if we delay
-	// to the future.  When we are triggered in the future, we
-	// won't do another delay.
-	stmt_type::dec_type *dec = p->_dec;
-	if (dec == 0 && !_parent->_always)
-		dec = p->_ec;
-
 	if (p->_value == 0)
 		{
-		// First time through or after delay...
 		if (p->_nonblocking)
 			{
-			p->_lval->set_target();
-			if (dec != 0)
-				dec->_delayed = true;
-			p->_value = new num_type(p->_rval->evaluate(evaluate_expr()));
+			p->_update->_lval->set_target();
+			p->_update->_value = new num_type(p->_rval->evaluate(evaluate_expr()));
 			if (p->_delayed_store != 0)
 				{
-				p->_delayed_store->_delayed = true;
+				// We're using p->_update, so no need set this flag.  p->_value
+				// is the flag now.
+				//p->_delayed_store->_delayed = true;
 				// We want to trigger this statement only, not delay the parent.
-				p->_delayed_store->trigger(trigger_dec(p));
+				p->_delayed_store->trigger(trigger_dec(p->_update));
 				}
 			else
 				{
 				if (!p->_event->is_queued())
 					{
+					// p->_event was setup using p->_update...
 					event_queue<stmt_base> &eventqueue = vbs_engine::eventqueue();
 					eventqueue.add_event(p->_event);
 					}
@@ -613,19 +606,23 @@ trigger_stmt::operator()(assignment_stmt *p) const
 			}
 		else
 			{
-			p->_lval->clr_target();
 			if (p->_delayed_store != 0)
 				{
+				stmt_type::dec_type *dec = p->_dec;
+				if (dec == 0 && !_parent->_always)
+					dec = p->_ec;
+
+				p->_lval->set_target(); // Evaluate ahead of update.
 				p->_value = new num_type(p->_rval->evaluate(evaluate_expr()));
 				if (dec != 0)
-					dec->_delayed = true;
+					dec->_delayed = true; // Skip inter-statement delay.
 				p->_delayed_store->_delayed = true;
-				// Delay the parent.
 				p->_delayed_store->trigger(trigger_dec(_parent));
 				return false;
 				}
 			else
 				{
+				p->_lval->clr_target();
 				const num_type &res(p->_rval->evaluate(evaluate_expr()));
 				if (!res.is_tristate())
 					p->_lval->trigger(trigger_lvalue(res));
@@ -634,8 +631,6 @@ trigger_stmt::operator()(assignment_stmt *p) const
 		}
 	else
 		{
-		if (dec != 0)
-			dec->_delayed = false;
 		if (p->_delayed_store != 0)
 			p->_delayed_store->_delayed = false;
 		if (!p->_value->is_tristate())

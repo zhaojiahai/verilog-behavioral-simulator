@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -25,6 +25,7 @@ struct setup_tfdecl : public mitf_setup, public decl_setup
 	void operator()(net_decl *) const;
 	void operator()(reg_decl *) const;
 	void operator()(int_decl *) const;
+	void operator()(time_decl *) const;
 	};
 
 #endif // _TFSETUP_H

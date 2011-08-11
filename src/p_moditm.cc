@@ -19,6 +19,7 @@
 #include "moditm/d_net.h"
 #include "moditm/d_reg.h"
 #include "moditm/d_int.h"
+#include "moditm/d_time.h"
 #include "moditm/d_param.h"
 #include "parser.h"
 #include "p_moditm.h"
@@ -125,6 +126,17 @@ p_create_int_declaration(p_decl_assign_list idlst)
 	ret->_lineno = cur_lineno;
 	DEBUG_STATE(DEBUG_PARSER);
 	DEBUG_OUTPUT("PARSER:  created integer declaration.\n");
+	return ret;
+	}
+
+p_time_declaration
+p_create_time_declaration(p_decl_assign_list idlst)
+	{
+	time_decl *ret;
+	ret = new time_decl((time_decl::decl_assign_list *) idlst);
+	ret->_lineno = cur_lineno;
+	DEBUG_STATE(DEBUG_PARSER);
+	DEBUG_OUTPUT("PARSER:  created time declaration.\n");
 	return ret;
 	}
 

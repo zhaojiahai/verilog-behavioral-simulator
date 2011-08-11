@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -25,4 +25,8 @@ setup_tfdecl::operator()(reg_decl *p) const
 
 void
 setup_tfdecl::operator()(int_decl *p) const
+	{ decl_setup::operator()(p); }
+
+void
+setup_tfdecl::operator()(time_decl *p) const
 	{ decl_setup::operator()(p); }

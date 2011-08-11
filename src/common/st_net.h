@@ -51,7 +51,7 @@ public:
 	friend void entry_iovars(std::list<hash_value> &, std::list< basic_ptr<expr_base> > &);
 	friend void exit_iovars(std::list<hash_value> &, std::list< basic_ptr<expr_base> > &);
 
-	enum net_type { PORT, WIRE, REGISTER, INTEGER, MEMORY, PARAMETER };
+	enum net_type { PORT, WIRE, REGISTER, INTEGER, TIME, MEMORY, PARAMETER };
 	enum iodirection_type { UNDEF, IN, OUT, INOUT };
 
 	st_net(const str_type &, net_type = PORT, iodirection_type = UNDEF);

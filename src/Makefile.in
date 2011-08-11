@@ -161,6 +161,7 @@ SRCS5 =	\
 		d_net.cc \
 		d_reg.cc \
 		d_int.cc \
+		d_time.cc \
 		d_param.cc \
 		d_rdwr.cc \
 		d_setup.cc \

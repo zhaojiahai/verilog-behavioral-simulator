@@ -89,6 +89,9 @@ setup_port::operator()(port *p) const
 			elst->push_back(id);
 			lvalue *lval = new lvalue(elst);
 			lval->setup(setup_lvalue(_scope));
+			// Do not setup this expression.  It will modify the scope.
+			// The expression in _port_conn should already be setup
+			// and have the correct index.
 			expr_base *exp = _port_conn->_expr->copy_constructor();
 			stmt_base *st = new assignment_stmt(lval, exp, false);
 			_stmtlist->push_back(basic_ptr<stmt_base>(st));

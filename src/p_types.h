@@ -1,6 +1,6 @@
 /*
  * Verilog Behavioral Simulator
- * Copyright (C) 1995-1997,2002 Lay Hoon Tho, Jimen Ching
+ * Copyright (C) 1995-1997,2002,2011 Lay Hoon Tho, Jimen Ching
  *
  * This file is part of the Verilog Behavioral Simulator package.
  * See the file COPYRIGHT for copyright and disclaimer information.
@@ -95,6 +95,7 @@ typedef void *p_io_declaration;
 typedef void *p_net_declaration;
 typedef void *p_reg_declaration;
 typedef void *p_int_declaration;
+typedef void *p_time_declaration;
 typedef void *p_function_declaration;
 typedef void *p_task_declaration;
 typedef void *p_module_instantiation;

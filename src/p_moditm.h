@@ -63,6 +63,9 @@ p_create_reg_declaration(p_decl_assign_list, p_part_select);
 p_int_declaration
 p_create_int_declaration(p_decl_assign_list idlst);
 
+p_time_declaration
+p_create_time_declaration(p_decl_assign_list idlst);
+
 p_net_declaration
 p_create_net_declaration(int, p_decl_assign_list, p_part_select);
 

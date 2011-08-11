@@ -25,6 +25,7 @@
 #include "moditm/d_net.h"
 #include "moditm/d_reg.h"
 #include "moditm/d_int.h"
+#include "moditm/d_time.h"
 #include "moditm/d_param.h"
 #include "moditm/d_setup.h"
 #include "vbs.h"
@@ -178,6 +179,9 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position
 				case net_type::INTEGER:
 					err = vbs_error::SE_INTDECL;
 					break;
+				case net_type::TIME:
+					err = vbs_error::SE_TIMEDECL;
+					break;
 				case net_type::MEMORY:
 					err = vbs_error::SE_MEMDECL;
 					break;
@@ -222,6 +226,11 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position
 		else if (t == net_type::INTEGER)
 			{
 			ms = 31;
+			ls = 0;
+			}
+		else if (t == net_type::TIME)
+			{
+			ms = 63;
 			ls = 0;
 			}
 		else if (t == net_type::PARAMETER)
@@ -276,6 +285,11 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position
 		else if (t == net_type::INTEGER)
 			{
 			ms = 31;
+			ls = 0;
+			}
+		else if (t == net_type::TIME)
+			{
+			ms = 63;
 			ls = 0;
 			}
 		else if (t == net_type::PARAMETER)
@@ -437,7 +451,35 @@ decl_setup::operator()(int_decl *p) const
 			// Assign value into symbol table.
 			net_type *net;
 			(*itp)->_ident->setup(setup_expr(_scope));
-			(*itp)->_rval->setup(setup_expr(_scope, true, 0, 32));
+			(*itp)->_rval->setup(setup_expr(_scope, true));
+			net = (symboltable.get((*itp)->_ident->index()))->get_net();
+			if (net != 0)
+				{
+				const num_type &num((*itp)->_rval->evaluate(evaluate_expr()));
+				net->assignment(num, -1, -1, -1, -1);
+				}
+			}
+		}
+	}
+
+void
+decl_setup::operator()(time_decl *p) const
+	{
+	// Go through each variable, and set it up.
+	symbol_table &symboltable = vbs_engine::symboltable();
+	int_decl::decl_assign_list::iterator itp(p->_id_list->begin());
+	int_decl::decl_assign_list::iterator stop(p->_id_list->end());
+	for (; itp != stop; ++itp)
+		{
+		net_setup((*itp)->_ident, 0, net_type::TIME);
+
+		// Setup expression.
+		if ((*itp)->_rval != 0)
+			{
+			// Assign value into symbol table.
+			net_type *net;
+			(*itp)->_ident->setup(setup_expr(_scope));
+			(*itp)->_rval->setup(setup_expr(_scope, true));
 			net = (symboltable.get((*itp)->_ident->index()))->get_net();
 			if (net != 0)
 				{
@@ -455,7 +497,7 @@ decl_setup::operator()(param_decl *p) const
 	symbol_table &symboltable = vbs_engine::symboltable();
 	param_decl::decl_assign_list::const_iterator itp(p->_id_list->begin());
 	param_decl::decl_assign_list::const_iterator stop(p->_id_list->end());
-	range_type::position_type ps;
+	range_type::position_type ps = 8 * sizeof(num_type::decimal_type);
 	for (; itp != stop; ++itp)
 		{
 		// Must setup expression if exist.  Need to know how big to set

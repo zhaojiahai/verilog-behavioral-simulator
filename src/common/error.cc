@@ -59,6 +59,7 @@ vbs_error::str_type vbs_error::messages[] =
 	str_type("invalid wire declaration"),
 	str_type("invalid register declaration"),
 	str_type("invalid integer declaration"),
+	str_type("invalid time declaration"),
 	str_type("invalid memory declaration"),
 	str_type("invalid parameter declaration"),
 	str_type("recursive instantiation of module"),

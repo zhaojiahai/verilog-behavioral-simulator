@@ -1,5 +1,5 @@
 // Verilog Behavioral Simulator
-// Copyright (C) 1995-1997,2001,2002 Lay Hoon Tho, Jimen Ching
+// Copyright (C) 1995-1997,2001,2002,2011 Lay Hoon Tho, Jimen Ching
 //
 // This file is part of the Verilog Behavioral Simulator package.
 // See the file COPYRIGHT for copyright and disclaimer information.
@@ -87,6 +87,7 @@ struct vbs_error
 		SE_WIREDECL, // Invalid wire declaration.
 		SE_REGDECL, // Invalid register declaration.
 		SE_INTDECL, // Invalid integer declaration.
+		SE_TIMEDECL, // Invalid time declaration.
 		SE_MEMDECL, // Invalid memory declaration.
 		SE_PARAMDECL, // Invalid parameter declaration.
 		SE_RECURSE, // Recursive instantiation of module.
