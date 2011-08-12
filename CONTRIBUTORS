@@ -1,5 +1,9 @@
 Persons who have contributed patches:
 
+Guosheng Wu <micbot.com@gmail.com>
+	Compile under Windows
+	Other modifications for library use.
+
 George Varughese <vgeorge@computer.org>
 	$dump* system tasks.
 	scoping identifiers.
