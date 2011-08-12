@@ -260,20 +260,25 @@ dnl Any lexer should work.
 AC_PROG_LEX
 AC_DECL_YYTEXT
 
-dnl We have multiple stages which uses fork.
-AC_CHECK_HEADERS(unistd.h)
-if test "$ac_cv_header_unistd_h" = no
+dnl Only check if pre-processor is enabled.
+if test "$vppprog"
 then
-	AC_MSG_ERROR([unistd.h not found, POSIX.1 required.])
-fi
-AC_CHECK_FUNCS(fork stat)
-if test "$ac_cv_func_fork" = no
-then
-	AC_MSG_ERROR([fork() not found, POSIX.1 required.])
-fi
-if test "$ac_cv_func_stat" = no
-then
-	AC_MSG_ERROR([stat() not found, POSIX.1 required.])
+	dnl We have multiple stages which uses fork.
+	AC_CHECK_HEADERS(unistd.h)
+	if test "$ac_cv_header_unistd_h" = no
+	then
+		AC_MSG_ERROR([unistd.h not found, POSIX.1 required.])
+	fi
+
+	AC_CHECK_FUNCS(fork stat)
+	if test "$ac_cv_func_fork" = no
+	then
+		AC_MSG_ERROR([fork() not found, POSIX.1 required.])
+	fi
+	if test "$ac_cv_func_stat" = no
+	then
+		AC_MSG_ERROR([stat() not found, POSIX.1 required.])
+	fi
 fi
 
 dnl We use getopt to parse the command line.
@@ -293,31 +298,8 @@ else
 	fi
 fi
 
-dnl HPUX needs _HPUX_SOURCE to prototype getpid().
-dnl We switch to C++ because undeclared functions cause errors.
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-AC_CACHE_CHECK(
-	[whether _HPUX_SOURCE is required for POSIX prototypes],
-	ac_cv_test_hpux_source,
-	AC_TRY_COMPILE(
-		[#include <unistd.h>],
-		[getpid()],
-		ac_cv_test_hpux_source=no,
-		AC_TRY_COMPILE(
-			[
-			#define _HPUX_SOURCE
-			#include <unistd.h>
-			],
-			[getpid()],
-			ac_cv_test_hpux_source=yes,
-			ac_cv_test_hpux_source=no)))
-if test "$ac_cv_test_hpux_source" = yes
-then
-	CFLAGS="$CFLAGS -D_HPUX_SOURCE"
-	CXXFLAGS="$CXXFLAGS -D_HPUX_SOURCE"
-fi
-
 dnl See if getopt is prototyped in unistd.h.
 AC_CACHE_CHECK(
 	[whether getopt is prototyped in unistd.h],

@@ -15,6 +15,10 @@
 #include <stdlib.h> /* malloc() */
 #include "parser.h"
 
+/* Also used by main.cc... */
+int parms_cnt;
+char *parms[16];
+
 int
 p_start(FILE *fp, const char *fn, int ln)
 	{
@@ -52,13 +56,7 @@ vbs_strdup(const char *str)
 #include <fcntl.h>
 #include <signal.h>
 #include <errno.h>
-
-#ifndef _POSIX_SOURCE
-extern int fileno(FILE *); /* Needed by lexer. */
-#endif /* _POSIX_SOURCE */
-
-int parms_cnt;
-char *parms[16];
+#include <stdio.h> /* fileno */
 
 int
 sim_program_exist(const char *fn)

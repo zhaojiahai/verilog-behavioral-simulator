@@ -19,6 +19,8 @@
 #ifndef _LOGIC_H
 #define _LOGIC_H
 
+#include <cstdlib>
+
 class logic
 	{
 	friend bool operator==(const logic, const logic);
