@@ -99,8 +99,8 @@ decl_setup::io_setup(ident_list *il, range_type *r,
 				r->setup(setup_select(_scope));
 				r->get_data(ms, ls);
 				}
-			net->_storage = new num_type(ms, ls);
-			net->_result = new num_type(ms, ls);
+			net->_storage = new num_type(ms, ls, num_type::UNSET);
+			net->_result = new num_type(ms, ls, num_type::UNSET);
 			}
 
 		// Save the hash value index for later testing.
@@ -257,8 +257,8 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position
 				// Direction declared first but the index order was different.
 				delete net->_storage;
 				delete net->_result;
-				net->_storage = new num_type(ms, ls, num_type::BASE10, true);
-				net->_result = new num_type(ms, ls, num_type::BASE10, true);
+				net->_storage = new num_type(ms, ls, num_type::SIGNED, num_type::BASE10);
+				net->_result = new num_type(ms, ls, num_type::SIGNED, num_type::BASE10);
 				}
 			else
 				{
@@ -316,19 +316,19 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position
 				}
 			net->_storage = new num_type[net->_upper_mem_idx+1];
 			for (int i = 0; i <= net->_upper_mem_idx; ++i)
-				net->_storage[i] = num_type(ms, ls);
-			net->_result = new num_type(ms, ls);
+				net->_storage[i] = num_type(ms, ls, num_type::UNSIGNED);
+			net->_result = new num_type(ms, ls, num_type::UNSIGNED);
 			net->_type = net_type::MEMORY;
 			}
 		else
 			{
 			if (t == net_type::WIRE)
-				net->_storage = new num_type(ms, ls, num_type::BASE10, false, Z);
+				net->_storage = new num_type(ms, ls, num_type::UNSIGNED, num_type::BASE10, Z);
 			else if (t == net_type::INTEGER)
-				net->_storage = new num_type(ms, ls, num_type::BASE10, true);
+				net->_storage = new num_type(ms, ls, num_type::SIGNED, num_type::BASE10);
 			else
-				net->_storage = new num_type(ms, ls);
-			net->_result = new num_type(ms, ls);
+				net->_storage = new num_type(ms, ls, num_type::UNSIGNED);
+			net->_result = new num_type(*net->_storage);
 			}
 		}
 

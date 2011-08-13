@@ -302,7 +302,7 @@ setup_stmt::operator()(sysfunc_time *p) const
 	func_type *f = new func_type(p->_name, p);
 	// System functions always have global scope.
 	f->scope(0);
-	f->_storage = func_type::num_type(63, 0);
+	f->_storage = func_type::num_type(63, 0, func_type::num_type::UNSIGNED);
 	// Need to save index to get the symbol table node, to store
 	// the return value (time).  This is a function call.
 	symbol_table &symboltable = vbs_engine::symboltable();
@@ -323,7 +323,7 @@ setup_stmt::operator()(sysfunc_stime *p) const
 	func_type *f = new func_type(p->_name, p);
 	// System functions always have global scope.
 	f->scope(0);
-	f->_storage = func_type::num_type(31, 0);
+	f->_storage = func_type::num_type(31, 0, func_type::num_type::UNSIGNED);
 	// Need to save index to get the symbol table node, to store
 	// the return value (time).  This is a function call.
 	symbol_table &symboltable = vbs_engine::symboltable();
@@ -344,7 +344,7 @@ setup_stmt::operator()(sysfunc_random *p) const
 	func_type *f = new func_type(p->_name, p);
 	// System functions always have global scope.
 	f->scope(0);
-	f->_storage = func_type::num_type(32, 0);
+	f->_storage = func_type::num_type(32, 0, func_type::num_type::SIGNED);
 	// Need to save index to get the symbol table node, to store
 	// the return value (random).  This is a function call.
 	symbol_table &symboltable = vbs_engine::symboltable();
@@ -446,7 +446,7 @@ setup_stmt::second_pass()
 				vbs_err.set_data(vbs_error::SE_TYPE, (*itp)->_lineno);
 				vbs_err.out(buf);
 				}
-			int lvls = static_cast<unsigned long>(*n);
+			int lvls = n->to_signed_int();
 			++itp;
 			for (; itp != stop; ++itp)
 				{

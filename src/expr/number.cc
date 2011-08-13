@@ -11,12 +11,12 @@
 #include <cstdlib>
 #include "expr/number.h"
 
-number::number(const char *n, number::base_type b, number::size_type s)
-	: expr_base(true), bit_vector(n, b, s)
+number::number(const char *n, signed_type st, number::base_type b, number::size_type s)
+	: expr_base(true), bit_vector(n, st, b, s)
 	{}
 
-number::number(number::position_type m, number::position_type l)
-	: expr_base(true), bit_vector(m, l)
+number::number(number::position_type m, number::position_type l, signed_type st)
+	: expr_base(true), bit_vector(m, l, st)
 	{}
 
 number::number(const number &p)

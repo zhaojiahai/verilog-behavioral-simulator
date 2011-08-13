@@ -34,7 +34,7 @@ void
 test_equality(bit_vector &, bit_vector &, bit_vector &c,
 		bit_vector &d, bit_vector &)
 	{
-	bit_vector test1(string("1101"));
+	bit_vector test1(string("1101"),bit_vector::UNSIGNED);
 	if (test1 == d)
 		cout << "test1 == d (ok!)" << endl;
 	else
@@ -71,7 +71,7 @@ void
 test_equal(bit_vector &, bit_vector &, bit_vector &c,
 		bit_vector &d, bit_vector &)
 	{
-	bit_vector test1(0,2), test2(2,1);
+	bit_vector test1(0,2,bit_vector::UNSIGNED), test2(2,1,bit_vector::UNSIGNED);
 	test1 = d;
 	test2 = c;
 	cout << "test1(0,2=d)=" << test1 << " (=101)"
@@ -83,7 +83,7 @@ void
 test_plus(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &e)
 	{
-	bit_vector test1(3,0), test2(4,0);
+	bit_vector test1(3,0,bit_vector::UNSIGNED), test2(4,0,bit_vector::UNSIGNED);
 
 	//test1 = e + One;
 	binary_add(test1, e, One);
@@ -98,7 +98,7 @@ void
 test_minus(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &e)
 	{
-	bit_vector test1(3,0), test2(4,0);
+	bit_vector test1(3,0,bit_vector::UNSIGNED), test2(4,0,bit_vector::UNSIGNED);
 
 	//test1 = e - One;
 	binary_sub(test1, e, One);
@@ -114,7 +114,7 @@ test_shift(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &e)
 	{
 	bit_vector four(4UL), two(2UL);
-	bit_vector test(7,0), test1(7,0), test2(3,0);
+	bit_vector test(7,0,bit_vector::UNSIGNED), test1(7,0,bit_vector::UNSIGNED), test2(3,0,bit_vector::UNSIGNED);
 
 	test = e;
 	//test1 = test << four;
@@ -139,7 +139,7 @@ void
 test_logic(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &e)
 	{
-	bit_vector test1(3,0), test2(string("10110"));
+	bit_vector test1(3,0,bit_vector::UNSIGNED), test2(string("10110"),bit_vector::UNSIGNED);
 
 	//test1 = test2 | e;
 	logic_or(test1, test2, e);
@@ -156,7 +156,7 @@ void
 test_range(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &d, bit_vector &e)
 	{
-	bit_vector test1(7,0);
+	bit_vector test1(7,0,bit_vector::UNSIGNED);
 
 	test1(6,5) = d(1,0);
 	test1(4,1) = e;
@@ -168,9 +168,9 @@ void
 test_conv(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &)
 	{
-	bit_vector test1(string("4567"), bit_vector::BASE8),
-		test2(string("6789"), bit_vector::BASE10),
-		test3(string("9abc"), bit_vector::BASE16);
+	bit_vector test1(string("4567"),bit_vector::UNSIGNED, bit_vector::BASE8),
+		test2(string("6789"),bit_vector::UNSIGNED, bit_vector::BASE10),
+		test3(string("9abc"),bit_vector::UNSIGNED, bit_vector::BASE16);
 
 	cout << "test1(8,4567)=" << test1 << endl
 		<< "test2(d,6789)=" << test2 << endl
@@ -181,7 +181,8 @@ void
 test_comp(bit_vector &, bit_vector &, bit_vector &,
 		bit_vector &, bit_vector &)
 	{
-	bit_vector test1(15UL), test2(25UL), test3(15UL), test4("e7", bit_vector::BASE16, 8, true);
+	bit_vector test1(15UL), test2(25UL), test3(15UL);
+	bit_vector test4("e7",bit_vector::SIGNED, bit_vector::BASE16, 8);
 
 	if (test1 < test2)
 		cout << test1 << " < " << test2 << " ok!" << endl;
@@ -246,8 +247,8 @@ main()
 	{
 	bit_vector a;
 	bit_vector b(HI);
-	bit_vector c(4,0);
-	bit_vector d(string("1101"));
+	bit_vector c(4,0,bit_vector::UNSIGNED);
+	bit_vector d(string("1101"),bit_vector::UNSIGNED);
 	bit_vector e(d);
 	bit_vector f(115UL);
 
@@ -286,7 +287,7 @@ main()
 	cout << "e(res+d)=" << e << " (=xxxx)" << endl;
 	printout(a,b,c,d,e);
 
-	bit_vector tmp(string("101101101011"));
+	bit_vector tmp(string("101101101011"),bit_vector::UNSIGNED);
 	string tmp1 = tmp.to_string(bit_vector::BASE8);
 	string tmp2 = tmp.to_string(bit_vector::BASE10);
 	string tmp3 = tmp.to_string(bit_vector::BASE16);

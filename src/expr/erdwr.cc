@@ -183,7 +183,7 @@ read_expr::operator()() const
 					_in >> (num_type::position_type &) ls;
 					_in >> (num_type::position_type &) ms;
 					}
-				num_type *n= new number(ms, ls);
+				num_type *n= new number(ms, ls, number::UNSET); // FIXME!
 				num_type::size_type size;
 				_in >> (num_type::size_type &) size;
 				for (num_type::size_type i = 0; i < size; ++i)

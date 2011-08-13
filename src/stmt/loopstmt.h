@@ -48,7 +48,7 @@ public:
 
 private:
 	bool _delayed; // For delays in loops.
-	unsigned long _repeat_count; // For triggering statement.
+	unsigned int _repeat_count; // For triggering statement.
 	loop_type _type;
 	expr_type *_expr;
 	stmt_type *_stmt;

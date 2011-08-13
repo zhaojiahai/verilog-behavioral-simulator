@@ -26,7 +26,10 @@ bit_select::~bit_select()
 bit_select::select_size_type
 bit_select::get_data(position_type &ms, position_type &ls) const
 	{
-	ms = ls = (unsigned long)_expr->evaluate(evaluate_expr());
+	bool fail;
+	ms = ls = _expr->evaluate(evaluate_expr()).to_signed_int(&fail);
+	if (fail)
+		ms = -1;
 	return select_type::SELECT_BIT;
 	}
 

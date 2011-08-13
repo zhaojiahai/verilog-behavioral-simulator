@@ -23,12 +23,13 @@ class number : public expr_base, public expr_base::num_type
 public:
 	typedef num_type::size_type size_type;
 	typedef num_type::position_type position_type;
+	typedef num_type::signed_type signed_type;
 	typedef num_type::base_type base_type;
 	typedef expr_base::str_type nstr_type;
 	typedef expr_base::ostream_type nostream_type;
 
-	number(const char *, base_type, size_type);
-	number(position_type, position_type);
+	number(const char *, signed_type, base_type, size_type);
+	number(position_type, position_type, signed_type);
 	number(const number &);
 	virtual ~number();
 

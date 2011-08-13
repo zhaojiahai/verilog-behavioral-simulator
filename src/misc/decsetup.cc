@@ -90,8 +90,9 @@ setup_dec::operator()(delay_num *p) const
 	// An event object is needed in case the delay amount is zero.
 	// In which case, we need to append this event into the event
 	// queue.
-	p->_value = *p;
-	if (p->_value == static_cast<unsigned long>(-1))
+	bool fail = false;
+	p->_value = p->to_decimal_type(&fail);
+	if (fail)
 		p->_value = 0;
 	if (p->_value == 0)
 		{
@@ -111,8 +112,9 @@ setup_dec::operator()(delay_id *p) const
 	p->_expr->setup(setup_expr(_scope, true));
 
 	// Is constant, so evaluate it now to avoid recalculations later.
-	p->_value = p->_expr->evaluate(evaluate_expr());
-	if (p->_value == static_cast<unsigned long>(-1))
+	bool fail = false;
+	p->_value = p->_expr->evaluate(evaluate_expr()).to_decimal_type(&fail);
+	if (fail)
 		p->_value = 0;
 	if (p->_value == 0)
 		{

@@ -227,9 +227,9 @@ trigger_stmt::sys_task_readmem(task_caller_type *caller, int base) const
 	num_type::position_type start = -1, finish = -1;
 	if (++itp != stop)
 		{
-		start = (unsigned long) (*itp)->evaluate(evaluate_expr());
+		start = (*itp)->evaluate(evaluate_expr()).to_signed_int();
 		if (++itp != stop)
-			finish = (unsigned long) (*itp)->evaluate(evaluate_expr());
+			finish = (*itp)->evaluate(evaluate_expr()).to_signed_int();
 		}
 
 	// Read file into memory.
@@ -318,7 +318,7 @@ trigger_stmt::operator()(systask_dumpvars *) const
 		number *n = ((*first)->get_number());
 		if (n != NULL)
 			{
-			unsigned long a = (*first)->evaluate(evaluate_expr());
+			int a = (*first)->evaluate(evaluate_expr()).to_signed_int();
 			dumpinfo.levels(a);
 			}
 		++first;
@@ -706,9 +706,15 @@ trigger_stmt::operator()(loop_stmt *p) const
 			test_cond = true;
 			break;
 		case loop_stmt::REPEAT:
-			p->_repeat_count = p->_expr->evaluate(evaluate_expr());
-			test_cond = (p->_repeat_count != 0);
+			{
+			bool fail = false;
+			p->_repeat_count = p->_expr->evaluate(evaluate_expr()).to_unsigned_int(&fail);
+			if (fail)
+				test_cond = false;
+			else
+				test_cond = (p->_repeat_count != 0);
 			break;
+			}
 		case loop_stmt::WHILE:
 			test_cond = (bool(p->_expr->evaluate(evaluate_expr())) != false);
 			break;

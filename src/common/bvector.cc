@@ -8,7 +8,7 @@
 //
 // bvector.cc
 
-#include <cctype> // isdigit()
+#include <cerrno> // errno
 #include <cstdlib> // strtoul()
 #include "common/bvector.h"
 
@@ -185,8 +185,8 @@ find_hw(bit_vector::decimal_type val, bit_vector::decimal_type &wt)
 
 // Public member functions for bit_vector class.
 
-bit_vector::bit_vector(unsigned long value)
-	: _msb_lower(false), _tristate(false), _signed(false), _base(BASE10), _begin(0)
+bit_vector::bit_vector(decimal_type value)
+	: _msb_lower(false), _tristate(false), _signed(UNSIGNED), _base(BASE10), _begin(0)
 	{
 	// Automatic conversion from integer.
 	if (value == 0)
@@ -212,16 +212,17 @@ bit_vector::bit_vector(unsigned long value)
 		}
 	_end = i - 1;
 	_size = (_end - _begin) + 1;
-	memset(_bits + i, static_cast<int>(LO), largest - i);
+	memset(_bits + i, static_cast<int>(NVL), largest - i);
 	}
 
-bit_vector::bit_vector(const str_type &str, base_type base, size_type len, bool neg)
-	: _msb_lower(false), _tristate(false), _signed(neg), _base(base), _begin(0)
+bit_vector::bit_vector(const str_type &str, signed_type s, base_type base, size_type len)
+	: _msb_lower(false), _tristate(false), _signed(s), _base(base), _begin(0)
 	{
 	// Set our bit vector from the base specified in <base>, with
 	// the value contained in <str>.  <len> is optional, and set
 	// to the needed size.
 	// Determine our length.
+	bool trunc = false;
 	if (len == 0)
 		{
 		int underscores = 0;
@@ -238,7 +239,50 @@ bit_vector::bit_vector(const str_type &str, base_type base, size_type len, bool 
 			{
 			case 2: break;
 			case 8: len *= 3; break;
-			case 10: len = 8 * sizeof(decimal_type); break;
+			case -2: // BASEDFLT
+			case 10:
+				{
+				// No size specified.  We need to find the
+				// smallest size that will hold the specified
+				// value closest to 32bit.
+				char *err = 0;
+				errno = 0;
+				decimal_type value = strtoul(str.c_str(), &err, 10);
+				if (*err != '\0' || (value == ULONG_MAX && errno == ERANGE))
+					{
+					_end = 0;
+					_size = 0;
+					_bits = 0;
+					return;
+					}
+				if (value == 0)
+					{
+					// A number must be at least 32bits,
+					// even if it is zero.
+					len = 32;
+					}
+				else
+					{
+					int amt = 8 * sizeof(decimal_type);
+					if (amt > 32)
+						{
+						decimal_type tmp = value;
+						int num0 = 1;
+						if ((tmp >> 32) == 0) { num0 += 32; tmp <<= 32; }
+						if ((tmp >> 48) == 0) { num0 += 16; tmp <<= 16; }
+						if ((tmp >> 56) == 0) { num0 +=  8; tmp <<=  8; }
+						if ((tmp >> 60) == 0) { num0 +=  4; tmp <<=  4; }
+						if ((tmp >> 62) == 0) { num0 +=  2; tmp <<=  2; }
+						num0 -= tmp >> 63;
+						len = num0 < 32 ? 64 - num0 : 32;
+						if (len > 32 && value > 0xffffffff)
+							trunc = true;
+						}
+					else
+						len = 32;
+					}
+				break;
+				}
 			case 16: len *= 4; break;
 			default: break;
 			}
@@ -253,7 +297,8 @@ bit_vector::bit_vector(const str_type &str, base_type base, size_type len, bool 
 			{
 			case 2: assign_from_bin(str); break;
 			case 8: assign_from_oct(str); break;
-			case 10: assign_from_dec(str); break;
+			case -2: // BASEDFLT
+			case 10: assign_from_dec(str, trunc); break;
 			case 16: assign_from_hex(str); break;
 			default: break;
 			}
@@ -280,27 +325,6 @@ bit_vector::operator bool() const
 	return found_true;
 	}
 
-bit_vector::operator unsigned long() const
-	{
-	// Convert to integer for quicker arithmetic.  The result is
-	// truncated to the size of unsigned long.
-	unsigned long res = 0;
-	position_type numbits = 8 * sizeof(res);
-	position_type j = _begin;
-	if (static_cast<size_type>(numbits) >= _size)
-		numbits = _end;
-	else
-		numbits = (_begin + numbits) - 1;
-	for (int i = 0; j <= numbits; ++i, ++j)
-		{
-		if (_bits[j] == HI)
-			res |= 1 << i;
-		else if (_bits[j] > HI)
-			return static_cast<unsigned long>(-1);
-		}
-	return res;
-	}
-
 
 // Protected member functions of bit_vector class.
 
@@ -308,16 +332,19 @@ bit_vector::operator unsigned long() const
 inline bit_vector &
 bit_vector::operator+=(const bit_vector &bv)
 	{
+	typedef bit_vector::logic_type logic_type;
+	typedef bit_vector::position_type position_type;
+
 	// Addition using ourselves as the result.  If we don't have enough
 	// bits to hold the carryout bit, it is lost.
 	int pad = 0;
-	bit_vector::logic_type L, R;
-	bit_vector::logic_type Ci = LO;
-	bit_vector::position_type i = _begin;
-	bit_vector::position_type li = _begin;
-	bit_vector::position_type ri = bv._begin;
-	bit_vector::logic_type *data = _bits;
-	bit_vector::logic_type *bv_data = bv._bits;
+	logic_type L, R;
+	logic_type Ci = LO;
+	position_type i = _begin;
+	position_type li = _begin;
+	position_type ri = bv._begin;
+	logic_type *data = _bits;
+	logic_type *bv_data = bv._bits;
 	for (; i <= _end; ++i, ++li, ++ri)
 		{
 		L = R = NVL;
@@ -368,16 +395,19 @@ bit_vector::operator+=(const bit_vector &bv)
 inline bit_vector &
 bit_vector::operator-=(const bit_vector &bv)
 	{
+	typedef bit_vector::logic_type logic_type;
+	typedef bit_vector::position_type position_type;
+
 	// Subtraction using ourselves as the result.  If we don't have enough
 	// bits to hold the borrowin bit, it is lost.
 	int pad = 0;
-	bit_vector::logic_type L, R;
-	bit_vector::logic_type Bi = LO;
-	bit_vector::position_type i = _begin;
-	bit_vector::position_type li = _begin;
-	bit_vector::position_type ri = bv._begin;
-	bit_vector::logic_type *data = _bits;
-	bit_vector::logic_type *bv_data = bv._bits;
+	logic_type L, R;
+	logic_type Bi = LO;
+	position_type i = _begin;
+	position_type li = _begin;
+	position_type ri = bv._begin;
+	logic_type *data = _bits;
+	logic_type *bv_data = bv._bits;
 	for (; i <= _end; ++i, ++li, ++ri)
 		{
 		L = R = NVL;
@@ -485,13 +515,13 @@ bit_vector::binary_2_decimal(size_type len) const
 	{
 	bit_vector tmp(*this);
 	position_type j = tmp._begin;
-	bool neg = _signed && _bits[_end] == HI;
+	bool neg = _signed == bit_vector::SIGNED && _bits[_end] == HI;
 	if (neg)
 		{
 		// The conversion below uses unsigned number.  So take
 		// the 2's complement first, then prepend sign after.
 		bit_vector one(HI);
-		bit_vector inv(_end, _begin);
+		bit_vector inv(_end, _begin, UNSIGNED);
 		unary_inv(inv, *this);
 		binary_add(tmp, inv, one);
 		}
@@ -543,7 +573,12 @@ bit_vector::binary_2_decimal(size_type len) const
 	else
 		size = len;
 	if (size == 0)
+		{
 		size = 1;
+		neg = false;
+		}
+	else
+		size += neg;
 	str_type res(size, ' ');
 	position_type i = size - 1;
 	decimal_type digit = 0;
@@ -555,7 +590,20 @@ bit_vector::binary_2_decimal(size_type len) const
 		if (num <= 0)
 			break;
 		}
-	return (neg) ? ("-" + res) : res;
+	if (neg)
+		{
+		str_type::reverse_iterator b = res.rbegin();
+		str_type::reverse_iterator e = res.rend();
+		for (; b != e; ++b)
+			{
+			if (*b == ' ')
+				{
+				*b = '-';
+				break;
+				}
+			}
+		}
+	return res;
 	}
 
 int BITS2INT[4][5] =
@@ -728,38 +776,42 @@ bit_vector::assign_from_oct(const str_type &str)
 	}
 
 void
-bit_vector::assign_from_dec(const str_type &str)
+bit_vector::assign_from_dec(const str_type &str, bool trunc)
 	{
-	// Validate string is valid decimal number.
-	for (str_type::size_type i = 0; i < str.size(); ++i)
-		{
-		if (isspace(str[i]))
-			continue;
-		if (!isdigit(str[i]))
-			{
-			// Set entire bit vector to don't cares.
-			memset(_bits, static_cast<int>(DC), _size);
-			return;
-			}
-		}
-
-	// Optimize zero.
+	// Optimize zero.  Errors have already been checked.
 	decimal_type value = strtoul(str.c_str(), 0, 10);
 	if (value == 0)
 		{
 		memset(_bits, static_cast<int>(LO), _size);
+		_base = BASE10; // In case base wasn't specified.
 		return;
 		}
 
 	// Perform conversion.
+	// There are two forms of representing
+	// decimal numbers 1234 or 'd1234.  In the former, we truncate
+	// and sign extend.  In the later, we truncate but don't
+	// sign extend.
 	position_type i = _begin;
-	decimal_type rem = value;
+	decimal_type rem;
+	if (trunc)
+		{
+		rem = value & 0xffffffff;
+		if (_base == BASEDFLT)
+			{
+			decimal_type hbset = static_cast<decimal_type>(1) << 31;
+			rem = (rem ^ hbset) - hbset;
+			}
+		}
+	else
+		rem = value;
 	while (i <= _end)
 		{
 		// Now convert integer to binary.
 		_bits[i++] = (rem & 1) ? HI : LO;
 		rem >>= 1;
 		}
+	_base = BASE10; // In case base wasn't specified.
 	}
 
 void
@@ -873,9 +925,10 @@ compare_backward(const bit_vector &l, const bit_vector &r,
 	bit_vector::logic_type res;
 
 	// See if we're comparing 2's complement numbers.
-	if (l._signed && l._bits[l._end] == HI)
+	if (l._signed == bit_vector::SIGNED && l._bits[l._end] == HI)
 		{
-		if (!r._signed || (r._signed && r._bits[r._end] == LO))
+		if (r._signed == bit_vector::UNSIGNED ||
+		   (r._signed == bit_vector::SIGNED && r._bits[r._end] == LO))
 			{
 			// Now make sure there are no DC/Z.
 			while (li >= l._begin || ri >= r._begin)
@@ -898,9 +951,10 @@ compare_backward(const bit_vector &l, const bit_vector &r,
 			return HI;
 			}
 		}
-	else if (r._signed && r._bits[r._end] == HI)
+	else if (r._signed == bit_vector::SIGNED && r._bits[r._end] == HI)
 		{
-		if (!l._signed || (l._signed && l._bits[l._end] == LO))
+		if (l._signed == bit_vector::UNSIGNED ||
+		   (l._signed == bit_vector::SIGNED && l._bits[l._end] == LO))
 			{
 			// Now make sure there are no DC/Z.
 			while (li >= l._begin || ri >= r._begin)
@@ -1047,18 +1101,21 @@ unary_inv(bit_vector &res, const bit_vector &bv)
 bit_vector &
 binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 	{
+	typedef bit_vector::logic_type logic_type;
+	typedef bit_vector::position_type position_type;
+
 	// The result of an addition supports the carryout bit.  But
 	// if the user doesn't save this bit, it is destroyed upon
 	// call to destructor.
 	int pad = 0;
-	bit_vector::logic_type L, R;
-	bit_vector::logic_type Ci = LO;
-	bit_vector::position_type i = res._begin;
-	bit_vector::position_type li = l._begin;
-	bit_vector::position_type ri = r._begin;
-	bit_vector::logic_type *data = res._bits;
-	bit_vector::logic_type *l_data = l._bits;
-	bit_vector::logic_type *r_data = r._bits;
+	logic_type L, R;
+	logic_type Ci = LO;
+	position_type i = res._begin;
+	position_type li = l._begin;
+	position_type ri = r._begin;
+	logic_type *data = res._bits;
+	logic_type *l_data = l._bits;
+	logic_type *r_data = r._bits;
 	for (; i <= res._end; ++i, ++li, ++ri)
 		{
 		L = R = NVL;
@@ -1111,8 +1168,8 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 				}
 			}
 		pad = static_cast<int>(Ci) + static_cast<int>(L) + static_cast<int>(R);
-		data[i] = static_cast<bit_vector::logic_type::state_value>(pad & 1);
-		Ci = static_cast<bit_vector::logic_type::state_value>(pad >> 1);
+		data[i] = static_cast<logic_type::state_value>(pad & 1);
+		Ci = static_cast<logic_type::state_value>(pad >> 1);
 		}
 	return res;
 	}
@@ -1120,18 +1177,21 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 bit_vector &
 binary_sub(bit_vector &res, const bit_vector &l, const bit_vector &r)
 	{
+	typedef bit_vector::logic_type logic_type;
+	typedef bit_vector::position_type position_type;
+
 	// The result of a subtraction supports the borrowin bit.  But
 	// if the user doesn't save this bit, it is destroyed upon
 	// call to destructor.
 	int pad = 0;
-	bit_vector::logic_type L, R;
-	bit_vector::logic_type Bi = LO;
-	bit_vector::position_type i = res._begin;
-	bit_vector::position_type li = l._begin;
-	bit_vector::position_type ri = r._begin;
-	bit_vector::logic_type *data = res._bits;
-	bit_vector::logic_type *r_data = r._bits;
-	bit_vector::logic_type *l_data = l._bits;
+	logic_type L, R;
+	logic_type Bi = LO;
+	position_type i = res._begin;
+	position_type li = l._begin;
+	position_type ri = r._begin;
+	logic_type *data = res._bits;
+	logic_type *r_data = r._bits;
+	logic_type *l_data = l._bits;
 	for (; i <= res._end; ++i, ++li, ++ri)
 		{
 		L = R = NVL;
@@ -1161,120 +1221,226 @@ binary_sub(bit_vector &res, const bit_vector &l, const bit_vector &r)
 				}
 			}
 		pad = (static_cast<int>(L) - static_cast<int>(R) - static_cast<int>(Bi)) & 3;
-		data[i] = static_cast<bit_vector::logic_type::state_value>(pad & 1);
-		Bi = static_cast<bit_vector::logic_type::state_value>(pad >> 1);
+		data[i] = static_cast<logic_type::state_value>(pad & 1);
+		Bi = static_cast<logic_type::state_value>(pad >> 1);
 		}
 	return res;
 	}
 
 bit_vector &
-binary_mul(bit_vector &sum, const bit_vector &l, const bit_vector &r)
+binary_mul(bit_vector &p, const bit_vector &l, const bit_vector &r)
 	{
+	typedef bit_vector::decimal_type decimal_type;
+	typedef bit_vector::position_type position_type;
+	bit_vector nan(p._end, p._begin, bit_vector::UNSET, bit_vector::BASE10, DC);
+
+	position_type i;
+	bool l_signed = l._signed == bit_vector::SIGNED;
+	bool r_signed = r._signed == bit_vector::SIGNED;
+	bool l_neg = l_signed && l._bits[l._end] == HI;
+	bool r_neg = r_signed && r._bits[r._end] == HI;
+
+	// Optimization: for values resulting in a product that can fit
+	// in a decimal_type, we use built-in arithmetic.  The
+	// multiplication is done with unsigned numbers.
+	bool lfail = false;
+	decimal_type ld = l.to_decimal_type(&lfail);
+	if (lfail && ld == 0)
+		return p = nan;
+	bool rfail = false;
+	decimal_type rd = r.to_decimal_type(&rfail);
+	if (rfail && rd == 0)
+		return p = nan;
+	const unsigned half_size = 8 * sizeof(decimal_type) / 2;
+	decimal_type max_dec = (static_cast<decimal_type>(1) << half_size) - 1;
+	decimal_type lud = l_neg ? (~ld + 1) : ld;
+	decimal_type rud = r_neg ? (~rd + 1) : rd;
+	if ((!lfail && lud <= max_dec) &&
+		(!rfail && rud <= max_dec))
+		{
+		if (l_neg ^ r_neg)
+			p = -(lud * rud);
+		else
+			p = lud * rud;
+		return p;
+		}
+
 	// Multiplication using shift and add algorithm.
-	bit_vector::position_type i;
-	bit_vector tmp(sum._begin, sum._end);
-
-	sum = 0;
-	tmp = l;
-	for (i = r._begin; i <= r._end; ++i)
+	bit_vector one(HI);
+	bit_vector mplier, mcand(p._end, p._begin, bit_vector::UNSIGNED);
+	p = LO;
+	if (l_neg)
 		{
-		if (r._bits[i] == HI)
-			sum += tmp;
-		tmp <<= 1UL;
+		bit_vector tmp(l._end, l._begin, bit_vector::UNSIGNED);
+		unary_inv(tmp, l);
+		binary_add(mcand, tmp, one);
 		}
-	return sum;
+	else
+		mcand = l;
+	if (r_neg)
+		{
+		bit_vector tmp(r._end, r._begin, bit_vector::UNSIGNED);
+		unary_inv(tmp, r);
+		binary_add(mplier, tmp, one);
+		}
+	else
+		mplier = r;
+	for (i = mplier._begin; i <= mplier._end; ++i)
+		{
+		if (mplier._bits[i] == HI)
+			p += mcand;
+		mcand <<= 1UL;
+		}
+	if (l_neg ^ r_neg)
+		{
+		bit_vector tmp(p._end, p._begin, bit_vector::SIGNED);
+		unary_inv(tmp, p);
+		binary_add(p, tmp, one);
+		}
+	if (p._signed == bit_vector::UNSET)
+		p._signed = l_signed || r_signed ? bit_vector::SIGNED : bit_vector::UNSIGNED;
+	return p;
 	}
 
 bit_vector &
-binary_div(bit_vector &qoutient, const bit_vector &l, const bit_vector &r)
+binary_div_rem(bit_vector &q, bit_vector &rem, const bit_vector &l, const bit_vector &r)
 	{
+	typedef bit_vector::decimal_type decimal_type;
+	typedef bit_vector::position_type position_type;
+	bit_vector nan(q._end, q._begin, bit_vector::UNSET, bit_vector::BASE10, DC);
+
+	bit_vector::position_type i, j;
+	bool l_signed = l._signed == bit_vector::SIGNED;
+	bool r_signed = r._signed == bit_vector::SIGNED;
+	bool l_neg = l_signed && l._bits[l._end] == HI;
+	bool r_neg = r_signed && r._bits[r._end] == HI;
+
+	bool lfail = false;
+	decimal_type ld = l.to_decimal_type(&lfail);
+	if (lfail && ld == 0)
+		{
+		rem = nan;
+		return q = nan;
+		}
+	bool rfail = false;
+	decimal_type rd = r.to_decimal_type(&rfail);
+	if (rfail && rd == 0)
+		{
+		rem = nan;
+		return q = nan;
+		}
+	if (!lfail && !rfail)
+		{
+		decimal_type lud = l_neg ? (~ld + 1) : ld;
+		decimal_type rud = r_neg ? (~rd + 1) : rd;
+		if (rud == 0)
+			{
+			rem = nan;
+			return q = nan;
+			}
+		if ((l_neg) ^ r_neg)
+			q = -(lud / rud);
+		else
+			q = lud / rud;
+		if (l_neg)
+			rem = -lud % rud;
+		else
+			rem = lud % rud;
+		return q;
+		}
+
 	// Division using shift and subtract algorithm.
-	bit_vector::position_type i;
-	bit_vector nan(qoutient._end, qoutient._begin, bit_vector::BASE10, false, DC);
-	bit_vector remainder(qoutient._end, qoutient._begin, bit_vector::BASE10, false, LO);
-	bool is_zero = true;
-
-	// Check input to division.
-	for (i = r._begin; i <= r._end; ++i)
+	bit_vector::logic_type cmp;
+	bit_vector zero(LO), one(HI);
+	bit_vector dend(l._end, l._begin, bit_vector::UNSIGNED);
+	bit_vector dsor(r._end, r._begin, bit_vector::UNSIGNED);
+	if (r == zero)
 		{
-		if (r._bits[i] > HI)
-			return qoutient = nan;
-		else if (r._bits[i] == HI)
-			is_zero = false;
+		rem = nan;
+		return q = nan;
 		}
-	if (is_zero)
-		return qoutient = nan;
-
-	// Initialize result.
-	qoutient = LO;
-
-	for (i = l._end; i >= l._begin; --i)
+	if (l_neg)
 		{
-		if (l._bits[i] > HI)
-			return qoutient = nan;
-		remainder <<= 1UL;
-		remainder._bits[0] = l._bits[i];
-		if (remainder < r)
+		bit_vector tmp(l._end, l._begin, bit_vector::UNSIGNED);
+		unary_inv(tmp, l);
+		binary_add(dend, tmp, one);
+		}
+	else
+		dend = l;
+	if (r_neg)
+		{
+		bit_vector tmp(r._end, r._begin, bit_vector::UNSIGNED);
+		unary_inv(tmp, r);
+		binary_add(dsor, tmp, one);
+		}
+	else
+		dsor = r;
+	i = dend._end;
+	j = q._end;
+	for (; i >= dend._begin; --i)
+		{
+		rem <<= 1UL;
+		rem._bits[0] = dend._bits[i];
+		cmp = rem < dsor;
+		if (cmp == HI)
 			{
-			qoutient._bits[i] = LO;
+			q._bits[i] = LO;
+			}
+		else if (cmp == LO)
+			{
+			q._bits[i] = HI;
+			rem -= dsor;
 			}
 		else
 			{
-			qoutient._bits[i] = HI;
-			remainder -= r;
+			rem = nan;
+			return q = nan;
 			}
 		}
-	return qoutient;
+	if (l_neg ^ r_neg)
+		{
+		bit_vector tmp(q._end, q._begin, bit_vector::SIGNED);
+		unary_inv(tmp, q);
+		binary_add(q, tmp, one);
+		}
+	if (q._signed == bit_vector::UNSET)
+		q._signed = l_signed || r_signed ? bit_vector::SIGNED : bit_vector::UNSIGNED;
+	// Remainder takes the sign of the dividend.
+	rem._signed = l._signed;
+	if (l_neg)
+		{
+		bit_vector tmp(q._end, q._begin, bit_vector::SIGNED);
+		unary_inv(tmp, q);
+		binary_add(q, tmp, one);
+		}
+	return q;
 	}
 
 bit_vector &
-binary_mod(bit_vector &remainder, const bit_vector &l, const bit_vector &r)
+binary_div(bit_vector &q, const bit_vector &l, const bit_vector &r)
 	{
-	// Unsigned modulo using shift and subtract algorithm.
-	bit_vector::position_type i;
-	bit_vector nan(remainder._end, remainder._begin, bit_vector::BASE10, false, DC);
-	bit_vector qoutient(remainder._end, remainder._begin, bit_vector::BASE10, false, LO);
-	bool is_zero = true;
+	bit_vector rem(q._end, q._begin, bit_vector::UNSET, bit_vector::BASE10, LO);
+	q = LO;
+	binary_div_rem(q, rem, l, r);
+	return q;
+	}
 
-	// Contents of remainder are used in calculation, so clear it.
-	remainder = LO;
-
-	// Check input to divide.
-	for (i = r._begin; i <= r._end; ++i)
-		{
-		if (r._bits[i] > HI)
-			return remainder = nan;
-		else if (r._bits[i] == HI)
-			is_zero = false;
-		}
-	if (is_zero)
-		return remainder = nan;
-
-	for (i = l._end; i >= l._begin; --i)
-		{
-		if (l._bits[i] > HI)
-			return remainder = nan;
-		remainder <<= 1UL;
-		remainder._bits[0] = l._bits[i];
-		if (remainder < r)
-			{
-			qoutient._bits[i] = LO;
-			}
-		else
-			{
-			qoutient._bits[i] = HI;
-			remainder -= r;
-			}
-		}
-	return remainder;
+bit_vector &
+binary_mod(bit_vector &rem, const bit_vector &l, const bit_vector &r)
+	{
+	bit_vector q(rem._end, rem._begin, bit_vector::UNSET, bit_vector::BASE10, LO);
+	rem = LO;
+	binary_div_rem(q, rem, l, r);
+	return rem;
 	}
 
 bit_vector &
 binary_lshf(bit_vector &res, const bit_vector &l, const bit_vector &r)
 	{
 	// Shift <l> to the left by <r>.
-	unsigned long c = static_cast<unsigned long>(r);
-	if (c == static_cast<unsigned long>(-1))
+	bool fail = false;
+	bit_vector::decimal_type c = r.to_decimal_type(&fail);
+	if (fail)
 		memset(res._bits+res._begin, static_cast<int>(DC), res._size);
 	else
 		{
@@ -1295,8 +1461,9 @@ bit_vector &
 binary_rshf(bit_vector &res, const bit_vector &l, const bit_vector &r)
 	{
 	// Shift <l> to the right by <r>.
-	unsigned long c = static_cast<unsigned long>(r);
-	if (c == static_cast<unsigned long>(-1))
+	bool fail = false;
+	unsigned long c = r.to_decimal_type(&fail);
+	if (fail)
 		memset(res._bits+res._begin, static_cast<int>(DC), res._size);
 	else
 		{
@@ -1343,6 +1510,55 @@ logic_op(bit_vector &bv, const bit_vector &l, const bit_vector &r,
 		data[i++] = op[LO][LO];
 
 	return bv;
+	}
+
+bit_vector::decimal_type
+bit_vector::to_decimal_type(bool *fail, size_type nb) const
+	{
+	// Convert to decimal for quicker arithmetic.  The result is
+	// truncated to the size of decimal_type.
+	bool signextend = false;
+	decimal_type res = 0;
+	position_type j = _begin;
+	position_type numbits;
+	if (nb == 0)
+		nb = 8 * sizeof(res);
+	if (nb > _size)
+		{
+		signextend = _signed == SIGNED && _bits[_end] == HI;
+		numbits = _end;
+		}
+	else if (nb == _size)
+		numbits = _end;
+	else
+		numbits = (_begin + nb) - 1;
+	for (int i = 0; j <= numbits; ++i, ++j)
+		{
+		if (_bits[j] == HI)
+			res |= static_cast<decimal_type>(1) << i;
+		if (_bits[j] > HI)
+			{
+			if (fail != 0)
+				*fail = true;
+			return 0;
+			}
+		}
+	logic_type hb = _bits[_end];
+	for (; j <= _end; ++j)
+		{
+		if (_bits[j] != hb)
+			{
+			if (fail != 0)
+				*fail = true;
+			return static_cast<decimal_type>(-1);
+			}
+		}
+	if (signextend)
+		{
+		decimal_type tmp = static_cast<decimal_type>(1) << (_size - 1);
+		res = (res ^ tmp) - tmp;
+		}
+	return res;
 	}
 
 

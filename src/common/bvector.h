@@ -41,12 +41,23 @@ public:
 #ifndef DECTYPE
 # if defined(__GNUC__) && !defined(__STDC__)
 	typedef unsigned long long int decimal_type;
+	typedef signed long long int sdecimal_type;
 # else
 	typedef unsigned long int decimal_type;
+	typedef signed long int sdecimal_type;
 # endif
 #else
-	typedef DECTYPE decimal_type;
+	typedef unsigned DECTYPE decimal_type;
+	typedef signed DECTYPE sdecimal_type;
 #endif
+
+	// The signed type is used in binary arithmetic functions.
+	enum signed_type
+		{
+		UNSET = -1,
+		UNSIGNED = 0,
+		SIGNED = 1
+		};
 
 	// The base type is used in conversion functions.
 	enum base_type
@@ -168,6 +179,7 @@ public:
 	friend bit_vector &binary_add(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_sub(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_mul(bit_vector &, const bit_vector &, const bit_vector &);
+	friend bit_vector &binary_div_rem(bit_vector &, bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_div(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_mod(bit_vector &, const bit_vector &, const bit_vector &);
 	friend bit_vector &binary_lshf(bit_vector &, const bit_vector &, const bit_vector &);
@@ -196,14 +208,32 @@ public:
 
 	bit_vector(logic_type = NVL);
 	bit_vector(decimal_type);
-	bit_vector(position_type, position_type, base_type = BASE10, bool = false, logic_type = DC);
-	bit_vector(const str_type &, base_type = BASE2, size_type = 0, bool = false);
+	bit_vector(position_type, position_type, signed_type, base_type = BASE10, logic_type = DC);
+	bit_vector(const str_type &, signed_type, base_type = BASE2, size_type = 0);
 	bit_vector(const bit_vector &);
 	virtual ~bit_vector();
 
 	// Implicit converters.
 	operator bool() const;
-	operator unsigned long() const;
+	decimal_type to_decimal_type(bool * = 0, size_type = 0) const;
+	signed int to_signed_int(bool *fail = 0) const
+		{
+		bool f = false;
+		size_type s = 8 * sizeof(signed int);
+		decimal_type d = to_decimal_type(&f, s);
+		signed int res;
+		if (f)
+			res = static_cast<signed int>(1) << (s - 1);
+		else
+			res = static_cast<signed int>(d);
+		return res;
+		}
+	unsigned int to_unsigned_int(bool *fail = 0) const
+		{
+		size_type s = 8 * sizeof(unsigned int);
+		decimal_type d = to_decimal_type(fail, s);
+		return static_cast<unsigned int>(d);
+		}
 
 	// Public operators.
 	bit_vector &operator=(const bit_vector &);
@@ -232,7 +262,7 @@ protected:
 	void sign_extend(position_type);
 	void assign_from_bin(const str_type &);
 	void assign_from_oct(const str_type &);
-	void assign_from_dec(const str_type &);
+	void assign_from_dec(const str_type &, bool);
 	void assign_from_hex(const str_type &);
 
 private:
@@ -246,12 +276,21 @@ private:
 	// mostly used for error checking.
 	bool _msb_lower;
 	bool _tristate;
-	bool _signed;
+	signed_type _signed;
 	base_type _base;
 	position_type _begin;
 	position_type _end;
 	size_type _size;
 	logic_type *_bits;
+
+	operator int(); // signed
+	operator int() const; // signed
+	operator unsigned int();
+	operator unsigned int() const;
+	operator long(); // signed
+	operator long() const; // signed
+	operator unsigned long();
+	operator unsigned long() const;
 
 public:
 	bool msb_lower() const
@@ -293,7 +332,13 @@ bit_vector::sub_bit_vector::sub_bit_vector(bit_vector &bv,
 	{
 	// According to the Verilog LRM, <ms> and <ls> must be non-negative
 	// and <ms> must reference a more significant bit than <ls>
-	if (bv._msb_lower == false && ms >= ls)
+	if (ms < 0 || ls < 0)
+		{
+		// Cause _size to be 0 when calculated below.
+		_begin = 1;
+		_end = 0;
+		}
+	else if (bv._msb_lower == false && ms >= ls)
 		{
 		_begin = ls;
 		_end = ms;
@@ -468,7 +513,7 @@ operator<<(bit_vector::ostream_type &s, const bit_vector::const_sub_bit_vector &
 
 inline
 bit_vector::bit_vector(logic_type b)
-	: _msb_lower(false), _tristate(false), _signed(false), _base(BASE2)
+	: _msb_lower(false), _tristate(false), _base(BASE2)
 	{
 	// The default constructor.  If no default logic value is given,
 	// then we assume the caller wants a invalid bit vector.
@@ -478,6 +523,7 @@ bit_vector::bit_vector(logic_type b)
 		_end = -2;
 		_size = 0;
 		_bits = 0;
+		_signed = UNSET;
 		}
 	else
 		{
@@ -485,12 +531,13 @@ bit_vector::bit_vector(logic_type b)
 		_size = 1;
 		_bits = new logic_type[1];
 		_bits[0] = b;
+		_signed = UNSIGNED;
 		}
 	}
 
 inline
-bit_vector::bit_vector(position_type ms, position_type ls, base_type b, bool neg, logic_type val)
-	: _tristate(false), _signed(neg), _base(b)
+bit_vector::bit_vector(position_type ms, position_type ls, signed_type s, base_type b, logic_type val)
+	: _tristate(false), _signed(s), _base(b)
 	{
 	// Create a bit vector with the specified size.
 	// According to the Verilog LRM, <ls> can be greater than
@@ -518,7 +565,7 @@ bit_vector::bit_vector(position_type ms, position_type ls, base_type b, bool neg
 inline
 bit_vector::bit_vector(const bit_vector &bv)
 	: _msb_lower(bv._msb_lower), _tristate(false), _signed(bv._signed), _base(bv._base),
-	_begin(bv._begin), _end(bv._end), _size(bv._size)
+	  _begin(bv._begin), _end(bv._end), _size(bv._size)
 	{
 	// Copy constructor, make an exact copy.
 	if (_size > 0)
@@ -563,6 +610,7 @@ bit_vector::operator=(const bit_vector &bv)
 		_end = bv._end;
 		_size = bv._size;
 		_bits = new logic_type[_end + 1];
+		_signed = bv._signed;
 		memcpy(_bits, bv._bits, _end + 1);
 		}
 	else
@@ -573,16 +621,20 @@ bit_vector::operator=(const bit_vector &bv)
 		if (i < _size)
 			{
 			memcpy(dst, src, i);
+			logic_type hb;
 			if (dst[i - 1] == DC)
-				memset(dst + i, static_cast<int>(DC), _size - i);
+				hb = DC;
 			else
-				memset(dst + i, static_cast<int>(LO), _size - i);
+				hb = bv._signed && dst[i - 1] == HI ? HI : LO;
+			memset(dst + i, static_cast<int>(hb), _size - i);
 			}
 		else
 			{
 			// Copy only what we need.
 			memcpy(dst, src, _size);
 			}
+		if (_signed == UNSET)
+			_signed = bv._signed;
 		}
 	return *this;
 	}
@@ -602,6 +654,7 @@ bit_vector::operator=(const sub_bit_vector &sbv)
 		_end = sbv._end;
 		_size = sbv._size;
 		_bits = new logic_type[_end + 1];
+		_signed = sbv._BV._signed;
 		memcpy(_bits, sbv._BV._bits, _end + 1);
 		}
 	else
@@ -627,6 +680,8 @@ bit_vector::operator=(const sub_bit_vector &sbv)
 			// Copy only what we need.
 			memcpy(dst, src, _size);
 			}
+		if (_signed == UNSET)
+			_signed = sbv._BV._signed;
 		}
 	return *this;
 	}
@@ -646,6 +701,7 @@ bit_vector::operator=(const const_sub_bit_vector &sbv)
 		_end = sbv._end;
 		_size = sbv._size;
 		_bits = new logic_type[_end + 1];
+		_signed = sbv._BV._signed;
 		memcpy(_bits, sbv._BV._bits, _end + 1);
 		}
 	else
@@ -671,6 +727,8 @@ bit_vector::operator=(const const_sub_bit_vector &sbv)
 			// Copy only what we need.
 			memcpy(dst, src, _size);
 			}
+		if (_signed == UNSET)
+			_signed = sbv._BV._signed;
 		}
 	return *this;
 	}

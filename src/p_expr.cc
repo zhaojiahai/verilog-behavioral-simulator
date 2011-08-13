@@ -116,15 +116,18 @@ p_create_number(char *s)
 	bit_vector::base_type type = bit_vector::BASE2;
 	char *str, *siz, *num, base;
 	number *ret;
+	number::signed_type neg;
 
 	// A constant number is never negative.  The minus in front of
 	// a number will result in a unary expression.  Thus, we just
 	// ignore any sign specifier here.
 
+	neg = number::UNSIGNED;
 	str = s;
 	if (strchr(str, '\'') == 0)
 		{
-		base = 'd';
+		neg = number::SIGNED;
+		base = 'u';
 		num = str;
 		}
 	else
@@ -133,8 +136,10 @@ p_create_number(char *s)
 		if (str[0] == '\'')
 			{
 			if (*(str + 1) == 's')
+				{
+				neg = number::SIGNED;
 				idx++;
-			len = 32; // Unsized constants must be at least 32bits.
+				}
 			base = *(str + idx++);
 			num = str + idx;
 			}
@@ -143,7 +148,10 @@ p_create_number(char *s)
 			char *tmp = vbs_strdup(str);
 			siz = strtok(tmp, "\'");
 			if (*(str + strlen(siz) + 1) == 's')
+				{
+				neg = number::SIGNED;
 				idx++;
+				}
 			len = atoi(siz);
 			base = *(str + strlen(siz) + idx++);
 			num = str + strlen(siz) + idx;
@@ -152,12 +160,13 @@ p_create_number(char *s)
 		}
 	switch(base)
 		{
-		case 'b': case 'B': type = bit_vector::BASE2; break;
-		case 'o': case 'O': type = bit_vector::BASE8; break;
-		case 'd': case 'D': type = bit_vector::BASE10; break;
-		case 'h': case 'H': type = bit_vector::BASE16; break;
+		case 'b': case 'B': type = number::BASE2; break;
+		case 'o': case 'O': type = number::BASE8; break;
+		case 'd': case 'D': type = number::BASE10; break;
+		case 'h': case 'H': type = number::BASE16; break;
+		case 'u': case 'U': type = number::BASEDFLT; break;
 		}
-	ret = new number(num, type, len);
+	ret = new number(num, neg, type, len);
 	ret->_lineno = cur_lineno;
 	free(s);
 	DEBUG_STATE(DEBUG_PARSER);

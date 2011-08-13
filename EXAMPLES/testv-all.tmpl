@@ -64,6 +64,17 @@ a && a (Ok)
 
 Simulation stopped at time unit 0 due to $finish.
 
+./vbs -q ../vbs/src/../EXAMPLES/expr_div.v
+Compiling file '../vbs/src/../EXAMPLES/expr_div.v'.
+Top-level module:  main
+
+0x4 0x0 (0x4 0x0)
+-7 5 6 (-7 5 6)
+0x80000000000000000 (0x8_0000_0000_0000_0000)
+0x40000000000000000 (0x4_0000_0000_0000_0000)
+
+Simulation stopped at time unit 0 due to $finish.
+
 ./vbs -q ../vbs/src/../EXAMPLES/expr_eqeq.v
 Compiling file '../vbs/src/../EXAMPLES/expr_eqeq.v'.
 Top-level module:  main
@@ -163,6 +174,17 @@ c0 00 (0xc0 0x00)
 
 Simulation stopped at time unit 0 due to $finish.
 
+./vbs -q ../vbs/src/../EXAMPLES/expr_mult.v
+Compiling file '../vbs/src/../EXAMPLES/expr_mult.v'.
+Top-level module:  main
+
+0x14 0x0 (0x14 0x0)
+-18 36 15 (-18 36 15)
+0x80000000000000000 (0x8_0000_0000_0000_0000)
+0x280000000000000000 (0x28_0000_0000_0000_0000)
+
+Simulation stopped at time unit 0 due to $finish.
+
 ./vbs -q ../vbs/src/../EXAMPLES/expr_not.v
 Compiling file '../vbs/src/../EXAMPLES/expr_not.v'.
 Top-level module:  main
@@ -206,10 +228,10 @@ Simulation stopped at time unit 0 due to $finish.
 Compiling file '../vbs/src/../EXAMPLES/expr_signcmp.v'.
 Top-level module:  main
 
-15 < pipe: 0 (0)
-done at                 2000 (2000)
+i < -1: ok!
 
-Simulation stopped at time unit 2000 due to $finish.
+
+Simulation stopped at time unit 0 due to $finish.
 
 ./vbs -q ../vbs/src/../EXAMPLES/expr_sub.v
 Compiling file '../vbs/src/../EXAMPLES/expr_sub.v'.
@@ -817,6 +839,17 @@ Top-level module:  multiple_test
 Finished at                   69:                    14 *                   13 =                  182
 
 Simulation stopped at time unit 69 due to $finish.
+
+./vbs -q ../vbs/src/../EXAMPLES/x_namedarg.v
+Compiling file '../vbs/src/../EXAMPLES/x_namedarg.v'.
+Top-level module:  test
+
+0 ^ 0 = 0
+1 ^ 0 = 1
+1 ^ 1 = 0
+0 ^ 1 = 1
+
+Simulation stopped at time unit 4 due to $finish.
 
 ./vbs -q ../vbs/src/../EXAMPLES/x_nds.v
 Compiling file '../vbs/src/../EXAMPLES/x_nds.v'.

@@ -304,7 +304,7 @@ readmem_data(std::ifstream &ifs, int base, st_net_assign::num_type &num)
 				// If an address, indicate it to caller.
 				if (i != 0)
 					return -2;
-				num = num_type(&s[1], num_type::BASE16);
+				num = num_type(&s[1], num_type::UNSIGNED, num_type::BASE16);
 				return 1;
 			default:
 				if (base == 16)
@@ -321,7 +321,7 @@ readmem_data(std::ifstream &ifs, int base, st_net_assign::num_type &num)
 			}
 		}
 
-	num_type tmp(s, base == 16 ? num_type::BASE16 : num_type::BASE2);
+	num_type tmp(s, num_type::UNSIGNED, base == 16 ? num_type::BASE16 : num_type::BASE2);
 	if (base == 2 && tmp.size() != num.size())
 		return -5;
 	num = tmp;
@@ -414,7 +414,7 @@ st_net_assign::operator()(const char *fn, int base,
 		else if (status == 1)
 			{
 			// Continue at this address.
-			start = (unsigned long)num;
+			start = num.to_signed_int();
 			}
 		else
 			{

@@ -1,6 +1,5 @@
 /*
  * Test named arguments to module instantiation.
- * This is not currently supported, but vbs should not crash.
  */
 
 module a_mod (a, b, c);
@@ -12,18 +11,27 @@ module a_mod (a, b, c);
 
 	always @(a or c)
 		begin
-		b = a + c;
+		b = a ^ c;
 		end
 
 endmodule
 
 module test;
 
+	reg x, y;
+	wire z;
+
 	a_mod a( .c(x), .a(y), .b(z) );
 
 	initial
 		begin
-		#10 $finish;
+		$monitor("%0b ^ %0b = %0b", x, y, z);
+		x = 0;
+		y = 0;
+		#1 x = 1;
+		#1 y = 1;
+		#1 x = 0;
+		#1 $finish;
 		end
 
 endmodule

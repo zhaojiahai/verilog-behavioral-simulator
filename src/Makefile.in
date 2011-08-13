@@ -386,6 +386,7 @@ testv-dec:
 testv-expr:
 	$(EX_COM) $(EX_DIR)/expr_add.v
 	$(EX_COM) $(EX_DIR)/expr_andand.v
+	$(EX_COM) $(EX_DIR)/expr_div.v
 	$(EX_COM) $(EX_DIR)/expr_eqeq.v
 	$(EX_COM) $(EX_DIR)/expr_grteq.v
 	$(EX_COM) $(EX_DIR)/expr_grtthan.v
@@ -396,6 +397,7 @@ testv-expr:
 	$(EX_COM) $(EX_DIR)/expr_logor.v
 	$(EX_COM) $(EX_DIR)/expr_logxor.v
 	$(EX_COM) $(EX_DIR)/expr_lshift.v
+	$(EX_COM) $(EX_DIR)/expr_mult.v
 	$(EX_COM) $(EX_DIR)/expr_not.v
 	$(EX_COM) $(EX_DIR)/expr_noteq.v
 	$(EX_COM) $(EX_DIR)/expr_oror.v
@@ -454,6 +456,7 @@ testv-x:
 	$(EX_COM) $(EX_DIR)/x_monitor.v
 	$(EX_COM) $(EX_DIR)/x_mulmain.v $(EX_DIR)/x_multv1.v
 	$(EX_COM) $(EX_DIR)/x_mulmain.v $(EX_DIR)/x_multv2.v
+	$(EX_COM) $(EX_DIR)/x_namedarg.v
 	$(EX_COM) $(EX_DIR)/x_nds.v
 	$(EX_COM) $(EX_DIR)/x_nested.v
 	$(EX_COM) $(EX_DIR)/x_range.v
@@ -461,9 +464,6 @@ testv-x:
 	$(EX_COM) $(EX_DIR)/x_taskdec.v
 	$(EX_COM) $(EX_DIR)/x_gareth.v
 #	$(EX_COM) $(EX_DIR)/x_vpp.v
-
-testv-y:
-	-$(EX_COM) $(EX_DIR)/y_namedarg.v
 
 testv-ivl:
 	$(EX_DIR)/ivl.sh $(IVLOPTS) ./vbs $(IVLDIR)

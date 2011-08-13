@@ -100,7 +100,7 @@ setup_expr::operator()(function_call *p) const
 			(*itp)->setup(setup_expr(_scope));
 		}
 
-	p->_result = new num_type(node->size() - 1, 0);
+	p->_result = new num_type(node->size() - 1, 0, num_type::UNSET);
 	return p->_result->size();
 	}
 
@@ -116,15 +116,17 @@ setup_expr::operator()(concatenation *p) const
 	// Repeat expression must be constant, save time by evaluating it now.
 	if (p->_repeat_expr != 0)
 		{
+		bool fail = false;
 		p->_repeat_expr->setup(setup_expr(_scope, true));
-		repeat_count = p->_repeat_expr->evaluate(evaluate_expr());
-		if (static_cast<signed long>(repeat_count) < 0)
+		int tmp = p->_repeat_expr->evaluate(evaluate_expr()).to_signed_int(&fail);
+		if (fail || tmp <= 0)
 			{
 			vbs_error::strstream_type buf;
 			buf << *p;
 			vbs_err.set_data(vbs_error::SE_RANGE, p->_lineno);
 			vbs_err.out(buf);
 			}
+		repeat_count = tmp;
 		}
 
 	for (; itp != stop; ++itp)
@@ -135,7 +137,7 @@ setup_expr::operator()(concatenation *p) const
 		}
 	p->_repeat_count = repeat_count;
 	size *= p->_repeat_count;
-	p->_result = new num_type(size > 0 ? size - 1 : 0, 0);
+	p->_result = new num_type(size > 0 ? size - 1 : 0, 0, num_type::UNSET);
 	return p->_result->size();
 	}
 
@@ -199,7 +201,7 @@ setup_expr::operator()(range_id *p) const
 	// The range depends on the type of identifier.
 	vbs_error::value_type er = vbs_error::SE_NONE;
 	size_type rs = 0;
-	bool neg = false;
+	num_type::signed_type neg = num_type::UNSET;
 	if (net != 0)
 		{
 		rs = net->size();
@@ -214,9 +216,9 @@ setup_expr::operator()(range_id *p) const
 				break;
 			case net_type::INTEGER:
 				// Integers are not constant.
-				neg = true;
 				if (_check_const)
 					er = vbs_error::SE_TYPE;
+				neg = num_type::SIGNED;
 				break;
 			case net_type::MEMORY:
 				if (_check_const)
@@ -270,7 +272,7 @@ setup_expr::operator()(range_id *p) const
 		vbs_err.out(buf);
 		}
 
-	p->_result = new num_type(rs - 1, 0, num_type::BASE10, neg);
+	p->_result = new num_type(rs - 1, 0, neg, num_type::BASE10);
 	return p->_result->size();
 	}
 
@@ -279,13 +281,13 @@ setup_expr::operator()(unary_op_expr *p) const
 	{
 	size_type s = p->_expr->setup(setup_expr(_scope, _check_const, _parent, _result_size));
 	size_type size = 0, rs = 0;
-	bool neg = false;
+	num_type::signed_type neg = num_type::UNSET;
 	switch (p->_operator)
 		{
 		case unary_op_expr::MINUS_EXPR:
 			// If the expression is a constant, this operator will make it a signed constant.
 			if (p->_expr->get_number() != 0)
-				neg = true;
+				neg = num_type::SIGNED;
 			// no break
 		case unary_op_expr::PLUS_EXPR:
 			rs = s;
@@ -307,7 +309,7 @@ setup_expr::operator()(unary_op_expr *p) const
 			size = rs = 1;
 			break;
 		}
-	p->_result = new num_type(size - 1, 0, num_type::BASE10, neg);
+	p->_result = new num_type(size - 1, 0, neg, num_type::BASE10);
 	return p->_result->size();
 	}
 
@@ -320,7 +322,6 @@ setup_expr::operator()(binary_op_expr *p) const
 	size_type ls = p->_left->setup(setup_expr(_scope, cc, _parent, _result_size));
 	size_type rs = p->_right->setup(setup_expr(_scope, cc, _parent, _result_size));
 	num_type tmp;
-	num_type::decimal_type r, e;
 	size_type size = 0, s = 0;
 	switch (p->_operator)
 		{
@@ -341,11 +342,14 @@ setup_expr::operator()(binary_op_expr *p) const
 		case binary_op_expr::POWER:
 			// We calculate the result now, so we need a size
 			// that can store the result.
-			r = p->_left->evaluate(evaluate_expr());
-			e = p->_right->evaluate(evaluate_expr());
+			{
+			int r, e;
+			r = p->_left->evaluate(evaluate_expr()).to_signed_int();
+			e = p->_right->evaluate(evaluate_expr()).to_signed_int();
 			tmp = num_type(static_cast<num_type::decimal_type>(pow(r, e)));
 			size = tmp.size();
 			break;
+			}
 		case binary_op_expr::EQUAL_EQUAL:
 		case binary_op_expr::NOT_EQUAL:
 		case binary_op_expr::EQUAL_EQUAL_EQUAL:
@@ -374,7 +378,7 @@ setup_expr::operator()(binary_op_expr *p) const
 			size = s < _result_size ? _result_size : s;
 			break;
 		}
-	p->_result = new num_type(size - 1, 0);
+	p->_result = new num_type(size - 1, 0, num_type::UNSET);
 	if (p->_operator == binary_op_expr::POWER)
 		*p->_result = tmp;
 	return p->_result->size();
@@ -388,7 +392,7 @@ setup_expr::operator()(ternary_op_expr *p) const
 	size_type fs = p->_false_expr->setup(setup_expr(_scope, _check_const, _parent, _result_size));
 	size_type rs = ts > fs ? ts : fs;
 	size_type size = rs < _result_size ? _result_size : rs;
-	p->_result = new num_type(size - 1, 0);
+	p->_result = new num_type(size - 1, 0, num_type::UNSET);
 	return p->_result->size();
 	}
 
@@ -415,6 +419,6 @@ setup_expr::operator()(mintypmax_expr *p) const
 			rs = p->_min_expr->setup(setup_expr(_scope, _check_const));
 			break;
 		}
-	p->_result = new num_type(rs - 1, 0);
+	p->_result = new num_type(rs - 1, 0, num_type::UNSET);
 	return p->_result->size();
 	}

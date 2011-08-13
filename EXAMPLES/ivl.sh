@@ -69,7 +69,8 @@ run_test () {
 	$vbs $arg ${vfn}.v > tmp.log
 	retval=$?
 
-	# Bus error, segmentation fault
+	# Bus error, segmentation fault, floating point exception
+	[ $retval -eq 136 ] && bad_exit $vbs $arg ${vfn}.v
 	[ $retval -eq 138 ] && bad_exit $vbs $arg ${vfn}.v
 	[ $retval -eq 139 ] && bad_exit $vbs $arg ${vfn}.v
 

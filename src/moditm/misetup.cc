@@ -280,7 +280,8 @@ setup_module_item::operator()(function *p) const
 			p->_retsize->setup(setup_select(_scope));
 			p->_retsize->get_data(ms, ls);
 			}
-		func->_storage = num_type(ms, ls);
+		// FIXME!  When return type is integer, this becomes signed.
+		func->_storage = num_type(ms, ls, num_type::UNSIGNED);
 		func->scope(_scope.top());
 		func->_lineno = p->_lineno;
 		hv = symboltable.add(func);

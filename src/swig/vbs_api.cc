@@ -92,7 +92,7 @@ bool
 vbs_set_net(char *net_name, char *val)
 	{
 	string v = val;
-	bit_vector bv(v);
+	bit_vector bv(v, bit_vector::UNSIGNED);
 	st_net * net = get_net(net_name);
 	if (net != 0)
 		{
