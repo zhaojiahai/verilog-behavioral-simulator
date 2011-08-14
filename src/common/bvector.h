@@ -143,11 +143,18 @@ public:
 	friend class bit_vector::sub_bit_vector;
 	friend class bit_vector::const_sub_bit_vector;
 	friend logic_type compare_forward(const bit_vector &, const bit_vector &,
-		logic_type, logic_type, const logic [][NUMLOGIC]);
+		logic_type, logic_type, const logic [][NUMLOGIC], logic_type = LO);
 	friend logic_type compare_backward(const bit_vector &, const bit_vector &,
 		logic_type, logic_type, const logic [][NUMLOGIC]);
 	friend logic_type operator==(const bit_vector &l, const bit_vector &r)
-		{ return compare_forward(l, r, HI, HI, logic_EQU); }
+		{
+		logic_type hb = LO;
+		if (l._size < r._size && l._signed == SIGNED)
+			hb = l._bits[l._end];
+		else if (r._size < l._size && r._signed == SIGNED)
+			hb = r._bits[r._end];
+		return compare_forward(l, r, HI, HI, logic_EQU, hb);
+		}
 	friend logic_type operator!=(const bit_vector &l, const bit_vector &r)
 		{ return !(l == r); }
 	friend logic_type operator<(const bit_vector &l, const bit_vector &r)
@@ -159,7 +166,15 @@ public:
 	friend logic_type operator>=(const bit_vector &l, const bit_vector &r)
 		{ return !(l < r); }
 	friend logic_type compare_c(const bit_vector &l, const bit_vector &r)
-		{ return compare_forward(l, r, HI, HI, logic_EQC); } // case.
+		{
+		 // case.
+		logic_type hb = LO;
+		if (l._size < r._size && l._signed == SIGNED)
+			hb = l._bits[l._end];
+		else if (r._size < l._size && r._signed == SIGNED)
+			hb = r._bits[r._end];
+		return compare_forward(l, r, HI, HI, logic_EQC, hb);
+		}
 	friend logic_type compare_x(const bit_vector &l, const bit_vector &r)
 		{ return compare_forward(l, r, HI, HI, logic_EQX); } // casex.
 	friend logic_type compare_z(const bit_vector &l, const bit_vector &r)
@@ -226,6 +241,8 @@ public:
 			res = static_cast<signed int>(1) << (s - 1);
 		else
 			res = static_cast<signed int>(d);
+		if (fail != 0)
+			*fail = f;
 		return res;
 		}
 	unsigned int to_unsigned_int(bool *fail = 0) const
@@ -386,6 +403,8 @@ bit_vector::sub_bit_vector::operator=(const sub_bit_vector &sbv)
 	// Did we get everything we asked for?
 	if (i <= _end && i <= _BV._end)
 		memset(_BV._bits + i, static_cast<int>(LO), _end - i + 1);
+	if (_BV._signed == UNSET)
+		_BV._signed = sbv._BV._signed;
 	return *this;
 	}
 
@@ -413,6 +432,8 @@ bit_vector::sub_bit_vector::operator=(const const_sub_bit_vector &sbv)
 	// Did we get everything we asked for?
 	if (i <= _end && i <= _BV._end)
 		memset(_BV._bits + i, static_cast<int>(LO), _end - i + 1);
+	if (_BV._signed == UNSET)
+		_BV._signed = sbv._BV._signed;
 	return *this;
 	}
 
@@ -435,6 +456,8 @@ bit_vector::sub_bit_vector::operator=(const bit_vector &bv)
 		}
 	if (i <= _end && i <= _BV._end)
 		memset(_BV._bits + i, static_cast<int>(LO), _end - i + 1);
+	if (_BV._signed == UNSET)
+		_BV._signed = bv._signed;
 	return *this;
 	}
 
@@ -621,11 +644,9 @@ bit_vector::operator=(const bit_vector &bv)
 		if (i < _size)
 			{
 			memcpy(dst, src, i);
-			logic_type hb;
-			if (dst[i - 1] == DC)
-				hb = DC;
-			else
-				hb = bv._signed && dst[i - 1] == HI ? HI : LO;
+			logic_type hb = LO;
+			if (bv._signed == SIGNED)
+				hb = dst[i - 1];
 			memset(dst + i, static_cast<int>(hb), _size - i);
 			}
 		else
@@ -670,10 +691,10 @@ bit_vector::operator=(const sub_bit_vector &sbv)
 		else if (i < _size)
 			{
 			memcpy(dst, src, i);
-			if (dst[i - 1] == DC)
-				memset(dst + i, static_cast<int>(DC), _size - i);
-			else
-				memset(dst + i, static_cast<int>(LO), _size - i);
+			logic_type hb = LO;
+			if (sbv._BV._signed == SIGNED)
+				hb = dst[i - 1];
+			memset(dst + i, static_cast<int>(hb), _size - i);
 			}
 		else
 			{
@@ -717,10 +738,10 @@ bit_vector::operator=(const const_sub_bit_vector &sbv)
 		else if (i < _size)
 			{
 			memcpy(dst, src, i);
-			if (dst[i - 1] == DC)
-				memset(dst + i, static_cast<int>(DC), _size - i);
-			else
-				memset(dst + i, static_cast<int>(LO), _size - i);
+			logic_type hb = LO;
+			if (sbv._BV._signed == SIGNED)
+				hb = dst[i - 1];
+			memset(dst + i, static_cast<int>(hb), _size - i);
 			}
 		else
 			{

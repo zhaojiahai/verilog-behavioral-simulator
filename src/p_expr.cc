@@ -132,10 +132,12 @@ p_create_number(char *s)
 		}
 	else
 		{
+		char c;
 		int idx = 1;
 		if (str[0] == '\'')
 			{
-			if (*(str + 1) == 's')
+			c = *(str + 1);
+			if (c == 's' || c == 'S')
 				{
 				neg = number::SIGNED;
 				idx++;
@@ -147,7 +149,8 @@ p_create_number(char *s)
 			{
 			char *tmp = vbs_strdup(str);
 			siz = strtok(tmp, "\'");
-			if (*(str + strlen(siz) + 1) == 's')
+			c = *(str + strlen(siz) + 1);
+			if (c == 's' || c == 'S')
 				{
 				neg = number::SIGNED;
 				idx++;

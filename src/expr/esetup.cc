@@ -100,7 +100,8 @@ setup_expr::operator()(function_call *p) const
 			(*itp)->setup(setup_expr(_scope));
 		}
 
-	p->_result = new num_type(node->size() - 1, 0, num_type::UNSET);
+	p->_result = new num_type(node->size() - 1, 0,
+			node->size() == 1 ? num_type::UNSIGNED : num_type::UNSET);
 	return p->_result->size();
 	}
 
@@ -137,7 +138,8 @@ setup_expr::operator()(concatenation *p) const
 		}
 	p->_repeat_count = repeat_count;
 	size *= p->_repeat_count;
-	p->_result = new num_type(size > 0 ? size - 1 : 0, 0, num_type::UNSET);
+	p->_result = new num_type(size > 0 ? size - 1 : 0, 0,
+			size == 1 ? num_type::UNSIGNED : num_type::UNSET);
 	return p->_result->size();
 	}
 
@@ -162,24 +164,6 @@ setup_expr::size_type
 setup_expr::operator()(range_id *p) const
 	{
 	p->_index = st_node_find(p->_name.c_str(), _scope);
-// FIXME: must be some kind of extension used by a contributor (delete later).
-#if 0
-	{
-#include "moditm/d_int.h"
-	// This should be treated as a int with value calculated during
-	// trigger, denoting the scope of the string.
-	typedef range_id::list_type< basic_ptr<range_id> > ident_ptr_list;
-	int_decl *i;
-	ident_ptr_list *idlst;
-	idlst = new ident_ptr_list;
-	if (idlst != 0)
-		idlst->push_back(p);
-	i = new int_decl((ident_ptr_list *) idlst);
-	i->_lineno = p->_lineno;
-	i->setup(mitf_setup());
-	return;
-	}
-#endif
 	if (p->_index._scope < 0)
 		{
 		vbs_err.set_data((vbs_error::value_type) p->_index._value, p->_lineno);
@@ -272,6 +256,8 @@ setup_expr::operator()(range_id *p) const
 		vbs_err.out(buf);
 		}
 
+	if (rs == 1)
+		neg = num_type::UNSIGNED;
 	p->_result = new num_type(rs - 1, 0, neg, num_type::BASE10);
 	return p->_result->size();
 	}
@@ -280,7 +266,7 @@ setup_expr::size_type
 setup_expr::operator()(unary_op_expr *p) const
 	{
 	size_type s = p->_expr->setup(setup_expr(_scope, _check_const, _parent, _result_size));
-	size_type size = 0, rs = 0;
+	size_type size = 0;
 	num_type::signed_type neg = num_type::UNSET;
 	switch (p->_operator)
 		{
@@ -290,14 +276,13 @@ setup_expr::operator()(unary_op_expr *p) const
 				neg = num_type::SIGNED;
 			// no break
 		case unary_op_expr::PLUS_EXPR:
-			rs = s;
-			size = rs < _result_size ? _result_size : rs;
+			size = s < _result_size ? _result_size : s;
 			break;
 		case unary_op_expr::NOT_EXPR:
-			size = rs = 1;
+			size = 1;
 			break;
 		case unary_op_expr::INVERT_EXPR:
-			size = rs = s;
+			size = s < _result_size ? _result_size : s;
 			break;
 		case unary_op_expr::AND_EXPR:
 		case unary_op_expr::NAND_EXPR:
@@ -306,9 +291,11 @@ setup_expr::operator()(unary_op_expr *p) const
 		case unary_op_expr::XOR_EXPR:
 		case unary_op_expr::XNOR_EXPR:
 		case unary_op_expr::NXOR_EXPR:
-			size = rs = 1;
+			size = 1;
 			break;
 		}
+	if (size == 1)
+		neg = num_type::UNSIGNED;
 	p->_result = new num_type(size - 1, 0, neg, num_type::BASE10);
 	return p->_result->size();
 	}
@@ -378,7 +365,8 @@ setup_expr::operator()(binary_op_expr *p) const
 			size = s < _result_size ? _result_size : s;
 			break;
 		}
-	p->_result = new num_type(size - 1, 0, num_type::UNSET);
+	p->_result = new num_type(size - 1, 0,
+			size == 1 ? num_type::UNSIGNED : num_type::UNSET);
 	if (p->_operator == binary_op_expr::POWER)
 		*p->_result = tmp;
 	return p->_result->size();
@@ -392,7 +380,8 @@ setup_expr::operator()(ternary_op_expr *p) const
 	size_type fs = p->_false_expr->setup(setup_expr(_scope, _check_const, _parent, _result_size));
 	size_type rs = ts > fs ? ts : fs;
 	size_type size = rs < _result_size ? _result_size : rs;
-	p->_result = new num_type(size - 1, 0, num_type::UNSET);
+	p->_result = new num_type(size - 1, 0,
+			size == 1 ? num_type::UNSIGNED : num_type::UNSET);
 	return p->_result->size();
 	}
 
@@ -419,6 +408,7 @@ setup_expr::operator()(mintypmax_expr *p) const
 			rs = p->_min_expr->setup(setup_expr(_scope, _check_const));
 			break;
 		}
-	p->_result = new num_type(rs - 1, 0, num_type::UNSET);
+	p->_result = new num_type(rs - 1, 0,
+			rs == 1 ? num_type::UNSIGNED : num_type::UNSET);
 	return p->_result->size();
 	}

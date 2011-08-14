@@ -169,8 +169,32 @@ while read first second third mixed; do
 
 	# FIXME: improve performance.
 	case "$fn" in
+		# pr1742910: sum is 1 bit, !== to 32 bits
+		# pr1913918a: Nothing is driving a wire
+		# pr1570635b: + is left associative
+		# pr1388974: unsized decimal is 32 bits
+		# nblkpush: didn't give events time to execute
+		# tern9: drive register to z (high impedance)
+		# always3.1.1[AB]: initial block doesn't need to be before always block
+		pr1742910|pr1913918a|pr1570635b|pr1388974|nblkpush|tern9|always3.1.1[AB])
+			echo "$fn.v -- bad Verilog, skipped"
+			skipped=$(expr $skipped + 1)
+			continue
+			;;
+		cmdline_parm1)
+			echo "$fn.v -- unsupported feature, skipped"
+			skipped=$(expr $skipped + 1)
+			continue
+			;;
+		# pr2991457|pr2985542: ~ has highest precidence
+		# pr1701921: can two registers drive the same wire?
+		pr2991457|pr2985542|pr1701921)
+			echo "$fn.v -- bad behavior resquested, skipped"
+			skipped=$(expr $skipped + 1)
+			continue
+			;;
 		multiply_large|no_if_statement)
-			echo "$fn.v -- takes too long, skipped"
+			echo "$fn.v -- waste of time, skipped"
 			skipped=$(expr $skipped + 1)
 			continue
 			;;
@@ -228,6 +252,7 @@ while read first second third mixed; do
 							cat tmp.log >> invalid_verilog.log
 							;;
 						*)
+						echo "$0: unknown failure in $testdir/${fn}.v!" >> other_error.log
 							other_error=$(expr $other_error + 1)
 							cat tmp.log >> other_error.log
 							;;
@@ -294,5 +319,6 @@ rm -f gold
 rm -f tmp.log
 rm -f *.vcd
 rm -f *.dump
+rm -f *.dmp
 
 exit 0

@@ -248,7 +248,7 @@ main()
 	bit_vector a;
 	bit_vector b(HI);
 	bit_vector c(4,0,bit_vector::UNSIGNED);
-	bit_vector d(string("1101"),bit_vector::UNSIGNED);
+	bit_vector d(string("1101"),bit_vector::UNSIGNED,bit_vector::BASE2, 4);
 	bit_vector e(d);
 	bit_vector f(115UL);
 

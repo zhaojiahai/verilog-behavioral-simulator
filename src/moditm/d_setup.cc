@@ -99,8 +99,11 @@ decl_setup::io_setup(ident_list *il, range_type *r,
 				r->setup(setup_select(_scope));
 				r->get_data(ms, ls);
 				}
-			net->_storage = new num_type(ms, ls, num_type::UNSET);
-			net->_result = new num_type(ms, ls, num_type::UNSET);
+			num_type::signed_type s = num_type::UNSET;
+			if (ms == ls)
+				s = num_type::UNSIGNED;
+			net->_storage = new num_type(ms, ls, s);
+			net->_result = new num_type(ms, ls, s);
 			}
 
 		// Save the hash value index for later testing.
@@ -326,6 +329,13 @@ decl_setup::net_setup(ident_ptr &id, range_type *r, type t, range_type::position
 				net->_storage = new num_type(ms, ls, num_type::UNSIGNED, num_type::BASE10, Z);
 			else if (t == net_type::INTEGER)
 				net->_storage = new num_type(ms, ls, num_type::SIGNED, num_type::BASE10);
+			else if (t == net_type::PARAMETER)
+				{
+				num_type::signed_type s = num_type::UNSET;
+				if (ms == ls)
+					s = num_type::UNSIGNED;
+				net->_storage = new num_type(ms, ls, s, num_type::BASE10);
+				}
 			else
 				net->_storage = new num_type(ms, ls, num_type::UNSIGNED);
 			net->_result = new num_type(*net->_storage);

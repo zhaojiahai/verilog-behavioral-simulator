@@ -73,6 +73,30 @@ logic logic_TERNARY[][NUMLOGIC] =
 	  {DC,DC,DC,DC,DC}
 	};
 
+logic logic_reduce_AND[][NUMLOGIC] =
+	{ {LO,LO,LO,LO,DC},
+	  {LO,HI,DC,DC,DC},
+	  {LO,DC,DC,DC,DC},
+	  {LO,DC,DC,DC,DC},
+	  {DC,DC,DC,DC,DC},
+	};
+
+logic logic_reduce_OR[][NUMLOGIC] =
+	{ {LO,HI,DC,DC,DC},
+	  {HI,HI,HI,HI,DC},
+	  {DC,HI,DC,DC,DC},
+	  {DC,HI,DC,DC,DC},
+	  {DC,DC,DC,DC,DC},
+	};
+
+logic logic_reduce_XOR[][NUMLOGIC] =
+	{ {LO,HI,DC,DC,DC},
+	  {HI,LO,DC,DC,DC},
+	  {DC,DC,DC,DC,DC},
+	  {DC,DC,DC,DC,DC},
+	  {DC,DC,DC,DC,DC},
+	};
+
 // Boolean states of logic comparison.
 
 logic logic_EQU[][NUMLOGIC] =
@@ -85,7 +109,7 @@ logic logic_EQU[][NUMLOGIC] =
 	  {DC, DC, DC, DC, DC}
 	};
 
-logic logic_EQL[][NUMLOGIC] =
+logic logic_LES[][NUMLOGIC] =
 	{
 	// This table is used with < comparisons.
 	  { Z, HI, DC, DC, DC},
@@ -129,33 +153,9 @@ logic logic_EQZ[][NUMLOGIC] =
 	// condition.  Thus we can return true for these bit comparisons.
 	  {HI, LO, LO, HI, LO},
 	  {LO, HI, LO, HI, LO},
-	  {LO, LO, LO, HI, LO},
+	  {LO, LO, HI, HI, LO},
 	  {HI, HI, HI, HI, LO},
 	  {LO, LO, LO, LO, HI}
-	};
-
-logic logic_reduce_AND[][NUMLOGIC] =
-	{ {LO,LO,LO,LO,DC},
-	  {LO,HI,DC,DC,DC},
-	  {LO,DC,DC,DC,DC},
-	  {LO,DC,DC,DC,DC},
-	  {DC,DC,DC,DC,DC},
-	};
-
-logic logic_reduce_OR[][NUMLOGIC] =
-	{ {LO,HI,DC,DC,DC},
-	  {HI,HI,HI,HI,DC},
-	  {DC,HI,DC,DC,DC},
-	  {DC,HI,DC,DC,DC},
-	  {DC,DC,DC,DC,DC},
-	};
-
-logic logic_reduce_XOR[][NUMLOGIC] =
-	{ {LO,HI,DC,DC,DC},
-	  {HI,LO,DC,DC,DC},
-	  {DC,DC,DC,DC,DC},
-	  {DC,DC,DC,DC,DC},
-	  {DC,DC,DC,DC,DC},
 	};
 
 #endif
@@ -255,13 +255,7 @@ bit_vector::bit_vector(const str_type &str, signed_type s, base_type base, size_
 					_bits = 0;
 					return;
 					}
-				if (value == 0)
-					{
-					// A number must be at least 32bits,
-					// even if it is zero.
-					len = 32;
-					}
-				else
+				if (value > 0)
 					{
 					int amt = 8 * sizeof(decimal_type);
 					if (amt > 32)
@@ -278,14 +272,16 @@ bit_vector::bit_vector(const str_type &str, signed_type s, base_type base, size_
 						if (len > 32 && value > 0xffffffff)
 							trunc = true;
 						}
-					else
-						len = 32;
 					}
 				break;
 				}
 			case 16: len *= 4; break;
 			default: break;
 			}
+
+		// Unsized constants must be at least 32bits.
+		if (len < 32)
+			len = 32;
 		}
 	_end = len - 1;
 	_size = len;
@@ -877,7 +873,7 @@ bit_vector::assign_from_hex(const str_type &str)
 bit_vector::logic_type
 compare_forward(const bit_vector &l, const bit_vector &r,
 				bit_vector::logic_type dft, bit_vector::logic_type chk,
-				const logic cmp[][NUMLOGIC])
+				const logic cmp[][NUMLOGIC], bit_vector::logic_type hb)
 	{
 	bit_vector::position_type li = l._begin;
 	bit_vector::position_type ri = r._begin;
@@ -892,7 +888,7 @@ compare_forward(const bit_vector &l, const bit_vector &r,
 			}
 		for (; ri <= r._end; ++ri)
 			{
-			res = cmp[LO][r._bits[ri]];
+			res = cmp[hb][r._bits[ri]];
 			if (res != chk)
 				return res;
 			}
@@ -907,7 +903,7 @@ compare_forward(const bit_vector &l, const bit_vector &r,
 			}
 		for (; li <= l._end; ++li)
 			{
-			res = cmp[l._bits[li]][LO];
+			res = cmp[l._bits[li]][hb];
 			if (res != chk)
 				return res;
 			}
@@ -1021,7 +1017,7 @@ reduce_and(const bit_vector &bv)
 	if (bv._size < 1)
 		return DC;
 	else if (bv._size < 2)
-		return data[bv._begin];
+		return data[bv._begin] < DC ? data[bv._begin] : DC;
 
 	bit_vector::position_type i = bv._begin;
 	bit_vector::logic_type res = reduce_and(data[i], data[i+1]);
@@ -1038,7 +1034,7 @@ reduce_or(const bit_vector &bv)
 	if (bv._size < 1)
 		return DC;
 	else if (bv._size < 2)
-		return data[bv._begin];
+		return data[bv._begin] < DC ? data[bv._begin] : DC;
 
 	bit_vector::position_type i = bv._begin;
 	bit_vector::logic_type res = reduce_or(data[i], data[i+1]);
@@ -1050,11 +1046,14 @@ reduce_or(const bit_vector &bv)
 bit_vector::logic_type
 reduce_xor(const bit_vector &bv)
 	{
-	if (bv._size < 2)
+	bit_vector::logic_type *data = bv._bits;
+
+	if (bv._size < 1)
 		return DC;
+	else if (bv._size < 2)
+		return data[bv._begin] < DC ? data[bv._begin] : DC;
 
 	bit_vector::position_type i = bv._begin;
-	bit_vector::logic_type *data = bv._bits;
 	bit_vector::logic_type res = reduce_xor(data[i], data[i+1]);
 	for (i += 2; i <= bv._end; ++i)
 		res = reduce_xor(res, data[i]);
@@ -1171,6 +1170,10 @@ binary_add(bit_vector &res, const bit_vector &l, const bit_vector &r)
 		data[i] = static_cast<logic_type::state_value>(pad & 1);
 		Ci = static_cast<logic_type::state_value>(pad >> 1);
 		}
+	if (res._signed == bit_vector::UNSET)
+		res._signed = l._signed == bit_vector::SIGNED ||
+					  r._signed == bit_vector::SIGNED ?
+					  bit_vector::SIGNED : bit_vector::UNSIGNED;
 	return res;
 	}
 
@@ -1224,6 +1227,10 @@ binary_sub(bit_vector &res, const bit_vector &l, const bit_vector &r)
 		data[i] = static_cast<logic_type::state_value>(pad & 1);
 		Bi = static_cast<logic_type::state_value>(pad >> 1);
 		}
+	if (res._signed == bit_vector::UNSET)
+		res._signed = l._signed == bit_vector::SIGNED ||
+					  r._signed == bit_vector::SIGNED ?
+					  bit_vector::SIGNED : bit_vector::UNSIGNED;
 	return res;
 	}
 

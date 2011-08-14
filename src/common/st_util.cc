@@ -294,11 +294,15 @@ readmem_data(std::ifstream &ifs, int base, st_net_assign::num_type &num)
 
 	// Validate input.
 	int size = strlen(s);
+	int numdig = 0;
 	for (int i = 0; i < size; ++i)
 		{
 		switch (s[i])
 			{
-			case 'x': case 'X': case 'z': case 'Z': case '_':
+			case 'x': case 'X': case 'z': case 'Z':
+				numdig += 1;
+				break;
+			case '_':
 				break;
 			case '@':
 				// If an address, indicate it to caller.
@@ -317,13 +321,24 @@ readmem_data(std::ifstream &ifs, int base, st_net_assign::num_type &num)
 					if (s[i] != '0' && s[i] != '1')
 						return -4;
 					}
+				numdig += 1;
 				break;
 			}
 		}
-
-	num_type tmp(s, num_type::UNSIGNED, base == 16 ? num_type::BASE16 : num_type::BASE2);
-	if (base == 2 && tmp.size() != num.size())
+	num_type::size_type numbits;
+	if (base == 16)
+		{
+		if (numdig < 2)
+			numdig = 2;
+		numbits = 8 * ((numdig + 1) / 2);
+		}
+	else
+		numbits = numdig;
+	if (numbits != num.size())
 		return -5;
+	num_type::base_type b = base == 16 ? num_type::BASE16 : num_type::BASE2;
+	num_type::signed_type st = numbits == 1 ? num_type::UNSIGNED : num_type::SIGNED;
+	num_type tmp(s, st, b, numbits);
 	num = tmp;
 	return 0;
 	}

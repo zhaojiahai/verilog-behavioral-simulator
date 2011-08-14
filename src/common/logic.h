@@ -288,7 +288,7 @@ const logic logic_EQZ[][NUMLOGIC] =
 	// condition.  Thus we can return true for these bit comparisons.
 	  {HI, LO, LO, HI, LO},
 	  {LO, HI, LO, HI, LO},
-	  {LO, LO, LO, HI, LO},
+	  {LO, LO, HI, HI, LO},
 	  {HI, HI, HI, HI, LO},
 	  {LO, LO, LO, LO, HI}
 	};
